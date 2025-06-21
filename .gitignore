@@ -1,0 +1,82 @@
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.dylib
+
+# Compiled bytecode
+*.ebc
+
+# Core dumps
+core
+core.*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.#*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Log files
+*.log
+
+# Coverage files
+*.gcov
+*.gcda
+*.gcno
+coverage/
+
+# Static analysis reports
+scan-build-reports/
+clang-reports/
+
+# Performance test results
+*.perf
+benchmark_results_*.txt
+
+# Documentation build artifacts
+docs/_build/
+docs/html/
+
+# Package files
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+
+# Runtime-generated files
+tags
+TAGS
+cscope.out
+
+# Memory debugging files
+*.valgrind
+heapcheck.*
+
+# Node.js (for any tooling)
+node_modules/
+npm-debug.log*
+
+# Python cache (for scripts)
+__pycache__/
+*.pyc
+*.pyo
+
+# Backup files
+*.bak
+*.orig
+
+# Test artifacts
+test_results/
+test_output/

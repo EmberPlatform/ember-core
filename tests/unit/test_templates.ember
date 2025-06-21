@@ -1,0 +1,46 @@
+// Template functionality test script
+print("Testing Template Functionality\n");
+
+// Test 1: HTML escaping
+print("=== HTML Escaping Test ===\n");
+let unsafe_html = "<script>alert('XSS');</script>";
+let escaped = html_escape(unsafe_html);
+print("Original: " + unsafe_html + "\n");
+print("Escaped:  " + escaped + "\n\n");
+
+// Test 2: URL encoding
+print("=== URL Encoding Test ===\n");
+let unsafe_url = "hello world & test=value";
+let encoded = url_encode(unsafe_url);
+print("Original: " + unsafe_url + "\n");
+print("Encoded:  " + encoded + "\n\n");
+
+// Test 3: String replacement
+print("=== String Replace All Test ===\n");
+let text = "The quick brown fox jumps over the brown dog";
+let replaced = replace_all(text, "brown", "red");
+print("Original: " + text + "\n");
+print("Replaced: " + replaced + "\n\n");
+
+// Test 4: Text truncation
+print("=== Text Truncation Test ===\n");
+let long_text = "This is a very long piece of text that should be truncated";
+let truncated = truncate(long_text, 20);
+print("Original: " + long_text + "\n");
+print("Truncated: " + truncated + "\n\n");
+
+// Test 5: Basic template rendering
+print("=== Template Rendering Test ===\n");
+let template = "Hello, {{name}}! Welcome to {{site}}.";
+let rendered = template_render(template);
+print("Template: " + template + "\n");
+print("Rendered: " + rendered + "\n\n");
+
+// Test 6: Markdown rendering
+print("=== Markdown Rendering Test ===\n");
+let markdown = "# Hello World\n\nThis is **bold** text.\n\n## Subheading\n\nSome regular text.";
+let html = markdown_render(markdown);
+print("Markdown:\n" + markdown + "\n\n");
+print("HTML:\n" + html + "\n\n");
+
+print("Template tests completed!\n");

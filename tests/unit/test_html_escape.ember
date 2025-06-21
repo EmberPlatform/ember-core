@@ -1,0 +1,5 @@
+print("Testing HTML escape function")
+unsafe_html = "<script>alert('test');</script>"
+print("Original: " + unsafe_html)
+escaped = html_escape(unsafe_html)
+print("Escaped: " + escaped)

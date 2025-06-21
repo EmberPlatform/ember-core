@@ -1,0 +1,48 @@
+# Template functionality test script
+print("Testing Template Functionality")
+
+# Test 1: HTML escaping
+print("=== HTML Escaping Test ===")
+unsafe_html = "<script>alert('XSS');</script>"
+escaped = html_escape(unsafe_html)
+print("Original: " + unsafe_html)
+print("Escaped:  " + escaped)
+
+# Test 2: URL encoding
+print("=== URL Encoding Test ===")
+unsafe_url = "hello world & test=value"
+encoded = url_encode(unsafe_url)
+print("Original: " + unsafe_url)
+print("Encoded:  " + encoded)
+
+# Test 3: String replacement
+print("=== String Replace All Test ===")
+text = "The quick brown fox jumps over the brown dog"
+replaced = replace_all(text, "brown", "red")
+print("Original: " + text)
+print("Replaced: " + replaced)
+
+# Test 4: Text truncation
+print("=== Text Truncation Test ===")
+long_text = "This is a very long piece of text that should be truncated"
+truncated = truncate(long_text, 20)
+print("Original: " + long_text)
+print("Truncated: " + truncated)
+
+# Test 5: Basic template rendering
+print("=== Template Rendering Test ===")
+template = "Hello, {{name}}! Welcome to {{site}}."
+rendered = template_render(template)
+print("Template: " + template)
+print("Rendered: " + rendered)
+
+# Test 6: Markdown rendering
+print("=== Markdown Rendering Test ===")
+markdown = "# Hello World\n\nThis is **bold** text.\n\n## Subheading\n\nSome regular text."
+html = markdown_render(markdown)
+print("Markdown:")
+print(markdown)
+print("HTML:")
+print(html)
+
+print("Template tests completed!")

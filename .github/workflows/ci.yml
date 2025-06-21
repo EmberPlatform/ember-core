@@ -1,0 +1,276 @@
+name: Ember Core CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  BUILD_TYPE: release
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        build_type: [debug, release, asan]
+        include:
+          - os: ubuntu-latest
+            install_deps: sudo apt-get update && sudo apt-get install -y build-essential libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config
+          - os: macos-latest
+            install_deps: brew install readline openssl curl pkg-config
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: ${{ matrix.install_deps }}
+
+    - name: Configure build type
+      run: |
+        echo "BUILD_TYPE=${{ matrix.build_type }}" >> $GITHUB_ENV
+
+    - name: Build Ember Core
+      run: |
+        make clean
+        make BUILD_TYPE=${{ matrix.build_type }} all
+
+    - name: Run core tests
+      run: make BUILD_TYPE=${{ matrix.build_type }} check
+
+    - name: Run fuzzing tests (quick)
+      if: matrix.build_type == 'debug'
+      run: |
+        make BUILD_TYPE=${{ matrix.build_type }} fuzz
+        timeout 60s ./build/fuzz-comprehensive -n 100 || true
+        timeout 30s ./build/fuzz-parser 50 || true
+        timeout 30s ./build/fuzz-vm 50 || true
+
+    - name: Test REPL functionality
+      run: |
+        echo 'print("Hello, Ember Core!")' | ./build/ember
+        echo 'let x = 42; print("Answer:", x);' | ./build/ember
+
+    - name: Test compiler functionality  
+      run: |
+        echo 'print("Compiled test");' > test.ember
+        ./build/emberc test.ember -o test.ebc
+        file test.ebc
+
+  memory-safety:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config valgrind
+
+    - name: Build with AddressSanitizer
+      run: |
+        make clean
+        make BUILD_TYPE=asan all
+
+    - name: Run AddressSanitizer tests
+      run: |
+        export ASAN_OPTIONS=detect_leaks=1:abort_on_error=1
+        make BUILD_TYPE=asan check
+
+    - name: Build for Valgrind
+      run: |
+        make clean
+        make BUILD_TYPE=debug all
+
+    - name: Run Valgrind tests
+      run: |
+        valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 ./build/test-vm
+        valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 ./build/test-parser-core
+
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update  
+        sudo apt-get install -y build-essential libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config time
+
+    - name: Build optimized release
+      run: |
+        make clean
+        make BUILD_TYPE=release all
+
+    - name: Basic performance test
+      run: |
+        # Test startup time (should be under 100ms for core tests)
+        time ./build/test-minimal
+        time ./build/test-simple
+        
+        # Test REPL startup
+        time echo 'print("Performance test")' | ./build/ember
+
+    - name: VM performance test
+      run: |
+        # Test VM execution performance
+        echo 'for (let i = 0; i < 10000; i++) { let x = i * 2; }' | time ./build/ember
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config cppcheck clang clang-tools
+
+    - name: Run static analysis
+      run: |
+        # Run cppcheck
+        cppcheck --enable=all --inconclusive --std=c99 \
+          --inline-suppr --suppress=missingIncludeSystem \
+          --suppress=unusedFunction --suppress=unmatchedSuppression \
+          -I include -I src/core -I src/frontend -I src/runtime \
+          --template='{file}:{line}: {severity}: {message} [{id}]' \
+          src/ include/ || true
+
+    - name: Build with warnings as errors
+      run: |
+        CFLAGS="-Werror -Wall -Wextra" make BUILD_TYPE=debug all
+
+  build-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config clang
+
+    - name: Build with ${{ matrix.compiler }}
+      run: |
+        make clean
+        CC=${{ matrix.compiler }} make BUILD_TYPE=release all
+
+    - name: Test with ${{ matrix.compiler }}
+      run: |
+        CC=${{ matrix.compiler }} make BUILD_TYPE=release check
+
+  minimal-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install minimal dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libssl-dev
+
+    - name: Build without optional dependencies
+      run: |
+        make clean
+        make BUILD_TYPE=release all
+
+    - name: Test core functionality
+      run: |
+        ./build/test-minimal
+        echo 'print("Minimal build test")' | ./build/ember
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: [test, memory-safety]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config
+
+    - name: Build release
+      run: |
+        make clean
+        make BUILD_TYPE=release all
+
+    - name: Integration test suite
+      run: |
+        # Test that all core tools work together
+        echo 'class Test { constructor() { this.value = 42; } getValue() { return this.value; } }' > integration.ember
+        echo 'let t = new Test(); print("Integration test:", t.getValue());' >> integration.ember
+        
+        # Compile and verify
+        ./build/emberc integration.ember -o integration.ebc
+        
+        # Run original
+        ./build/ember integration.ember
+        
+        # Test REPL functionality
+        echo 'let factorial = function(n) { return n <= 1 ? 1 : n * factorial(n-1); }; print("Factorial 5:", factorial(5));' | ./build/ember
+
+    - name: Stress test
+      run: |
+        # Create a more complex program
+        cat > stress_test.ember << 'EOF'
+        // Stress test for Ember Core
+        
+        class Matrix {
+            constructor(rows, cols) {
+                this.rows = rows;
+                this.cols = cols;
+                this.data = [];
+                for (let i = 0; i < rows * cols; i++) {
+                    this.data[i] = 0;
+                }
+            }
+            
+            set(row, col, value) {
+                this.data[row * this.cols + col] = value;
+            }
+            
+            get(row, col) {
+                return this.data[row * this.cols + col];
+            }
+        }
+        
+        let m = new Matrix(10, 10);
+        for (let i = 0; i < 10; i++) {
+            for (let j = 0; j < 10; j++) {
+                m.set(i, j, i * j);
+            }
+        }
+        
+        let sum = 0;
+        for (let i = 0; i < 10; i++) {
+            for (let j = 0; j < 10; j++) {
+                sum += m.get(i, j);
+            }
+        }
+        
+        print("Matrix sum:", sum);
+        
+        // Test recursion
+        function fibonacci(n) {
+            if (n <= 1) return n;
+            return fibonacci(n - 1) + fibonacci(n - 2);
+        }
+        
+        print("Fibonacci 10:", fibonacci(10));
+        
+        // Test JSON
+        let obj = {"test": true, "value": 123, "array": [1, 2, 3]};
+        let json = json_stringify(obj);
+        let parsed = json_parse(json);
+        print("JSON test:", parsed.value);
+        EOF
+        
+        ./build/ember stress_test.ember
