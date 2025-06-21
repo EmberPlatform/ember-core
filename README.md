@@ -26,6 +26,28 @@ Ember Core is the foundational language runtime that powers the complete Ember p
 - **Memory Safety**: Built-in memory safety features with bounds checking and leak detection
 - **Debug Tools**: Advanced debugging capabilities with breakpoints and stack inspection
 
+## 🏗️ Ember Platform Integration
+
+**Ember Core** is part of the modular [Ember Platform](https://github.com/EmberPlatform). For a complete development environment:
+
+```bash
+# Clone the complete platform
+mkdir ember-platform && cd ember-platform
+git clone https://github.com/EmberPlatform/ember-core.git
+git clone https://github.com/EmberPlatform/ember-stdlib.git
+git clone https://github.com/EmberPlatform/emberweb.git
+git clone https://github.com/EmberPlatform/ember-tools.git
+
+# Or see our [Platform Setup Guide](https://github.com/EmberPlatform/.github/blob/main/EMBER_PLATFORM_GUIDE.md)
+```
+
+### Related Repositories
+- **[ember-stdlib](https://github.com/EmberPlatform/ember-stdlib)** - Standard library (depends on ember-core)
+- **[emberweb](https://github.com/EmberPlatform/emberweb)** - Web server (depends on ember-core + ember-stdlib)
+- **[ember-tools](https://github.com/EmberPlatform/ember-tools)** - Development tools (depends on ember-core)
+- **[ember-tests](https://github.com/EmberPlatform/ember-tests)** - Test suite (tests ember-core + ember-stdlib)
+- **[ember-registry](https://github.com/EmberPlatform/ember-registry)** - Package registry (standalone service)
+
 ## Quick Start
 
 ### Building Ember Core
