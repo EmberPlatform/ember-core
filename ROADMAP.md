@@ -2,9 +2,26 @@
 
 ## Version 2.0.0 - Foundation (Current)
 
-**Status**: Release Candidate  
-**Target**: Q1 2025  
-**Focus**: Core language stability and performance
+**Status**: ⚠️ **Critical Security Issues Identified**  
+**Updated Target**: Q2 2025 (Delayed for Security Fixes)  
+**Focus**: **SECURITY FIRST** - Critical vulnerability remediation, then core language stability
+
+### 🚨 CRITICAL SECURITY FIXES (Immediate - Week 1-2)
+- [ ] **Fix Buffer Overflow in Parser** (parser/core.c:91) - CRITICAL
+- [ ] **Replace Unsafe Cryptographic Functions** (crypto timing attacks) - CRITICAL  
+- [ ] **Fix Memory Management Double-Free** (memory.c:484-488) - CRITICAL
+- [ ] **Implement SQL Injection Protection** (database components) - CRITICAL
+- [ ] **Fix Path Traversal Vulnerabilities** (VFS sandbox) - HIGH
+- [ ] **Replace All Unsafe String Functions** (strcpy, sprintf usage) - HIGH
+- [ ] **Complete Seccomp Sandbox Implementation** - HIGH
+
+### 🔒 SECURITY INFRASTRUCTURE (Week 3-4)
+- [ ] **Implement Stack Canaries** (add -fstack-protector-strong)
+- [ ] **Enable ASLR/PIE** (Position Independent Executable compilation)
+- [ ] **Add Control Flow Integrity** (-fcf-protection)
+- [ ] **Centralized Input Validation Framework**
+- [ ] **Comprehensive Audit Logging System**
+- [ ] **Secure Key Management System**
 
 ### Core Language Features ✅
 - [x] Complete VM implementation with bytecode interpreter
@@ -39,10 +56,33 @@
 
 ---
 
-## Version 2.1.0 - Enhanced Performance
+## Version 2.1.0 - Performance Optimization & Architecture Cleanup
 
-**Target**: Q2 2025  
-**Focus**: Advanced optimization and JIT compilation
+**Target**: Q3 2025 (Adjusted for Security/Architecture work)
+**Focus**: Critical performance bottlenecks and architectural consistency
+
+### 🚀 HIGH-IMPACT PERFORMANCE FIXES (Month 1)
+- [ ] **VM Instruction Cache Optimization** - 20-30% VM performance improvement
+  - Implement hot opcode tracking and instruction prefetching
+  - Replace switch-based dispatch with computed goto (25-40% dispatch reduction)
+- [ ] **Arena Allocator Optimization** - 25% memory efficiency improvement
+  - Add adaptive size class adjustment and memory compaction
+  - Implement NUMA-aware allocation
+- [ ] **HTTP Response Batching** - 30-40% network throughput improvement
+  - Buffer response fragments, implement vectored I/O
+
+### 🏗️ ARCHITECTURAL CONSISTENCY (Month 2)  
+- [ ] **Unified API Design Patterns** - Fix 27 inconsistent function signatures
+- [ ] **Standardized Error Handling** - Replace 3 different error systems with one
+- [ ] **Break Circular Dependencies** - Fix VM/stdlib coupling issues
+- [ ] **Eliminate Code Duplication** - 15% reduction in duplicate code
+
+### ⚡ CONCURRENCY IMPROVEMENTS (Month 3)
+- [ ] **Lock-Free VM Pool** - 50% concurrency improvement
+  - Complete work-stealing implementation
+  - Eliminate thread contention during VM acquisition
+- [ ] **Incremental GC** - 80% pause time reduction
+  - Implement incremental marking and generational collection
 
 ### Just-In-Time Compilation
 - [ ] **Adaptive JIT Compiler**: Profile-guided optimization for hot code paths

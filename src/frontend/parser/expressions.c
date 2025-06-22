@@ -24,11 +24,26 @@ void number_literal(ember_chunk* chunk) {
 
 void string_literal(ember_chunk* chunk) {
     parser_state* parser = get_parser_state();
-    // Extract string content (skip quotes)
+    // Extract string content (skip quotes) with bounds checking
+    if (parser->previous.length < 2) {
+        // Invalid string token - should have at least opening and closing quotes
+        return;
+    }
     int length = parser->previous.length - 2;
+    if (length < 0) {
+        // Additional safety check
+        return;
+    }
     char* str = malloc(length + 1);
-    memcpy(str, parser->previous.start + 1, length);
-    str[length] = '\0';
+    if (str) {
+        if (length > 0) {
+            memcpy(str, parser->previous.start + 1, length);
+        }
+        str[length] = '\0';
+    } else {
+        // Memory allocation failed
+        return;
+    }
     
     // Use GC-managed string creation for proper concatenation support
     ember_value string_val = ember_make_string_gc(parser->vm, str);
@@ -42,12 +57,26 @@ void string_literal(ember_chunk* chunk) {
 void interpolated_string_literal(ember_chunk* chunk) {
     parser_state* parser = get_parser_state();
     
-    
-    // Extract string content (skip quotes)
+    // Extract string content (skip quotes) with bounds checking
+    if (parser->previous.length < 2) {
+        // Invalid string token - should have at least opening and closing quotes
+        return;
+    }
     int length = parser->previous.length - 2;
+    if (length < 0) {
+        // Additional safety check
+        return;
+    }
     char* str = malloc(length + 1);
-    memcpy(str, parser->previous.start + 1, length);
-    str[length] = '\0';
+    if (str) {
+        if (length > 0) {
+            memcpy(str, parser->previous.start + 1, length);
+        }
+        str[length] = '\0';
+    } else {
+        // Memory allocation failed
+        return;
+    }
     
     // For now, use the OP_STRING_INTERPOLATE opcode to handle the interpolation
     // Store the raw interpolated string as a constant and let the VM handle parsing

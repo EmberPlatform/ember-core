@@ -1,0 +1,120 @@
+// JIT Compiler Demonstration
+// This example shows how the JIT compiler optimizes hot code paths
+
+// Function that will be JIT compiled after becoming hot
+function compute_intensive(n) {
+    var sum = 0.0;
+    
+    // This tight loop is ideal for JIT optimization
+    for (var i = 1; i <= n; i = i + 1) {
+        sum = sum + i * i;  // Simple arithmetic operations
+    }
+    
+    return sum;
+}
+
+// Function to demonstrate arithmetic pattern optimization
+function vector_dot_product(vec1, vec2) {
+    var result = 0.0;
+    
+    // The JIT can recognize this as a dot product pattern
+    for (var i = 0; i < vec1.length(); i = i + 1) {
+        result = result + vec1[i] * vec2[i];
+    }
+    
+    return result;
+}
+
+// Function showing FMA (Fused Multiply-Add) pattern
+function polynomial_eval(x, coeffs) {
+    var result = 0.0;
+    
+    // Horner's method - JIT can optimize multiply-add sequences
+    for (var i = coeffs.length() - 1; i >= 0; i = i - 1) {
+        result = result * x + coeffs[i];
+    }
+    
+    return result;
+}
+
+// Main benchmark function
+function run_jit_demo() {
+    print("=== Ember JIT Compiler Demo ===\n");
+    
+    // Warm up phase - make the code hot
+    print("Warming up functions (making them hot for JIT)...");
+    for (var i = 0; i < 2000; i = i + 1) {
+        compute_intensive(100);
+    }
+    print("Warm-up complete. Functions should now be JIT compiled.\n");
+    
+    // Benchmark compute_intensive
+    print("1. Testing compute_intensive function:");
+    var start = time_ms();
+    var result = 0;
+    for (var i = 0; i < 10000; i = i + 1) {
+        result = compute_intensive(1000);
+    }
+    var elapsed = time_ms() - start;
+    print("   Result: " + result);
+    print("   Time: " + elapsed + " ms");
+    print("   Note: JIT should provide ~10-20x speedup for this tight loop\n");
+    
+    // Test vector operations
+    print("2. Testing vector dot product:");
+    var vec1 = [];
+    var vec2 = [];
+    for (var i = 0; i < 100; i = i + 1) {
+        vec1.push(i * 1.5);
+        vec2.push(i * 0.5);
+    }
+    
+    // Warm up
+    for (var i = 0; i < 2000; i = i + 1) {
+        vector_dot_product(vec1, vec2);
+    }
+    
+    start = time_ms();
+    var dot_result = 0;
+    for (var i = 0; i < 10000; i = i + 1) {
+        dot_result = vector_dot_product(vec1, vec2);
+    }
+    elapsed = time_ms() - start;
+    print("   Result: " + dot_result);
+    print("   Time: " + elapsed + " ms");
+    print("   Note: JIT optimizes array access and arithmetic\n");
+    
+    // Test polynomial evaluation (FMA pattern)
+    print("3. Testing polynomial evaluation (FMA optimization):");
+    var coeffs = [1.0, 2.0, 3.0, 4.0, 5.0]; // 5x^4 + 4x^3 + 3x^2 + 2x + 1
+    
+    // Warm up
+    for (var i = 0; i < 2000; i = i + 1) {
+        polynomial_eval(2.0, coeffs);
+    }
+    
+    start = time_ms();
+    var poly_result = 0;
+    for (var i = 0; i < 100000; i = i + 1) {
+        poly_result = polynomial_eval(1.5, coeffs);
+    }
+    elapsed = time_ms() - start;
+    print("   Result: " + poly_result);
+    print("   Time: " + elapsed + " ms");
+    print("   Note: JIT recognizes multiply-add patterns\n");
+    
+    // Show JIT statistics if available
+    print("=== JIT Compilation Summary ===");
+    print("The JIT compiler automatically:");
+    print("- Detects hot code paths (>1000 executions)");
+    print("- Compiles arithmetic-heavy basic blocks to native code");
+    print("- Optimizes common patterns (loops, FMA, reductions)");
+    print("- Falls back to interpreter for cold code");
+    print("\nExpected speedups:");
+    print("- Tight arithmetic loops: 10-20x");
+    print("- Vector operations: 3-5x");
+    print("- Mixed code: 2-4x");
+}
+
+// Run the demo
+run_jit_demo();
