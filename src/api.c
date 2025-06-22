@@ -5,7 +5,6 @@
 #include "frontend/parser/parser.h"
 #include "frontend/lexer/lexer.h"
 #include "runtime/runtime.h"
-#include "stdlib/stdlib.h"
 #include "runtime/package/package.h"
 #include <stddef.h>
 #include <stdlib.h>
