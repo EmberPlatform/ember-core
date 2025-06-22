@@ -594,6 +594,36 @@ ember_value ember_native_num(ember_vm* vm, int argc, ember_value* argv);
 ember_value ember_native_int(ember_vm* vm, int argc, ember_value* argv);
 ember_value ember_native_bool(ember_vm* vm, int argc, ember_value* argv);
 
+// Secure VM Pool API
+// Error codes for VM pool operations
+#define EMBER_SUCCESS 0
+#define EMBER_ERROR_INVALID_PARAMETER -1
+#define EMBER_ERROR_OPERATION_FAILED -2
+#define EMBER_ERROR_MEMORY_ALLOCATION -3
+#define EMBER_ERROR_SECURITY_VIOLATION -4
+#define EMBER_ERROR_RESOURCE_EXHAUSTED -5
+
+// Maximum safe values for configuration parameters
+#define EMBER_MAX_SAFE_SIZE 1000000
+#define EMBER_MAX_SAFE_POOL_SIZE 1000
+#define EMBER_MAX_SAFE_TIMEOUT 86400000  // 24 hours in milliseconds
+
+// Secure VM pool configuration structure
+typedef struct {
+    uint32_t initial_size;          // Initial pool size (validated range: 1-1000)
+    uint32_t chunk_size;            // Growth chunk size (validated range: 1-100)
+    uint32_t thread_cache_size;     // Thread cache size (validated range: 1-100)
+    uint32_t max_vms_per_thread;    // Max VMs per thread (validated range: 1-100)
+    uint32_t rate_limit_window_ms;  // Rate limit window in ms (validated range: 100-86400000)
+    uint32_t rate_limit_max_allocs; // Max allocations per window (validated range: 1-10000)
+} vm_pool_config_t;
+
+// Secure VM pool API functions
+int ember_pool_init(const vm_pool_config_t* config);
+void ember_pool_cleanup(void);
+ember_vm* ember_pool_get_vm(void);
+void ember_pool_release_vm(ember_vm* vm);
+
 // Object helper macros
 #define IS_STRING(value) ((value).type == EMBER_VAL_STRING)
 #define AS_STRING(value) ((ember_string*)((value).as.obj_val))

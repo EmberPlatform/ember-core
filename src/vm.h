@@ -2,8 +2,8 @@
 #define EMBER_VM_H
 
 #include <stddef.h>
-#include "ember.h"
 #include <stdint.h>
+#include "ember.h"
 
 // VM creation and management
 ember_vm* ember_new_vm(void);
@@ -63,5 +63,11 @@ void vm_print_performance_stats(void);
 void vm_push_loop_context(ember_vm* vm, uint8_t* loop_start);
 void vm_pop_loop_context(ember_vm* vm);
 ember_runtime_loop_context* vm_get_current_loop_context(ember_vm* vm);
+
+// VM pool support functions
+int ember_vm_init(ember_vm* vm);
+void ember_vm_cleanup(ember_vm* vm);
+void ember_vm_clear_error(ember_vm* vm);
+ember_value ember_make_nil(void);
 
 #endif // EMBER_VM_H

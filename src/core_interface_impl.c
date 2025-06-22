@@ -4,9 +4,10 @@
  * Provides the core interface implementation for ember-core
  */
 
-#include "include/ember_interfaces.h"
-#include "include/ember.h"
+#include "ember_interfaces.h"
+#include "ember.h"
 #include <string.h>
+#include <stdlib.h>
 
 // Forward declarations of internal functions
 extern ember_vm* ember_new_vm(void);

@@ -13,8 +13,304 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <limits.h>
+#include <errno.h>
+#include <stdint.h>
+#include <time.h>
+#include <stdbool.h>
 
 // Clean public API - only embedding interface functions remain
+
+// ============================================================================
+// SECURE VM POOL API IMPLEMENTATION
+// ============================================================================
+
+// Global state for secure VM pool (simplified for security testing)
+static ember_vm** secure_vm_pool = NULL;
+static size_t secure_pool_size = 0;
+static size_t secure_pool_capacity = 0;
+static vm_pool_config_t secure_pool_config = {0};
+static bool secure_pool_initialized = false;
+static uint64_t allocation_count = 0;
+static uint64_t last_rate_limit_reset = 0;
+
+// Security validation constants
+#define MIN_POOL_SIZE 1
+#define MAX_POOL_SIZE 1000
+#define MIN_CHUNK_SIZE 1
+#define MAX_CHUNK_SIZE 100
+#define MIN_THREAD_CACHE 1
+#define MAX_THREAD_CACHE 100
+#define MIN_VMS_PER_THREAD 1
+#define MAX_VMS_PER_THREAD 100
+#define MIN_RATE_LIMIT_WINDOW 100
+#define MAX_RATE_LIMIT_WINDOW 86400000
+#define MIN_RATE_LIMIT_ALLOCS 1
+#define MAX_RATE_LIMIT_ALLOCS 10000
+
+// Default secure configuration
+static const vm_pool_config_t DEFAULT_SECURE_CONFIG = {
+    .initial_size = 16,
+    .chunk_size = 8,
+    .thread_cache_size = 4,
+    .max_vms_per_thread = 10,
+    .rate_limit_window_ms = 1000,
+    .rate_limit_max_allocs = 50
+};
+
+// Get current timestamp in milliseconds
+static uint64_t get_current_time_ms(void) {
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+        return 0;  // Return 0 on error (security: don't leak system details)
+    }
+    return (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+}
+
+// Secure configuration validation
+static int validate_pool_config(const vm_pool_config_t* config) {
+    if (!config) {
+        return EMBER_ERROR_INVALID_PARAMETER;
+    }
+    
+    // Check all parameters are within safe bounds
+    if (config->initial_size < MIN_POOL_SIZE || config->initial_size > MAX_POOL_SIZE) {
+        return EMBER_ERROR_INVALID_PARAMETER;
+    }
+    
+    if (config->chunk_size < MIN_CHUNK_SIZE || config->chunk_size > MAX_CHUNK_SIZE) {
+        return EMBER_ERROR_INVALID_PARAMETER;
+    }
+    
+    if (config->thread_cache_size < MIN_THREAD_CACHE || config->thread_cache_size > MAX_THREAD_CACHE) {
+        return EMBER_ERROR_INVALID_PARAMETER;
+    }
+    
+    if (config->max_vms_per_thread < MIN_VMS_PER_THREAD || config->max_vms_per_thread > MAX_VMS_PER_THREAD) {
+        return EMBER_ERROR_INVALID_PARAMETER;
+    }
+    
+    if (config->rate_limit_window_ms < MIN_RATE_LIMIT_WINDOW || config->rate_limit_window_ms > MAX_RATE_LIMIT_WINDOW) {
+        return EMBER_ERROR_INVALID_PARAMETER;
+    }
+    
+    if (config->rate_limit_max_allocs < MIN_RATE_LIMIT_ALLOCS || config->rate_limit_max_allocs > MAX_RATE_LIMIT_ALLOCS) {
+        return EMBER_ERROR_INVALID_PARAMETER;
+    }
+    
+    // Check for integer overflow potential
+    if (config->initial_size > UINT32_MAX / sizeof(ember_vm*)) {
+        return EMBER_ERROR_SECURITY_VIOLATION;
+    }
+    
+    return EMBER_SUCCESS;
+}
+
+// Apply secure defaults only for zero values (preserving invalid values for validation)
+static void apply_secure_defaults(vm_pool_config_t* config) {
+    if (!config) return;
+    
+    // Apply defaults only for zero values - let validation catch invalid ones
+    if (config->initial_size == 0) {
+        config->initial_size = DEFAULT_SECURE_CONFIG.initial_size;
+    }
+    
+    if (config->chunk_size == 0) {
+        config->chunk_size = DEFAULT_SECURE_CONFIG.chunk_size;
+    }
+    
+    if (config->thread_cache_size == 0) {
+        config->thread_cache_size = DEFAULT_SECURE_CONFIG.thread_cache_size;
+    }
+    
+    if (config->max_vms_per_thread == 0) {
+        config->max_vms_per_thread = DEFAULT_SECURE_CONFIG.max_vms_per_thread;
+    }
+    
+    if (config->rate_limit_window_ms == 0) {
+        config->rate_limit_window_ms = DEFAULT_SECURE_CONFIG.rate_limit_window_ms;
+    }
+    
+    if (config->rate_limit_max_allocs == 0) {
+        config->rate_limit_max_allocs = DEFAULT_SECURE_CONFIG.rate_limit_max_allocs;
+    }
+}
+
+// Rate limiting check
+static int check_rate_limit(void) {
+    uint64_t current_time = get_current_time_ms();
+    
+    // Reset allocation count if window has passed
+    if (current_time - last_rate_limit_reset >= secure_pool_config.rate_limit_window_ms) {
+        allocation_count = 0;
+        last_rate_limit_reset = current_time;
+    }
+    
+    // Check if rate limit exceeded
+    if (allocation_count >= secure_pool_config.rate_limit_max_allocs) {
+        return EMBER_ERROR_RESOURCE_EXHAUSTED;
+    }
+    
+    allocation_count++;
+    return EMBER_SUCCESS;
+}
+
+// Secure VM pool initialization
+int ember_pool_init(const vm_pool_config_t* config) {
+    // NULL config is allowed - use secure defaults
+    vm_pool_config_t effective_config;
+    
+    if (config == NULL) {
+        // Use default secure configuration
+        effective_config = DEFAULT_SECURE_CONFIG;
+    } else {
+        // Copy and validate provided configuration
+        effective_config = *config;
+        apply_secure_defaults(&effective_config);
+        
+        int validation_result = validate_pool_config(&effective_config);
+        if (validation_result != EMBER_SUCCESS) {
+            return validation_result;
+        }
+    }
+    
+    // Clean up existing pool if already initialized
+    if (secure_pool_initialized) {
+        ember_pool_cleanup();
+    }
+    
+    // Allocate pool array with size validation
+    size_t pool_size = effective_config.initial_size;
+    
+    // Check for potential integer overflow
+    if (pool_size > SIZE_MAX / sizeof(ember_vm*)) {
+        return EMBER_ERROR_SECURITY_VIOLATION;
+    }
+    
+    secure_vm_pool = malloc(pool_size * sizeof(ember_vm*));
+    if (!secure_vm_pool) {
+        return EMBER_ERROR_MEMORY_ALLOCATION;
+    }
+    
+    // Initialize all VMs to NULL for safe cleanup
+    for (size_t i = 0; i < pool_size; i++) {
+        secure_vm_pool[i] = NULL;
+    }
+    
+    // Set pool state
+    secure_pool_capacity = pool_size;
+    secure_pool_size = 0;
+    secure_pool_config = effective_config;
+    secure_pool_initialized = true;
+    allocation_count = 0;
+    last_rate_limit_reset = get_current_time_ms();
+    
+    return EMBER_SUCCESS;
+}
+
+// Secure VM pool cleanup
+void ember_pool_cleanup(void) {
+    if (!secure_pool_initialized || !secure_vm_pool) {
+        return;  // Safe to call multiple times
+    }
+    
+    // Clean up all VMs in the pool
+    for (size_t i = 0; i < secure_pool_capacity; i++) {
+        if (secure_vm_pool[i] != NULL) {
+            ember_free_vm(secure_vm_pool[i]);
+            secure_vm_pool[i] = NULL;
+        }
+    }
+    
+    // Free the pool array
+    free(secure_vm_pool);
+    secure_vm_pool = NULL;
+    secure_pool_capacity = 0;
+    secure_pool_size = 0;
+    secure_pool_initialized = false;
+    allocation_count = 0;
+    last_rate_limit_reset = 0;
+}
+
+// Secure VM acquisition with rate limiting
+ember_vm* ember_pool_get_vm(void) {
+    // Check if pool is initialized
+    if (!secure_pool_initialized) {
+        return NULL;  // Graceful failure - no error leakage
+    }
+    
+    // Apply rate limiting
+    int rate_check = check_rate_limit();
+    if (rate_check != EMBER_SUCCESS) {
+        return NULL;  // Rate limited - no error details leaked
+    }
+    
+    // Try to get VM from pool first
+    for (size_t i = 0; i < secure_pool_capacity; i++) {
+        if (secure_vm_pool[i] != NULL) {
+            ember_vm* vm = secure_vm_pool[i];
+            secure_vm_pool[i] = NULL;
+            secure_pool_size--;
+            
+            // Reset VM state for security
+            if (vm) {
+                vm->ip = 0;
+                vm->stack_top = 0;
+                vm->exception_pending = 0;
+                // Clear current exception for security
+                vm->current_exception = ember_make_nil();
+            }
+            
+            return vm;
+        }
+    }
+    
+    // No available VM in pool - create new one if under limits
+    if (secure_pool_size < secure_pool_config.max_vms_per_thread) {
+        ember_vm* new_vm = ember_new_vm();
+        if (new_vm) {
+            secure_pool_size++;
+        }
+        return new_vm;
+    }
+    
+    return NULL;  // Pool exhausted
+}
+
+// Secure VM release with validation
+void ember_pool_release_vm(ember_vm* vm) {
+    // NULL VM is safe to release - no error
+    if (!vm) {
+        return;
+    }
+    
+    // Check if pool is initialized
+    if (!secure_pool_initialized || !secure_vm_pool) {
+        // Pool not initialized - just free the VM
+        ember_free_vm(vm);
+        return;
+    }
+    
+    // Reset VM state for security before returning to pool
+    vm->ip = 0;
+    vm->stack_top = 0;
+    vm->exception_pending = 0;
+    vm->current_exception = ember_make_nil();
+    
+    // Try to return VM to pool
+    for (size_t i = 0; i < secure_pool_capacity; i++) {
+        if (secure_vm_pool[i] == NULL) {
+            secure_vm_pool[i] = vm;
+            return;
+        }
+    }
+    
+    // Pool is full - free the VM
+    ember_free_vm(vm);
+    if (secure_pool_size > 0) {
+        secure_pool_size--;
+    }
+}
 
 // Internal helper function for VM-aware module path resolution
 static char* ember_resolve_module_path_vm(ember_vm* vm, const char* module_name) {

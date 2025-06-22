@@ -5,7 +5,7 @@
 
 #include "package.h"
 #include "../value/value.h"
-#include "../../stdlib/http_native.h"
+#include "http_stubs.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

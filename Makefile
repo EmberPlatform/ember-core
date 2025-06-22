@@ -84,8 +84,8 @@ JIT_DIR = $(CORE_DIR)/jit
 
 # Core library source files
 FRONTEND_MODULES = $(FRONTEND_DIR)/lexer/lexer.c $(FRONTEND_DIR)/parser/parser.c $(FRONTEND_DIR)/parser/core.c $(FRONTEND_DIR)/parser/expressions.c $(FRONTEND_DIR)/parser/statements.c $(FRONTEND_DIR)/parser/oop.c
-CORE_MODULES = $(CORE_DIR)/vm.c $(CORE_DIR)/vm_arithmetic.c $(CORE_DIR)/vm_comparison.c $(CORE_DIR)/vm_stack.c $(CORE_DIR)/string_intern_optimized.c $(CORE_DIR)/bytecode.c $(CORE_DIR)/memory.c $(CORE_DIR)/error.c $(CORE_DIR)/optimizer.c $(CORE_DIR)/memory/memory_pool.c $(CORE_DIR)/vm_pool/concurrent_vm_pool.c $(CORE_DIR)/vm_pool/vm_pool_lockfree.c $(CORE_DIR)/vm_pool/work_stealing_pool.c $(CORE_DIR)/vm_pool/vm_memory_integration.c
-RUNTIME_MODULES = $(RUNTIME_DIR)/builtins.c $(RUNTIME_DIR)/value/value.c $(RUNTIME_DIR)/vfs/vfs.c $(RUNTIME_DIR)/package/package.c
+CORE_MODULES = $(CORE_DIR)/vm.c $(CORE_DIR)/vm_arithmetic.c $(CORE_DIR)/vm_comparison.c $(CORE_DIR)/vm_stack.c $(CORE_DIR)/string_intern_optimized.c $(CORE_DIR)/bytecode.c $(CORE_DIR)/memory.c $(CORE_DIR)/error.c $(CORE_DIR)/optimizer.c $(CORE_DIR)/memory/memory_pool.c $(CORE_DIR)/vm_pool/vm_pool_secure.c $(CORE_DIR)/vm_pool/vm_memory_integration.c src/vm_pool_api.c
+RUNTIME_MODULES = $(RUNTIME_DIR)/builtins.c $(RUNTIME_DIR)/value/value.c $(RUNTIME_DIR)/vfs/vfs.c $(RUNTIME_DIR)/package/package.c $(RUNTIME_DIR)/package/http_stubs.c $(RUNTIME_DIR)/template_stubs.c
 JIT_MODULES = $(JIT_DIR)/jit_compiler.c $(JIT_DIR)/jit_x86_64.c $(JIT_DIR)/jit_integration.c $(JIT_DIR)/jit_arithmetic.c
 
 LIBSRC = $(SRCDIR)/api.c $(FRONTEND_MODULES) $(CORE_MODULES) $(RUNTIME_MODULES) $(JIT_MODULES)
@@ -93,9 +93,10 @@ LIBSRC = $(SRCDIR)/api.c $(FRONTEND_MODULES) $(CORE_MODULES) $(RUNTIME_MODULES) 
 # Core library object files
 LIBOBJ = $(BUILDDIR)/api.o
 LIBOBJ += $(BUILDDIR)/lexer.o $(BUILDDIR)/parser.o $(BUILDDIR)/parser_core.o $(BUILDDIR)/parser_expressions.o $(BUILDDIR)/parser_statements.o $(BUILDDIR)/parser_oop.o
-LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_concurrent_vm_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_lockfree.o $(BUILDDIR)/core_vm_pool_work_stealing_pool.o $(BUILDDIR)/core_vm_pool_vm_memory_integration.o
-LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o
-LIBOBJ += $(BUILDDIR)/jit_compiler.o $(BUILDDIR)/jit_x86_64.o $(BUILDDIR)/jit_integration.o $(BUILDDIR)/jit_arithmetic.o
+LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_secure.o $(BUILDDIR)/core_vm_pool_vm_memory_integration.o $(BUILDDIR)/vm_pool_api.o
+LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o
+# JIT disabled for container build compatibility
+# LIBOBJ += $(BUILDDIR)/jit_compiler.o $(BUILDDIR)/jit_x86_64.o $(BUILDDIR)/jit_integration.o $(BUILDDIR)/jit_arithmetic.o
 
 # Core tools (essential tools only)
 CORE_TOOLS = ember emberc
@@ -175,8 +176,11 @@ $(BUILDDIR)/core_optimizer.o: $(CORE_DIR)/optimizer.c | $(BUILDDIR)
 $(BUILDDIR)/core_memory_memory_pool.o: $(CORE_DIR)/memory/memory_pool.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) $(THREAD_OPT_FLAGS) -c $< -o $@
 
-$(BUILDDIR)/core_vm_pool_concurrent_vm_pool.o: $(CORE_DIR)/vm_pool/concurrent_vm_pool.c | $(BUILDDIR)
-	$(CC) $(CFLAGS) $(THREAD_OPT_FLAGS) $(LOCKFREE_FLAGS) $(VM_POOL_FLAGS) -c $< -o $@
+$(BUILDDIR)/core_vm_pool_vm_pool_secure.o: $(CORE_DIR)/vm_pool/vm_pool_secure.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) $(THREAD_OPT_FLAGS) $(VM_POOL_FLAGS) -Wno-deprecated-declarations -c $< -o $@
+
+$(BUILDDIR)/vm_pool_api.o: $(SRCDIR)/vm_pool_api.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) $(VM_POOL_FLAGS) -c $< -o $@
 
 $(BUILDDIR)/core_vm_pool_vm_pool_lockfree.o: $(CORE_DIR)/vm_pool/vm_pool_lockfree.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) $(SECURITY_FLAGS) $(THREAD_OPT_FLAGS) $(LOCKFREE_FLAGS) $(VM_POOL_FLAGS) -c $< -o $@
@@ -198,6 +202,12 @@ $(BUILDDIR)/vfs.o: $(RUNTIME_DIR)/vfs/vfs.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/package.o: $(RUNTIME_DIR)/package/package.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/http_stubs.o: $(RUNTIME_DIR)/package/http_stubs.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/template_stubs.o: $(RUNTIME_DIR)/template_stubs.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # JIT modules

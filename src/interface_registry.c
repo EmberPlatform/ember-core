@@ -4,7 +4,7 @@
  * Manages interface registration and provides decoupled access to platform modules
  */
 
-#include "include/ember_interfaces.h"
+#include "ember_interfaces.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
