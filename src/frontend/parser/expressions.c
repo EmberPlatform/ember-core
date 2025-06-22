@@ -580,8 +580,53 @@ static parse_rule rules[] = {
     [TOKEN_THIS]          = {this_expression, NULL,         PREC_NONE},
     [TOKEN_SUPER]         = {super_expression, NULL,        PREC_NONE},
     [TOKEN_DOT]           = {NULL,       dot_expression,     PREC_CALL},
+    [TOKEN_ASYNC]         = {NULL,       NULL,              PREC_NONE},
+    [TOKEN_AWAIT]         = {await_expression, NULL,        PREC_UNARY},
+    [TOKEN_YIELD]         = {yield_expression, NULL,        PREC_UNARY},
     [TOKEN_EOF]           = {NULL,       NULL,              PREC_NONE},
 };
+
+// Await expression
+void await_expression(ember_chunk* chunk) {
+    parser_state* parser = get_parser_state();
+    
+    // Check if we're in an async context
+    if (!parser->in_async_function) {
+        error("'await' can only be used inside async functions");
+        return;
+    }
+    
+    // Parse the expression to await
+    parse_precedence(PREC_UNARY, chunk);
+    
+    // Emit AWAIT instruction
+    write_chunk(chunk, OP_AWAIT);
+}
+
+// Yield expression  
+void yield_expression(ember_chunk* chunk) {
+    parser_state* parser = get_parser_state();
+    
+    // Check if we're in a generator context
+    if (!parser->in_generator_function) {
+        error("'yield' can only be used inside generator functions");
+        return;
+    }
+    
+    // Parse the expression to yield (optional)
+    if (!check(TOKEN_SEMICOLON) && !check(TOKEN_NEWLINE) && !check(TOKEN_RBRACE)) {
+        parse_precedence(PREC_ASSIGNMENT, chunk);
+    } else {
+        // No expression provided, yield undefined
+        ember_value nil_val = ember_make_nil();
+        int const_idx = add_constant(chunk, nil_val);
+        write_chunk(chunk, OP_PUSH_CONST);
+        write_chunk(chunk, const_idx);
+    }
+    
+    // Emit YIELD instruction
+    write_chunk(chunk, OP_YIELD);
+}
 
 parse_rule* get_rule(ember_token_type type) {
     return &rules[type];

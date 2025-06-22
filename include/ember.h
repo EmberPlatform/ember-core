@@ -59,7 +59,12 @@ typedef enum {
     EMBER_VAL_HASH_MAP,
     EMBER_VAL_EXCEPTION,
     EMBER_VAL_CLASS,
-    EMBER_VAL_INSTANCE
+    EMBER_VAL_INSTANCE,
+    EMBER_VAL_PROMISE,
+    EMBER_VAL_GENERATOR,
+    EMBER_VAL_SET,
+    EMBER_VAL_MAP,
+    EMBER_VAL_REGEX
 } ember_val_type;
 
 // Opcodes for the bytecode VM
@@ -117,6 +122,31 @@ typedef enum {
     OP_INVOKE,        // Invoke method
     OP_INHERIT,       // Inherit from superclass
     OP_GET_SUPER,     // Get superclass method
+    OP_PROMISE_NEW,   // Create new promise
+    OP_PROMISE_RESOLVE, // Resolve promise
+    OP_PROMISE_REJECT, // Reject promise
+    OP_AWAIT,         // Await promise resolution
+    OP_YIELD,         // Yield from generator
+    OP_GENERATOR_NEW, // Create new generator
+    OP_GENERATOR_NEXT, // Get next value from generator
+    OP_SET_NEW,       // Create new set
+    OP_SET_ADD,       // Add element to set
+    OP_SET_HAS,       // Check if set has element
+    OP_SET_DELETE,    // Delete element from set
+    OP_SET_SIZE,      // Get set size
+    OP_SET_CLEAR,     // Clear all elements from set
+    OP_MAP_NEW,       // Create new map
+    OP_MAP_SET,       // Set map key-value pair
+    OP_MAP_GET,       // Get map value by key
+    OP_MAP_HAS,       // Check if map has key
+    OP_MAP_DELETE,    // Delete key from map
+    OP_MAP_SIZE,      // Get map size
+    OP_MAP_CLEAR,     // Clear all key-value pairs from map
+    OP_REGEX_NEW,     // Create new regex from pattern
+    OP_REGEX_TEST,    // Test if string matches regex
+    OP_REGEX_MATCH,   // Get match details from regex
+    OP_REGEX_REPLACE, // Replace matches in string
+    OP_REGEX_SPLIT,   // Split string by regex
     OP_HALT           // Stop execution
 } ember_opcode;
 
@@ -179,6 +209,9 @@ typedef enum {
     TOKEN_THIS,
     TOKEN_SUPER,
     TOKEN_DOT,
+    TOKEN_ASYNC,
+    TOKEN_AWAIT,
+    TOKEN_YIELD,
     TOKEN_EOF,
     TOKEN_ERROR
 } ember_token_type;
@@ -208,7 +241,12 @@ typedef enum {
     OBJ_EXCEPTION,
     OBJ_CLASS,
     OBJ_INSTANCE,
-    OBJ_METHOD
+    OBJ_METHOD,
+    OBJ_PROMISE,
+    OBJ_GENERATOR,
+    OBJ_SET,
+    OBJ_MAP,
+    OBJ_REGEX
 } ember_object_type;
 
 // Base object structure for GC
@@ -294,6 +332,83 @@ typedef struct {
     ember_value receiver;                  // The instance this method is bound to
     ember_value method;                    // The function value
 } ember_bound_method;
+
+// Promise states
+typedef enum {
+    PROMISE_PENDING,
+    PROMISE_RESOLVED,
+    PROMISE_REJECTED
+} ember_promise_state;
+
+// Promise object structure
+typedef struct {
+    ember_object obj;
+    ember_promise_state state;
+    ember_value value;                     // Result value or rejection reason
+    ember_array* then_callbacks;          // Array of then callbacks
+    ember_array* catch_callbacks;         // Array of catch callbacks
+    ember_array* finally_callbacks;       // Array of finally callbacks
+} ember_promise;
+
+// Generator states
+typedef enum {
+    GENERATOR_CREATED,
+    GENERATOR_SUSPENDED,
+    GENERATOR_COMPLETED
+} ember_generator_state;
+
+// Generator object structure
+typedef struct {
+    ember_object obj;
+    ember_generator_state state;
+    ember_chunk* chunk;                    // Function bytecode
+    uint8_t* ip;                          // Current instruction pointer
+    ember_value* locals;                   // Local variable state
+    int local_count;                       // Number of locals
+    ember_value* stack;                    // Generator stack state
+    int stack_top;                         // Stack pointer
+    ember_value yielded_value;             // Last yielded value
+} ember_generator;
+
+// Set object structure
+typedef struct {
+    ember_object obj;
+    ember_hash_map* elements;              // Internal hash map for element storage
+    int size;                              // Number of elements in set
+} ember_set;
+
+// Map object structure
+typedef struct {
+    ember_object obj;
+    ember_hash_map* entries;               // Internal hash map for key-value storage
+    int size;                              // Number of key-value pairs in map
+} ember_map;
+
+// Regex flags
+typedef enum {
+    REGEX_NONE = 0,
+    REGEX_CASE_INSENSITIVE = 1,
+    REGEX_MULTILINE = 2,
+    REGEX_GLOBAL = 4,
+    REGEX_DOTALL = 8
+} ember_regex_flags;
+
+// Regex match result
+typedef struct {
+    int start;                             // Start position of match
+    int end;                               // End position of match
+    char* match;                           // Matched text
+} ember_regex_match;
+
+// Regex object structure
+typedef struct {
+    ember_object obj;
+    char* pattern;                         // Original regex pattern
+    ember_regex_flags flags;               // Regex flags
+    void* compiled_regex;                  // Compiled regex (implementation specific)
+    ember_array* groups;                   // Array of capture groups from last match
+    int last_index;                        // Last match position (for global matching)
+} ember_regex;
 
 // Exception handler structure for try/catch/finally
 typedef struct {
@@ -479,6 +594,15 @@ struct ember_vm {
     
     // Memory management context
     void* memory_context;           // VM memory management context (vm_memory_context*)
+    
+    // Async/await support
+    ember_array* pending_promises;   // Array of promises waiting to be resolved
+    ember_value* async_stack;        // Stack for async operation context
+    int async_stack_top;             // Async stack pointer
+    int is_async_context;            // Whether we're in an async function context
+    
+    // Generator support
+    ember_generator* current_generator; // Currently executing generator (if any)
 };
 
 // API functions
@@ -497,9 +621,57 @@ ember_value ember_make_exception(ember_vm* vm, const char* type, const char* mes
 ember_value ember_make_class(ember_vm* vm, const char* name);
 ember_value ember_make_instance(ember_vm* vm, ember_class* klass);
 ember_value ember_make_bound_method(ember_vm* vm, ember_value receiver, ember_value method);
+ember_value ember_make_promise(ember_vm* vm);
+ember_value ember_make_generator(ember_vm* vm, ember_chunk* chunk);
+ember_value ember_make_set(ember_vm* vm);
+ember_value ember_make_map(ember_vm* vm);
+ember_value ember_make_regex(ember_vm* vm, const char* pattern, ember_regex_flags flags);
 ember_value ember_make_nil(void);
+
+// Set operations
+int set_add(ember_set* set, ember_value element);
+int set_has(ember_set* set, ember_value element);
+int set_delete(ember_set* set, ember_value element);
+void set_clear(ember_set* set);
+
+// Map operations  
+int map_set(ember_map* map, ember_value key, ember_value value);
+ember_value map_get(ember_map* map, ember_value key);
+int map_has(ember_map* map, ember_value key);
+int map_delete(ember_map* map, ember_value key);
+void map_clear(ember_map* map);
+
+// Regex operations
+int regex_test(ember_regex* regex, const char* text);
+ember_array* regex_match(ember_vm* vm, ember_regex* regex, const char* text);
+ember_value regex_replace(ember_vm* vm, ember_regex* regex, const char* text, const char* replacement);
+ember_array* regex_split(ember_vm* vm, ember_regex* regex, const char* text);
+
+// VM collection operation handlers
+void vm_handle_set_new(ember_vm* vm);
+void vm_handle_set_add(ember_vm* vm);
+void vm_handle_set_has(ember_vm* vm);
+void vm_handle_set_delete(ember_vm* vm);
+void vm_handle_set_size(ember_vm* vm);
+void vm_handle_set_clear(ember_vm* vm);
+void vm_handle_map_new(ember_vm* vm);
+void vm_handle_map_set(ember_vm* vm);
+void vm_handle_map_get(ember_vm* vm);
+void vm_handle_map_has(ember_vm* vm);
+void vm_handle_map_delete(ember_vm* vm);
+void vm_handle_map_size(ember_vm* vm);
+void vm_handle_map_clear(ember_vm* vm);
+
+// VM regex operation handlers
+void vm_handle_regex_new(ember_vm* vm);
+void vm_handle_regex_test(ember_vm* vm);
+void vm_handle_regex_match(ember_vm* vm);
+void vm_handle_regex_replace(ember_vm* vm);
+void vm_handle_regex_split(ember_vm* vm);
 ember_value ember_peek_stack_top(ember_vm* vm);
 void ember_print_value(ember_value value);
+void print_value(ember_value value);
+int values_equal(ember_value a, ember_value b);
 
 // Performance optimization API
 void vm_set_optimization_level(int level); // 0=none, 1=basic, 2=advanced, 3=max
@@ -640,6 +812,16 @@ void ember_pool_release_vm(ember_vm* vm);
 #define AS_INSTANCE(value) ((ember_instance*)((value).as.obj_val))
 #define IS_BOUND_METHOD(value) ((value).type == EMBER_VAL_FUNCTION && ((value).as.obj_val)->type == OBJ_METHOD)
 #define AS_BOUND_METHOD(value) ((ember_bound_method*)((value).as.obj_val))
+#define IS_PROMISE(value) ((value).type == EMBER_VAL_PROMISE)
+#define AS_PROMISE(value) ((ember_promise*)((value).as.obj_val))
+#define IS_GENERATOR(value) ((value).type == EMBER_VAL_GENERATOR)
+#define AS_GENERATOR(value) ((ember_generator*)((value).as.obj_val))
+#define IS_SET(value) ((value).type == EMBER_VAL_SET)
+#define AS_SET(value) ((ember_set*)((value).as.obj_val))
+#define IS_MAP(value) ((value).type == EMBER_VAL_MAP)
+#define AS_MAP(value) ((ember_map*)((value).as.obj_val))
+#define IS_REGEX(value) ((value).type == EMBER_VAL_REGEX)
+#define AS_REGEX(value) ((ember_regex*)((value).as.obj_val))
 
 #ifdef __cplusplus
 }

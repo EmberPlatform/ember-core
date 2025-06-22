@@ -32,6 +32,8 @@ typedef struct {
     int loop_depth;              // Current loop nesting depth
     exception_context exception_stack[8];  // Stack of nested exception contexts
     int exception_depth;         // Current exception nesting depth
+    int in_async_function;       // Whether we're parsing an async function
+    int in_generator_function;   // Whether we're parsing a generator function
 } parser_state;
 
 // Precedence levels
@@ -81,6 +83,12 @@ void try_statement(ember_vm* vm, ember_chunk* chunk);
 void throw_statement(ember_chunk* chunk);
 void class_declaration(ember_vm* vm, ember_chunk* chunk);
 void method_definition(ember_vm* vm, ember_chunk* chunk);
+
+// Async/await and generator support
+void async_function_definition(ember_vm* vm, ember_chunk* chunk);
+void await_expression(ember_chunk* chunk);
+void yield_expression(ember_chunk* chunk);
+void generator_function_definition(ember_vm* vm, ember_chunk* chunk);
 
 // Binary operations
 void binary(ember_chunk* chunk);

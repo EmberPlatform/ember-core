@@ -487,8 +487,18 @@ void import_statement(ember_vm* vm, ember_chunk* chunk) {
 }
 
 void statement(ember_vm* vm, ember_chunk* chunk) {
-    if (match(TOKEN_FN)) {
-        function_definition(vm, chunk);
+    if (match(TOKEN_ASYNC)) {
+        // Handle async function declaration
+        consume(TOKEN_FN, "Expect 'fn' after 'async'");
+        async_function_definition(vm, chunk);
+    } else if (match(TOKEN_FN)) {
+        // Check if this is a generator function (fn* syntax)
+        if (check(TOKEN_MULTIPLY)) {
+            advance_parser(); // consume '*'
+            generator_function_definition(vm, chunk);
+        } else {
+            function_definition(vm, chunk);
+        }
     } else if (match(TOKEN_CLASS)) {
         class_declaration(vm, chunk);
     } else if (match(TOKEN_RETURN)) {
@@ -837,4 +847,159 @@ void throw_statement(ember_chunk* chunk) {
     
     // Emit THROW instruction
     write_chunk(chunk, OP_THROW);
+}
+
+// Async function definition
+void async_function_definition(ember_vm* vm, ember_chunk* chunk) {
+    parser_state* parser = get_parser_state();
+    
+    // Parse function name
+    consume(TOKEN_IDENTIFIER, "Expect function name");
+    ember_token name = parser->previous;
+    
+    // Create variable name string
+    char* name_str = malloc(name.length + 1);
+    memcpy(name_str, name.start, name.length);
+    name_str[name.length] = '\0';
+    
+    ember_value name_val = ember_make_string_gc(vm, name_str);
+    int const_idx = add_constant(chunk, name_val);
+    free(name_str);
+    
+    // Parse parameters
+    consume(TOKEN_LPAREN, "Expect '(' after function name");
+    
+    // Skip parameter parsing for now (could implement later)
+    while (!check(TOKEN_RPAREN) && !check(TOKEN_EOF)) {
+        advance_parser();
+    }
+    consume(TOKEN_RPAREN, "Expect ')' after parameters");
+    
+    // Parse function body with async context
+    consume(TOKEN_LBRACE, "Expect '{' before function body");
+    
+    // Set async context
+    int prev_async = parser->in_async_function;
+    parser->in_async_function = 1;
+    
+    // Create a new chunk for the async function body
+    ember_chunk* func_chunk = malloc(sizeof(ember_chunk));
+    init_chunk(func_chunk);
+    track_function_chunk(vm, func_chunk);
+    
+    // Parse function body statements
+    while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+        while (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) {
+            // Skip separators
+        }
+        if (check(TOKEN_RBRACE)) break;
+        
+        statement(vm, func_chunk);
+        
+        if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) {
+            // Consumed separator
+        } else if (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+            error("Expect newline, semicolon, or '}' after statement");
+            break;
+        }
+    }
+    
+    consume(TOKEN_RBRACE, "Expect '}' after async function body");
+    
+    // Restore async context
+    parser->in_async_function = prev_async;
+    
+    // Add return instruction
+    write_chunk(func_chunk, OP_RETURN);
+    
+    // Create async function value - for now, just store as regular function
+    // In a full implementation, this would wrap the function to return a Promise
+    ember_value func_val;
+    func_val.type = EMBER_VAL_FUNCTION;
+    func_val.as.func_val.chunk = func_chunk;
+    func_val.as.func_val.name = NULL; // Avoid use-after-free
+    
+    int func_const_idx = add_constant(chunk, func_val);
+    write_chunk(chunk, OP_PUSH_CONST);
+    write_chunk(chunk, func_const_idx);
+    write_chunk(chunk, OP_SET_GLOBAL);
+    write_chunk(chunk, const_idx);
+    write_chunk(chunk, OP_POP);
+}
+
+// Generator function definition
+void generator_function_definition(ember_vm* vm, ember_chunk* chunk) {
+    parser_state* parser = get_parser_state();
+    
+    // Parse function name
+    consume(TOKEN_IDENTIFIER, "Expect generator function name");
+    ember_token name = parser->previous;
+    
+    // Create variable name string
+    char* name_str = malloc(name.length + 1);
+    memcpy(name_str, name.start, name.length);
+    name_str[name.length] = '\0';
+    
+    ember_value name_val = ember_make_string_gc(vm, name_str);
+    int const_idx = add_constant(chunk, name_val);
+    free(name_str);
+    
+    // Parse parameters
+    consume(TOKEN_LPAREN, "Expect '(' after generator function name");
+    
+    // Skip parameter parsing for now
+    while (!check(TOKEN_RPAREN) && !check(TOKEN_EOF)) {
+        advance_parser();
+    }
+    consume(TOKEN_RPAREN, "Expect ')' after parameters");
+    
+    // Parse function body with generator context
+    consume(TOKEN_LBRACE, "Expect '{' before generator function body");
+    
+    // Set generator context
+    int prev_generator = parser->in_generator_function;
+    parser->in_generator_function = 1;
+    
+    // Create a new chunk for the generator function body
+    ember_chunk* func_chunk = malloc(sizeof(ember_chunk));
+    init_chunk(func_chunk);
+    track_function_chunk(vm, func_chunk);
+    
+    // Parse function body statements
+    while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+        while (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) {
+            // Skip separators
+        }
+        if (check(TOKEN_RBRACE)) break;
+        
+        statement(vm, func_chunk);
+        
+        if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) {
+            // Consumed separator
+        } else if (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+            error("Expect newline, semicolon, or '}' after statement");
+            break;
+        }
+    }
+    
+    consume(TOKEN_RBRACE, "Expect '}' after generator function body");
+    
+    // Restore generator context
+    parser->in_generator_function = prev_generator;
+    
+    // Add return instruction (generators auto-complete when they reach the end)
+    write_chunk(func_chunk, OP_RETURN);
+    
+    // Create generator constructor - this would create a generator when called
+    ember_value gen_constructor;
+    gen_constructor.type = EMBER_VAL_FUNCTION;
+    gen_constructor.as.func_val.chunk = func_chunk;
+    gen_constructor.as.func_val.name = NULL; // Avoid use-after-free
+    
+    int func_const_idx = add_constant(chunk, gen_constructor);
+    write_chunk(chunk, OP_PUSH_CONST);
+    write_chunk(chunk, func_const_idx);
+    write_chunk(chunk, OP_SET_GLOBAL);
+    write_chunk(chunk, const_idx);
+    write_chunk(chunk, OP_POP);
 }

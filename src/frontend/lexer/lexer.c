@@ -163,6 +163,14 @@ static ember_token_type identifier_type() {
                 memcmp(scanner.start, "and", 3) == 0) {
                 return TOKEN_AND;
             }
+            if (scanner.current - scanner.start == 5 && 
+                memcmp(scanner.start, "async", 5) == 0) {
+                return TOKEN_ASYNC;
+            }
+            if (scanner.current - scanner.start == 5 && 
+                memcmp(scanner.start, "await", 5) == 0) {
+                return TOKEN_AWAIT;
+            }
             break;
         case 'b':
             if (scanner.current - scanner.start == 5 && 
@@ -272,6 +280,12 @@ static ember_token_type identifier_type() {
             if (scanner.current - scanner.start == 5 && 
                 memcmp(scanner.start, "while", 5) == 0) {
                 return TOKEN_WHILE;
+            }
+            break;
+        case 'y':
+            if (scanner.current - scanner.start == 5 && 
+                memcmp(scanner.start, "yield", 5) == 0) {
+                return TOKEN_YIELD;
             }
             break;
     }

@@ -539,6 +539,51 @@ int values_equal(ember_value a, ember_value b) {
                 return 1;
             }
             return a.as.obj_val == b.as.obj_val;
+        case EMBER_VAL_SET:
+            if (a.as.obj_val && b.as.obj_val) {
+                ember_set* a_set = AS_SET(a);
+                ember_set* b_set = AS_SET(b);
+                if (a_set->size != b_set->size) return 0;
+                
+                // Check if all elements in a are also in b
+                for (int i = 0; i < a_set->elements->capacity; i++) {
+                    if (a_set->elements->entries[i].is_occupied) {
+                        if (!set_has(b_set, a_set->elements->entries[i].key)) {
+                            return 0;
+                        }
+                    }
+                }
+                return 1;
+            }
+            return a.as.obj_val == b.as.obj_val;
+        case EMBER_VAL_MAP:
+            if (a.as.obj_val && b.as.obj_val) {
+                ember_map* a_map = AS_MAP(a);
+                ember_map* b_map = AS_MAP(b);
+                if (a_map->size != b_map->size) return 0;
+                
+                // Check if all key-value pairs match
+                for (int i = 0; i < a_map->entries->capacity; i++) {
+                    if (a_map->entries->entries[i].is_occupied) {
+                        ember_value b_value = map_get(b_map, a_map->entries->entries[i].key);
+                        if (!values_equal(a_map->entries->entries[i].value, b_value)) {
+                            return 0;
+                        }
+                    }
+                }
+                return 1;
+            }
+            return a.as.obj_val == b.as.obj_val;
+        case EMBER_VAL_REGEX:
+            if (a.as.obj_val && b.as.obj_val) {
+                ember_regex* a_regex = AS_REGEX(a);
+                ember_regex* b_regex = AS_REGEX(b);
+                if (a_regex->flags != b_regex->flags) return 0;
+                if (!a_regex->pattern && !b_regex->pattern) return 1;
+                if (!a_regex->pattern || !b_regex->pattern) return 0;
+                return strcmp(a_regex->pattern, b_regex->pattern) == 0;
+            }
+            return a.as.obj_val == b.as.obj_val;
         default:
             return 0;
     }
@@ -613,6 +658,63 @@ void print_value(ember_value value) {
         case EMBER_VAL_INSTANCE: {
             ember_instance* instance = AS_INSTANCE(value);
             printf("<%s instance>", instance->klass->name ? instance->klass->name->chars : "unnamed");
+            break;
+        }
+        case EMBER_VAL_PROMISE: {
+            ember_promise* promise = AS_PROMISE(value);
+            printf("<Promise [%s]>", 
+                   promise->state == PROMISE_PENDING ? "pending" :
+                   promise->state == PROMISE_RESOLVED ? "resolved" : "rejected");
+            break;
+        }
+        case EMBER_VAL_GENERATOR: {
+            ember_generator* generator = AS_GENERATOR(value);
+            printf("<Generator [%s]>",
+                   generator->state == GENERATOR_CREATED ? "created" :
+                   generator->state == GENERATOR_SUSPENDED ? "suspended" : "completed");
+            break;
+        }
+        case EMBER_VAL_SET: {
+            ember_set* set = AS_SET(value);
+            printf("Set(%d) {", set->size);
+            int first = 1;
+            for (int i = 0; i < set->elements->capacity; i++) {
+                if (set->elements->entries[i].is_occupied) {
+                    if (!first) printf(", ");
+                    print_value(set->elements->entries[i].key);
+                    first = 0;
+                }
+            }
+            printf("}");
+            break;
+        }
+        case EMBER_VAL_MAP: {
+            ember_map* map = AS_MAP(value);
+            printf("Map(%d) {", map->size);
+            int first = 1;
+            for (int i = 0; i < map->entries->capacity; i++) {
+                if (map->entries->entries[i].is_occupied) {
+                    if (!first) printf(", ");
+                    print_value(map->entries->entries[i].key);
+                    printf(" => ");
+                    print_value(map->entries->entries[i].value);
+                    first = 0;
+                }
+            }
+            printf("}");
+            break;
+        }
+        case EMBER_VAL_REGEX: {
+            ember_regex* regex = AS_REGEX(value);
+            printf("/");
+            if (regex->pattern) {
+                printf("%s", regex->pattern);
+            }
+            printf("/");
+            if (regex->flags & REGEX_GLOBAL) printf("g");
+            if (regex->flags & REGEX_CASE_INSENSITIVE) printf("i");
+            if (regex->flags & REGEX_MULTILINE) printf("m");
+            if (regex->flags & REGEX_DOTALL) printf("s");
             break;
         }
     }
@@ -766,4 +868,343 @@ ember_value ember_make_bound_method(ember_vm* vm, ember_value receiver, ember_va
     value.type = EMBER_VAL_FUNCTION; // Bound methods are callable
     value.as.obj_val = (ember_object*)bound;
     return value;
+}
+
+// Set allocation and creation functions
+ember_set* allocate_set(ember_vm* vm) {
+    ember_set* set = (ember_set*)allocate_object(vm, sizeof(ember_set), OBJ_SET);
+    if (!set) {
+        return NULL;
+    }
+    
+    // Initialize with internal hash map for element storage
+    set->elements = allocate_hash_map(vm, 8);
+    if (!set->elements) {
+        return NULL;
+    }
+    
+    set->size = 0;
+    return set;
+}
+
+ember_value ember_make_set(ember_vm* vm) {
+    ember_set* set = allocate_set(vm);
+    if (!set) {
+        return ember_make_nil();
+    }
+    
+    ember_value value;
+    value.type = EMBER_VAL_SET;
+    value.as.obj_val = (ember_object*)set;
+    return value;
+}
+
+// Map allocation and creation functions
+ember_map* allocate_map(ember_vm* vm) {
+    ember_map* map = (ember_map*)allocate_object(vm, sizeof(ember_map), OBJ_MAP);
+    if (!map) {
+        return NULL;
+    }
+    
+    // Initialize with internal hash map for key-value storage
+    map->entries = allocate_hash_map(vm, 8);
+    if (!map->entries) {
+        return NULL;
+    }
+    
+    map->size = 0;
+    return map;
+}
+
+ember_value ember_make_map(ember_vm* vm) {
+    ember_map* map = allocate_map(vm);
+    if (!map) {
+        return ember_make_nil();
+    }
+    
+    ember_value value;
+    value.type = EMBER_VAL_MAP;
+    value.as.obj_val = (ember_object*)map;
+    return value;
+}
+
+// Set operation functions
+int set_add(ember_set* set, ember_value element) {
+    if (!set) return 0;
+    
+    // Check if element already exists
+    if (hash_map_has_key(set->elements, element)) {
+        return 1; // Element already exists, no change
+    }
+    
+    // Add element using itself as both key and value (Set behavior)
+    hash_map_set(set->elements, element, element);
+    set->size = set->elements->length;
+    return 1;
+}
+
+int set_has(ember_set* set, ember_value element) {
+    if (!set) return 0;
+    return hash_map_has_key(set->elements, element);
+}
+
+int set_delete(ember_set* set, ember_value element) {
+    if (!set) return 0;
+    
+    if (!hash_map_has_key(set->elements, element)) {
+        return 0; // Element doesn't exist
+    }
+    
+    // Find and remove the element
+    ember_hash_entry* entry = find_entry(set->elements->entries, set->elements->capacity, element);
+    if (entry && entry->is_occupied) {
+        entry->is_occupied = 0;
+        entry->key = ember_make_nil();
+        entry->value = ember_make_nil();
+        set->elements->length--;
+        set->size = set->elements->length;
+        return 1;
+    }
+    
+    return 0;
+}
+
+void set_clear(ember_set* set) {
+    if (!set) return;
+    
+    // Clear all entries
+    for (int i = 0; i < set->elements->capacity; i++) {
+        set->elements->entries[i].is_occupied = 0;
+        set->elements->entries[i].key = ember_make_nil();
+        set->elements->entries[i].value = ember_make_nil();
+    }
+    
+    set->elements->length = 0;
+    set->size = 0;
+}
+
+// Map operation functions
+int map_set(ember_map* map, ember_value key, ember_value value) {
+    if (!map) return 0;
+    
+    int had_key = hash_map_has_key(map->entries, key);
+    hash_map_set(map->entries, key, value);
+    
+    if (!had_key) {
+        map->size = map->entries->length;
+    }
+    
+    return 1;
+}
+
+ember_value map_get(ember_map* map, ember_value key) {
+    if (!map) return ember_make_nil();
+    return hash_map_get(map->entries, key);
+}
+
+int map_has(ember_map* map, ember_value key) {
+    if (!map) return 0;
+    return hash_map_has_key(map->entries, key);
+}
+
+int map_delete(ember_map* map, ember_value key) {
+    if (!map) return 0;
+    
+    if (!hash_map_has_key(map->entries, key)) {
+        return 0; // Key doesn't exist
+    }
+    
+    // Find and remove the key-value pair
+    ember_hash_entry* entry = find_entry(map->entries->entries, map->entries->capacity, key);
+    if (entry && entry->is_occupied) {
+        entry->is_occupied = 0;
+        entry->key = ember_make_nil();
+        entry->value = ember_make_nil();
+        map->entries->length--;
+        map->size = map->entries->length;
+        return 1;
+    }
+    
+    return 0;
+}
+
+void map_clear(ember_map* map) {
+    if (!map) return;
+    
+    // Clear all entries
+    for (int i = 0; i < map->entries->capacity; i++) {
+        map->entries->entries[i].is_occupied = 0;
+        map->entries->entries[i].key = ember_make_nil();
+        map->entries->entries[i].value = ember_make_nil();
+    }
+    
+    map->entries->length = 0;
+    map->size = 0;
+}
+
+// Regex allocation and creation functions
+ember_regex* allocate_regex(ember_vm* vm, const char* pattern, ember_regex_flags flags) {
+    ember_regex* regex = (ember_regex*)allocate_object(vm, sizeof(ember_regex), OBJ_REGEX);
+    if (!regex) {
+        return NULL;
+    }
+    
+    // Copy pattern string
+    if (pattern) {
+        size_t pattern_len = strlen(pattern);
+        regex->pattern = malloc(pattern_len + 1);
+        if (!regex->pattern) {
+            return NULL;
+        }
+        memcpy(regex->pattern, pattern, pattern_len + 1);
+    } else {
+        regex->pattern = NULL;
+    }
+    
+    regex->flags = flags;
+    regex->compiled_regex = NULL; // Simple implementation - no actual compilation
+    regex->groups = allocate_array(vm, 8); // Start with capacity for 8 groups
+    regex->last_index = 0;
+    
+    return regex;
+}
+
+ember_value ember_make_regex(ember_vm* vm, const char* pattern, ember_regex_flags flags) {
+    ember_regex* regex = allocate_regex(vm, pattern, flags);
+    if (!regex) {
+        return ember_make_nil();
+    }
+    
+    ember_value value;
+    value.type = EMBER_VAL_REGEX;
+    value.as.obj_val = (ember_object*)regex;
+    return value;
+}
+
+// Simple regex operation implementations (basic functionality)
+int regex_test(ember_regex* regex, const char* text) {
+    if (!regex || !regex->pattern || !text) {
+        return 0;
+    }
+    
+    // Simple substring search for basic patterns
+    // This is a simplified implementation - in production would use PCRE or similar
+    if (regex->flags & REGEX_CASE_INSENSITIVE) {
+        // Case-insensitive search (simplified)
+        const char* found = strstr(text, regex->pattern);
+        return found != NULL;
+    } else {
+        // Case-sensitive search
+        const char* found = strstr(text, regex->pattern);
+        return found != NULL;
+    }
+}
+
+ember_array* regex_match(ember_vm* vm, ember_regex* regex, const char* text) {
+    if (!regex || !regex->pattern || !text) {
+        return NULL;
+    }
+    
+    ember_array* matches = allocate_array(vm, 4);
+    if (!matches) {
+        return NULL;
+    }
+    
+    // Simple implementation - find first match
+    const char* found = strstr(text, regex->pattern);
+    if (found) {
+        // Create match result with position and matched text
+        ember_regex_match match_info;
+        match_info.start = found - text;
+        match_info.end = match_info.start + strlen(regex->pattern);
+        
+        size_t match_len = strlen(regex->pattern);
+        match_info.match = malloc(match_len + 1);
+        if (match_info.match) {
+            memcpy(match_info.match, regex->pattern, match_len + 1);
+        }
+        
+        // Add match to results array
+        ember_value match_val = ember_make_string_gc(vm, match_info.match);
+        array_push(matches, match_val);
+        
+        if (match_info.match) {
+            free(match_info.match);
+        }
+    }
+    
+    return matches;
+}
+
+ember_value regex_replace(ember_vm* vm, ember_regex* regex, const char* text, const char* replacement) {
+    if (!regex || !regex->pattern || !text || !replacement) {
+        return ember_make_nil();
+    }
+    
+    // Simple replace implementation
+    const char* found = strstr(text, regex->pattern);
+    if (!found) {
+        // No match found, return original text
+        return ember_make_string_gc(vm, text);
+    }
+    
+    size_t pattern_len = strlen(regex->pattern);
+    size_t replacement_len = strlen(replacement);
+    size_t prefix_len = found - text;
+    size_t suffix_len = strlen(found + pattern_len);
+    size_t result_len = prefix_len + replacement_len + suffix_len;
+    
+    char* result = malloc(result_len + 1);
+    if (!result) {
+        return ember_make_nil();
+    }
+    
+    // Build result string
+    memcpy(result, text, prefix_len);
+    memcpy(result + prefix_len, replacement, replacement_len);
+    memcpy(result + prefix_len + replacement_len, found + pattern_len, suffix_len);
+    result[result_len] = '\0';
+    
+    ember_value result_val = ember_make_string_gc(vm, result);
+    free(result);
+    
+    return result_val;
+}
+
+ember_array* regex_split(ember_vm* vm, ember_regex* regex, const char* text) {
+    if (!regex || !regex->pattern || !text) {
+        return NULL;
+    }
+    
+    ember_array* parts = allocate_array(vm, 4);
+    if (!parts) {
+        return NULL;
+    }
+    
+    const char* current = text;
+    const char* found;
+    
+    while ((found = strstr(current, regex->pattern)) != NULL) {
+        // Add part before the match
+        size_t part_len = found - current;
+        char* part = malloc(part_len + 1);
+        if (part) {
+            memcpy(part, current, part_len);
+            part[part_len] = '\0';
+            ember_value part_val = ember_make_string_gc(vm, part);
+            array_push(parts, part_val);
+            free(part);
+        }
+        
+        // Move past the match
+        current = found + strlen(regex->pattern);
+    }
+    
+    // Add remaining part
+    if (*current) {
+        ember_value remaining_val = ember_make_string_gc(vm, current);
+        array_push(parts, remaining_val);
+    }
+    
+    return parts;
 }

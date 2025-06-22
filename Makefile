@@ -85,7 +85,7 @@ JIT_DIR = $(CORE_DIR)/jit
 # Core library source files
 FRONTEND_MODULES = $(FRONTEND_DIR)/lexer/lexer.c $(FRONTEND_DIR)/parser/parser.c $(FRONTEND_DIR)/parser/core.c $(FRONTEND_DIR)/parser/expressions.c $(FRONTEND_DIR)/parser/statements.c $(FRONTEND_DIR)/parser/oop.c
 CORE_MODULES = $(CORE_DIR)/vm.c $(CORE_DIR)/vm_arithmetic.c $(CORE_DIR)/vm_comparison.c $(CORE_DIR)/vm_stack.c $(CORE_DIR)/string_intern_optimized.c $(CORE_DIR)/bytecode.c $(CORE_DIR)/memory.c $(CORE_DIR)/error.c $(CORE_DIR)/optimizer.c $(CORE_DIR)/memory/memory_pool.c $(CORE_DIR)/vm_pool/vm_pool_secure.c $(CORE_DIR)/vm_pool/vm_memory_integration.c src/vm_pool_api.c
-RUNTIME_MODULES = $(RUNTIME_DIR)/builtins.c $(RUNTIME_DIR)/value/value.c $(RUNTIME_DIR)/vfs/vfs.c $(RUNTIME_DIR)/package/package.c $(RUNTIME_DIR)/package/http_stubs.c $(RUNTIME_DIR)/template_stubs.c
+RUNTIME_MODULES = $(RUNTIME_DIR)/builtins.c $(RUNTIME_DIR)/value/value.c $(RUNTIME_DIR)/vfs/vfs.c $(RUNTIME_DIR)/package/package.c $(RUNTIME_DIR)/package/http_stubs.c $(RUNTIME_DIR)/template_stubs.c $(RUNTIME_DIR)/stdlib_stubs.c
 JIT_MODULES = $(JIT_DIR)/jit_compiler.c $(JIT_DIR)/jit_x86_64.c $(JIT_DIR)/jit_integration.c $(JIT_DIR)/jit_arithmetic.c
 
 LIBSRC = $(SRCDIR)/api.c $(FRONTEND_MODULES) $(CORE_MODULES) $(RUNTIME_MODULES) $(JIT_MODULES)
@@ -93,8 +93,8 @@ LIBSRC = $(SRCDIR)/api.c $(FRONTEND_MODULES) $(CORE_MODULES) $(RUNTIME_MODULES) 
 # Core library object files
 LIBOBJ = $(BUILDDIR)/api.o
 LIBOBJ += $(BUILDDIR)/lexer.o $(BUILDDIR)/parser.o $(BUILDDIR)/parser_core.o $(BUILDDIR)/parser_expressions.o $(BUILDDIR)/parser_statements.o $(BUILDDIR)/parser_oop.o
-LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_secure.o $(BUILDDIR)/core_vm_pool_vm_memory_integration.o $(BUILDDIR)/vm_pool_api.o
-LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o
+LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_secure.o $(BUILDDIR)/core_vm_pool_vm_memory_integration.o $(BUILDDIR)/vm_pool_api.o $(BUILDDIR)/core_async.o $(BUILDDIR)/core_vm_async.o $(BUILDDIR)/core_vm_collections.o
+LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o $(BUILDDIR)/stdlib_stubs.o
 # JIT disabled for container build compatibility
 # LIBOBJ += $(BUILDDIR)/jit_compiler.o $(BUILDDIR)/jit_x86_64.o $(BUILDDIR)/jit_integration.o $(BUILDDIR)/jit_arithmetic.o
 
@@ -106,13 +106,17 @@ CORE_TOOL_BINS = $(addprefix $(BUILDDIR)/, $(CORE_TOOLS))
 CORE_TESTS = test-vm test-lexer-basic test-parser-core test-parser-expressions test-parser-statements test-builtins test-value test-package test-basic-ops test-simple test-minimal
 CORE_TEST_BINS = $(addprefix $(BUILDDIR)/, $(CORE_TESTS))
 
+# Testing framework
+TEST_FRAMEWORK_DIR = src/runtime/testing
+TEST_FRAMEWORK_RUNNER = $(BUILDDIR)/ember_test_runner
+
 # Fuzzing tests
 FUZZ_TESTS = fuzz-parser fuzz-vm fuzz-comprehensive
 FUZZ_BINS = $(addprefix $(BUILDDIR)/, $(FUZZ_TESTS))
 
-.PHONY: all clean tools tests fuzz fuzz-run debug release asan coverage install check help
+.PHONY: all clean tools tests fuzz fuzz-run debug release asan coverage install check help test-framework test-all
 
-all: $(BUILDDIR)/$(LIBNAME) tools tests
+all: $(BUILDDIR)/$(LIBNAME) tools tests test-framework
 
 # Create build directory
 $(BUILDDIR):
@@ -191,6 +195,15 @@ $(BUILDDIR)/core_vm_pool_work_stealing_pool.o: $(CORE_DIR)/vm_pool/work_stealing
 $(BUILDDIR)/core_vm_pool_vm_memory_integration.o: $(CORE_DIR)/vm_pool/vm_memory_integration.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) $(THREAD_OPT_FLAGS) -c $< -o $@
 
+$(BUILDDIR)/core_async.o: $(CORE_DIR)/async.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/core_vm_async.o: $(CORE_DIR)/vm_async.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/core_vm_collections.o: $(CORE_DIR)/vm_collections.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 # Runtime modules
 $(BUILDDIR)/runtime_builtins.o: $(RUNTIME_DIR)/builtins.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -208,6 +221,9 @@ $(BUILDDIR)/http_stubs.o: $(RUNTIME_DIR)/package/http_stubs.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/template_stubs.o: $(RUNTIME_DIR)/template_stubs.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/stdlib_stubs.o: $(RUNTIME_DIR)/stdlib_stubs.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # JIT modules
@@ -293,7 +309,12 @@ asan:
 coverage:
 	$(MAKE) BUILD_TYPE=coverage
 
-# Run tests
+# Build testing framework
+test-framework: $(BUILDDIR)/$(LIBNAME)
+	@echo "Building comprehensive testing framework..."
+	@cd $(TEST_FRAMEWORK_DIR) && $(MAKE) all
+
+# Run core tests
 check: tests
 	@echo "Running core Ember language tests..."
 	$(BUILDDIR)/test-vm
@@ -307,6 +328,11 @@ check: tests
 	$(BUILDDIR)/test-basic-ops
 	$(BUILDDIR)/test-simple
 	$(BUILDDIR)/test-minimal
+
+# Run comprehensive test suite
+test-all: test-framework check
+	@echo "Running comprehensive test suite..."
+	@cd $(TEST_FRAMEWORK_DIR) && $(MAKE) test
 
 # Run fuzzing tests
 fuzz-run: fuzz
@@ -374,3 +400,8 @@ help:
 	@echo "Utilities:"
 	@echo "  readline-info    - Show readline library status"
 	@echo "  help             - Show this help message"
+	@echo ""
+	@echo "Testing:"
+	@echo "  test-framework   - Build comprehensive testing framework"
+	@echo "  test-all         - Run complete test suite (core + framework)"
+	@echo "  check            - Run core language tests only"

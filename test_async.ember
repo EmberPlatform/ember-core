@@ -1,0 +1,24 @@
+// Test async/await functionality
+
+// Simple async function
+async fn fetchData() {
+    print("Fetching data...")
+    return "Hello from async function!"
+}
+
+// Generator function  
+fn* countdown() {
+    yield 3
+    yield 2
+    yield 1
+    return "Done!"
+}
+
+// Test the functionality
+print("Testing async/await:")
+let result = fetchData()
+print(result)
+
+print("\nTesting generators:")
+let gen = countdown()
+print("Generator created:", gen)
