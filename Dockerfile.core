@@ -1,0 +1,77 @@
+# Ember Core Runtime Container
+# Lightweight container with just the Ember language runtime and virtual machine
+
+FROM alpine:3.19 AS builder
+
+# Install build dependencies
+RUN apk add --no-cache \
+    build-base \
+    gcc \
+    musl-dev \
+    make \
+    git \
+    numactl-dev
+
+# Create build directory
+WORKDIR /build
+
+# Copy source code
+COPY . .
+
+# Set up environment for optimized build
+ENV EMBER_BUILD_MODE=release
+ENV CFLAGS="-O3 -DNDEBUG -march=x86-64 -fstack-protector-strong"
+ENV LDFLAGS="-Wl,-z,relro,-z,now"
+
+# Build Ember Core
+RUN make BUILD_TYPE=release all
+
+# Production stage
+FROM alpine:3.19
+
+# Install minimal runtime dependencies
+RUN apk add --no-cache \
+    ca-certificates \
+    tini \
+    numactl
+
+# Create non-privileged user
+RUN addgroup -g 1000 -S ember && \
+    adduser -u 1000 -S ember -G ember -h /var/lib/ember
+
+# Create necessary directories
+RUN mkdir -p \
+    /var/lib/ember \
+    /tmp/ember && \
+    chown -R ember:ember \
+    /var/lib/ember \
+    /tmp/ember
+
+# Copy Ember runtime and libraries
+COPY --from=builder /build/build/ember /usr/local/bin/
+COPY --from=builder /build/build/libembercore.so /usr/local/lib/
+COPY --from=builder /build/include/ /usr/local/include/
+
+# Set proper permissions and update library cache
+RUN chmod +x /usr/local/bin/ember && \
+    chown root:root /usr/local/bin/ember && \
+    ldconfig
+
+# Switch to non-privileged user
+USER ember
+
+# Use tini as init system
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Container metadata
+LABEL org.opencontainers.image.title="Ember Core Runtime"
+LABEL org.opencontainers.image.description="Ember language runtime with virtual machine and JIT compiler"
+LABEL org.opencontainers.image.version="2.0.3"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.source="https://github.com/EmberPlatform/ember-core"
+LABEL org.opencontainers.image.documentation="https://github.com/EmberPlatform/ember-core/blob/master/README.md"
+LABEL org.opencontainers.image.base.name="alpine:3.19"
+LABEL org.opencontainers.image.vendor="Ember Platform"
+
+# Default command runs the Ember REPL
+CMD ["/usr/local/bin/ember"]
