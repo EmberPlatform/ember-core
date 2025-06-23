@@ -1,0 +1,30 @@
+Source: ember-core
+Section: devel
+Priority: optional
+Maintainer: Ember Project <maintainer@ember-lang.org>
+Build-Depends: debhelper (>= 10), gcc, make, libreadline-dev, libcurl4-openssl-dev, pkg-config
+Standards-Version: 4.5.1
+Homepage: https://github.com/exec/ember-core
+Vcs-Git: https://github.com/exec/ember-core.git
+Vcs-Browser: https://github.com/exec/ember-core
+
+Package: ember-core
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libc6, libreadline8
+Recommends: libcurl4
+Suggests: ember-stdlib, emberweb
+Description: Ember programming language runtime
+ Ember Core is the runtime environment for the Ember programming language.
+ It provides the core virtual machine, JIT compiler, and essential runtime
+ components. Features:
+ .
+  * High-performance virtual machine with JIT compilation
+  * Advanced memory management with VM pool optimization
+  * Lock-free concurrent execution support
+  * Security-hardened runtime with input validation
+  * NUMA-aware memory allocation
+  * Interactive REPL with readline support
+  * Comprehensive error handling and debugging support
+ .
+ This package contains the core Ember runtime (libember.so), interpreter 
+ (ember), and compiler (emberc) needed to run Ember programs.

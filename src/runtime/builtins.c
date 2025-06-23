@@ -11,6 +11,7 @@
 #include "../stdlib/router_native.h"
 #include "../stdlib/session_native.h"
 #include "../stdlib/template_native.h"
+#include "stdlib_working.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -267,26 +268,25 @@ void register_builtin_functions(ember_vm* vm) {
     ember_register_func(vm, "starts_with", ember_native_starts_with);
     ember_register_func(vm, "ends_with", ember_native_ends_with);
     
-    // File I/O functions from stdlib/io_native.c
-    ember_register_func(vm, "read_file", ember_native_read_file);
-    ember_register_func(vm, "write_file", ember_native_write_file);
-    ember_register_func(vm, "append_file", ember_native_append_file);
-    ember_register_func(vm, "file_exists", ember_native_file_exists);
+    // File I/O functions (working implementations)
+    ember_register_func(vm, "read_file", ember_native_read_file_working);
+    ember_register_func(vm, "write_file", ember_native_write_file_working);
+    ember_register_func(vm, "append_file", ember_native_append_file_working);
+    ember_register_func(vm, "file_exists", ember_native_file_exists_working);
     
-    // JSON functions from stdlib/json_native.c
-    ember_register_func(vm, "json_parse", ember_json_parse);
-    ember_register_func(vm, "json_stringify", ember_json_stringify);
-    ember_register_func(vm, "json_validate", ember_json_validate);
+    // JSON functions (working implementations)
+    ember_register_func(vm, "json_parse", ember_json_parse_working);
+    ember_register_func(vm, "json_stringify", ember_json_stringify_working);
+    ember_register_func(vm, "json_validate", ember_json_validate_working);
     
-    // Cryptographic functions from stdlib/crypto_native.c
-    ember_register_func(vm, "sha256", ember_native_sha256);
-    ember_register_func(vm, "sha512", ember_native_sha512);
-    ember_register_func(vm, "hmac_sha256", ember_native_hmac_sha256);
-    ember_register_func(vm, "hmac_sha512", ember_native_hmac_sha512);
-    ember_register_func(vm, "secure_random", ember_native_secure_random);
-    ember_register_func(vm, "secure_compare", ember_native_secure_compare);
-    ember_register_func(vm, "bcrypt_hash", ember_native_bcrypt_hash);
-    ember_register_func(vm, "bcrypt_verify", ember_native_bcrypt_verify);
+    // Cryptographic functions (working implementations)
+    ember_register_func(vm, "sha256", ember_native_sha256_working);
+    ember_register_func(vm, "sha512", ember_native_sha512_working);
+    ember_register_func(vm, "hmac_sha256", ember_native_hmac_sha256_working);
+    ember_register_func(vm, "secure_random", ember_native_secure_random_working);
+    // Note: hmac_sha512, secure_compare, bcrypt functions not implemented yet
+    // ember_register_func(vm, "bcrypt_hash", ember_native_bcrypt_hash);
+    // ember_register_func(vm, "bcrypt_verify", ember_native_bcrypt_verify);
     
     // Regular expression functions from stdlib/regex_native.c
     // NOTE: Temporarily commented out - regex functions not implemented yet

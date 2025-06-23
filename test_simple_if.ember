@@ -1,0 +1,12 @@
+// Very simple if test
+print("Testing simple if")
+
+x = 5
+y = 3
+
+// Use explicit parentheses
+if (x > y) {
+    print("x is greater than y")
+}
+
+print("Simple if test complete")

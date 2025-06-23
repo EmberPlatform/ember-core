@@ -1,0 +1,6 @@
+// Test just condition evaluation
+print("Testing condition evaluation...")
+
+x = 5
+condition = (x)
+print(condition)

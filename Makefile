@@ -94,7 +94,7 @@ LIBSRC = $(SRCDIR)/api.c $(FRONTEND_MODULES) $(CORE_MODULES) $(RUNTIME_MODULES) 
 LIBOBJ = $(BUILDDIR)/api.o
 LIBOBJ += $(BUILDDIR)/lexer.o $(BUILDDIR)/parser.o $(BUILDDIR)/parser_core.o $(BUILDDIR)/parser_expressions.o $(BUILDDIR)/parser_statements.o $(BUILDDIR)/parser_oop.o
 LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_secure.o $(BUILDDIR)/core_vm_pool_vm_memory_integration.o $(BUILDDIR)/vm_pool_api.o $(BUILDDIR)/core_async.o $(BUILDDIR)/core_vm_async.o $(BUILDDIR)/core_vm_collections.o
-LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o $(BUILDDIR)/stdlib_stubs.o
+LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o $(BUILDDIR)/stdlib_stubs.o $(BUILDDIR)/crypto_simple.o $(BUILDDIR)/json_simple.o $(BUILDDIR)/io_simple.o
 # JIT disabled for container build compatibility
 # LIBOBJ += $(BUILDDIR)/jit_compiler.o $(BUILDDIR)/jit_x86_64.o $(BUILDDIR)/jit_integration.o $(BUILDDIR)/jit_arithmetic.o
 
@@ -206,6 +206,15 @@ $(BUILDDIR)/core_vm_collections.o: $(CORE_DIR)/vm_collections.c | $(BUILDDIR)
 
 # Runtime modules
 $(BUILDDIR)/runtime_builtins.o: $(RUNTIME_DIR)/builtins.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/crypto_simple.o: $(RUNTIME_DIR)/crypto_simple.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/json_simple.o: $(RUNTIME_DIR)/json_simple.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/io_simple.o: $(RUNTIME_DIR)/io_simple.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/value.o: $(RUNTIME_DIR)/value/value.c | $(BUILDDIR)

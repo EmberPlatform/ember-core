@@ -1,0 +1,15 @@
+print("Checking available functions...")
+print("Built-in functions should include:")
+
+// Test basic built-ins that should work
+print("str() function: " + str(42))
+print("len() function: " + str(len("hello")))
+
+// Test some math functions that might be built-in
+try {
+    print("sqrt() function: " + str(sqrt(16)))
+} catch (e) {
+    print("sqrt() not available: " + str(e))
+}
+
+print("Test complete")

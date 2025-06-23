@@ -1,0 +1,19 @@
+// Test builtin functions
+print("Testing builtin functions:")
+
+// Type checking
+print("type(42) = " + type(42))
+print("type(\"hello\") = " + type("hello"))
+print("type(true) = " + type(true))
+
+// String conversion
+print("str(123) = " + str(123))
+print("str(true) = " + str(true))
+
+// Math functions
+print("abs(-5) = " + str(abs(-5)))
+print("sqrt(16) = " + str(sqrt(16)))
+print("max(3, 7) = " + str(max(3, 7)))
+print("min(3, 7) = " + str(min(3, 7)))
+print("floor(3.7) = " + str(floor(3.7)))
+print("ceil(3.2) = " + str(ceil(3.2)))

@@ -219,6 +219,10 @@ static ember_token_type identifier_type() {
                 memcmp(scanner.start, "finally", 7) == 0) {
                 return TOKEN_FINALLY;
             }
+            if (scanner.current - scanner.start == 8 && 
+                memcmp(scanner.start, "function", 8) == 0) {
+                return TOKEN_FUNCTION;
+            }
             break;
         case 'i':
             if (scanner.current - scanner.start == 2 && 

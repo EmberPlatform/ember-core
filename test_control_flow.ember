@@ -1,0 +1,121 @@
+// Test file for control flow structures after fixes
+print("Testing Ember Control Flow Structures")
+
+// Test 1: Basic if statement
+print("=== Test 1: Basic if statement ===")
+x = 5
+if x > 3 {
+    print("x is greater than 3")
+}
+print("After if statement")
+
+// Test 2: If-else statement
+print("=== Test 2: If-else statement ===")
+y = 2
+if y > 3 {
+    print("y is greater than 3")
+} else {
+    print("y is not greater than 3")
+}
+print("After if-else statement")
+
+// Test 3: Nested if statements
+print("=== Test 3: Nested if statements ===")
+a = 10
+b = 15
+if a > 5 {
+    print("a is greater than 5")
+    if b > 12 {
+        print("b is also greater than 12")
+    } else {
+        print("b is not greater than 12")
+    }
+}
+print("After nested if statements")
+
+// Test 4: While loop
+print("=== Test 4: While loop ===")
+i = 0
+while i < 3 {
+    print("While loop iteration: " + str(i))
+    i = i + 1
+}
+print("After while loop")
+
+// Test 5: Nested while loops
+print("=== Test 5: Nested while loops ===")
+outer = 0
+while outer < 2 {
+    print("Outer loop: " + str(outer))
+    inner = 0
+    while inner < 2 {
+        print("  Inner loop: " + str(inner))
+        inner = inner + 1
+    }
+    outer = outer + 1
+}
+print("After nested while loops")
+
+// Test 6: For loop with increment
+print("=== Test 6: For loop with increment ===")
+for (j = 0; j < 3; j++) {
+    print("For loop iteration: " + str(j))
+}
+print("After for loop")
+
+// Test 7: For loop with decrement
+print("=== Test 7: For loop with decrement ===")
+for (k = 3; k > 0; k--) {
+    print("For loop countdown: " + str(k))
+}
+print("After countdown for loop")
+
+// Test 8: For loop with compound assignment
+print("=== Test 8: For loop with compound assignment ===")
+for (m = 0; m < 10; m += 2) {
+    print("For loop step by 2: " + str(m))
+}
+print("After step-by-2 for loop")
+
+// Test 9: Control flow with break
+print("=== Test 9: Control flow with break ===")
+counter = 0
+while counter < 10 {
+    if counter == 3 {
+        print("Breaking at counter = " + str(counter))
+        break
+    }
+    print("Counter: " + str(counter))
+    counter = counter + 1
+}
+print("After while loop with break")
+
+// Test 10: Control flow with continue
+print("=== Test 10: Control flow with continue ===")
+for (n = 0; n < 5; n++) {
+    if n == 2 {
+        print("Skipping n = " + str(n))
+        continue
+    }
+    print("Processing n = " + str(n))
+}
+print("After for loop with continue")
+
+// Test 11: Complex nested control flow
+print("=== Test 11: Complex nested control flow ===")
+p = 0
+while p < 3 {
+    print("Outer while, p = " + str(p))
+    if p == 1 {
+        for (q = 0; q < 2; q++) {
+            print("  Nested for, q = " + str(q))
+            if q == 0 {
+                print("    Inner if executed")
+            }
+        }
+    }
+    p = p + 1
+}
+print("After complex nested control flow")
+
+print("All control flow tests completed!")

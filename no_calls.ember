@@ -1,0 +1,3 @@
+// No function calls at all
+x = 42
+y = x + 1

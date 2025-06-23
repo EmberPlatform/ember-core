@@ -1,0 +1,30 @@
+print("=== Working Ember Demo ===")
+
+// Variables and arithmetic
+x = 42
+y = 10
+z = x + y * 2
+print("x = " + str(x))
+print("y = " + str(y))  
+print("result = " + str(z))
+
+// String operations
+name = "Ember"
+message = "Welcome to " + name
+print(message)
+
+// Arrays
+numbers = [1, 2, 3, 4, 5]
+print(numbers)
+print("First: " + str(numbers[0]))
+
+// Math functions
+print("abs(-15) = " + str(abs(-15)))
+print("sqrt(25) = " + str(sqrt(25)))
+print("max(7, 3) = " + str(max(7, 3)))
+
+// Type conversion
+test_num = num("123")
+print("Converted: " + str(test_num))
+
+print("=== Demo Complete ===")

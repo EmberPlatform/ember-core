@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    remove|upgrade|deconfigure)
+        # Nothing special to do before removing ember-core
+        # The runtime doesn't run as a service, so no services to stop
+        echo "Preparing to remove Ember Core runtime..."
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

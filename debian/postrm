@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    purge)
+        # Remove ember user and group
+        if getent passwd ember >/dev/null; then
+            deluser ember >/dev/null 2>&1 || true
+        fi
+        
+        if getent group ember >/dev/null; then
+            delgroup ember >/dev/null 2>&1 || true
+        fi
+        
+        # Remove ember runtime directories and logs
+        rm -rf /var/lib/ember
+        rm -rf /var/log/ember
+        
+        # Update shared library cache
+        ldconfig
+        
+        echo "Ember Core runtime completely removed."
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,4 @@
+// Simple working example
+x = 42
+y = 10
+z = x + y

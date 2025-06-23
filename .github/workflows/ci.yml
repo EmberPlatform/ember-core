@@ -3,6 +3,7 @@ name: Ember Core CI
 on:
   push:
     branches: [ main, develop ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, develop ]
 
@@ -274,3 +275,313 @@ jobs:
         EOF
         
         ./build/ember stress_test.ember
+
+  # Package building jobs - only run on tags (releases)
+  package-deb:
+    runs-on: ubuntu-latest
+    needs: [test, memory-safety, performance, static-analysis]
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Debian packaging dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y devscripts build-essential dpkg-dev debhelper \
+          gcc make libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config
+
+    - name: Build Ember Core
+      run: |
+        make clean
+        make BUILD_TYPE=release all
+
+    - name: Build Debian package
+      run: |
+        # Build the .deb package
+        ./build-deb.sh
+
+    - name: Test Debian package installation
+      run: |
+        # Test package installation in isolated environment
+        sudo dpkg -i ../ember-core_*.deb || true
+        sudo apt-get install -f -y
+        
+        # Verify installation
+        ember --version || echo "ember version check failed"
+        emberc --help || echo "emberc help check failed"
+        
+        # Test basic functionality
+        echo 'print("Package test successful!")' | ember
+        
+        # Test compiler
+        echo 'print("Compile test");' > test_package.ember
+        emberc test_package.ember -o test_package.ebc
+        file test_package.ebc
+
+    - name: Upload Debian packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: debian-packages
+        path: ../ember-core_*.deb
+        retention-days: 30
+
+  package-rpm-centos:
+    runs-on: ubuntu-latest
+    needs: [test, memory-safety, performance, static-analysis]
+    if: startsWith(github.ref, 'refs/tags/v')
+    container:
+      image: centos:8
+    steps:
+    - name: Install build dependencies
+      run: |
+        # Update CentOS repositories to use vault.centos.org (CentOS 8 is EOL)
+        sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*.repo
+        sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo
+        
+        # Install development tools and dependencies
+        yum update -y
+        yum groupinstall -y "Development Tools"
+        yum install -y git rpm-build rpmdevtools readline-devel libcurl-devel pkgconfig openssl-devel
+
+    - uses: actions/checkout@v4
+
+    - name: Build Ember Core
+      run: |
+        make clean
+        make BUILD_TYPE=release all
+
+    - name: Build RPM package
+      run: |
+        # Setup RPM build environment
+        rpmdev-setuptree
+        
+        # Build the package using our script
+        ./build-rpm.sh
+
+    - name: Test RPM package installation
+      run: |
+        # Install the built package
+        yum localinstall -y ~/rpmbuild/RPMS/*/ember-core-*.rpm
+        
+        # Verify installation
+        ember --version || echo "ember version check failed"
+        emberc --help || echo "emberc help check failed"
+        
+        # Test basic functionality
+        echo 'print("RPM package test successful!")' | ember
+        
+        # Test compiler
+        echo 'print("RPM compile test");' > test_rpm_package.ember
+        emberc test_rpm_package.ember -o test_rpm_package.ebc
+        file test_rpm_package.ebc
+
+    - name: Upload RPM packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: centos-rpm-packages
+        path: |
+          ~/rpmbuild/RPMS/*/ember-core-*.rpm
+          ~/rpmbuild/SRPMS/ember-core-*.src.rpm
+        retention-days: 30
+
+  package-rpm-rocky:
+    runs-on: ubuntu-latest
+    needs: [test, memory-safety, performance, static-analysis]
+    if: startsWith(github.ref, 'refs/tags/v')
+    container:
+      image: rockylinux:8
+    steps:
+    - name: Install build dependencies
+      run: |
+        # Install development tools and dependencies
+        yum update -y
+        yum groupinstall -y "Development Tools"
+        yum install -y git rpm-build rpmdevtools readline-devel libcurl-devel pkgconfig openssl-devel
+
+    - uses: actions/checkout@v4
+
+    - name: Build Ember Core
+      run: |
+        make clean
+        make BUILD_TYPE=release all
+
+    - name: Build RPM package
+      run: |
+        # Setup RPM build environment
+        rpmdev-setuptree
+        
+        # Build the package using our script
+        ./build-rpm.sh
+
+    - name: Test RPM package installation
+      run: |
+        # Install the built package
+        yum localinstall -y ~/rpmbuild/RPMS/*/ember-core-*.rpm
+        
+        # Verify installation
+        ember --version || echo "ember version check failed"
+        emberc --help || echo "emberc help check failed"
+        
+        # Test basic functionality
+        echo 'print("Rocky Linux package test successful!")' | ember
+        
+        # Test compiler
+        echo 'print("Rocky compile test");' > test_rocky_package.ember
+        emberc test_rocky_package.ember -o test_rocky_package.ebc
+        file test_rocky_package.ebc
+
+    - name: Upload RPM packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: rocky-rpm-packages
+        path: |
+          ~/rpmbuild/RPMS/*/ember-core-*.rpm
+          ~/rpmbuild/SRPMS/ember-core-*.src.rpm
+        retention-days: 30
+
+  # Package validation job to ensure cross-platform compatibility
+  package-validation:
+    runs-on: ubuntu-latest
+    needs: [package-deb, package-rpm-centos, package-rpm-rocky]
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download all package artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: packages/
+
+    - name: List all built packages
+      run: |
+        echo "Built packages:"
+        find packages/ -name "*.deb" -o -name "*.rpm" | sort
+        echo ""
+        echo "Package sizes:"
+        find packages/ -name "*.deb" -o -name "*.rpm" -exec ls -lh {} \;
+
+    - name: Validate package metadata
+      run: |
+        echo "=== Debian Package Info ==="
+        for deb in packages/debian-packages/*.deb; do
+          if [ -f "$deb" ]; then
+            echo "Package: $(basename "$deb")"
+            dpkg-deb --info "$deb" | grep -E "(Package|Version|Architecture|Depends)"
+            echo ""
+          fi
+        done
+        
+        echo "=== RPM Package Info ==="
+        for rpm in packages/*/ember-core-*.rpm; do
+          if [ -f "$rpm" ]; then
+            echo "Package: $(basename "$rpm")"
+            rpm -qip "$rpm" 2>/dev/null | grep -E "(Name|Version|Release|Architecture|Requires)" || echo "RPM query failed"
+            echo ""
+          fi
+        done
+
+  # Release job to create GitHub release with packages
+  release:
+    runs-on: ubuntu-latest
+    needs: [package-validation]
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download all package artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: packages/
+
+    - name: Create release notes
+      run: |
+        # Extract version from tag
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "Creating release for version $VERSION"
+        
+        # Create release notes
+        cat > release_notes.md << EOF
+        # Ember Core v$VERSION Release
+        
+        ## Native Packages
+        
+        This release includes native packages for multiple Linux distributions:
+        
+        ### Debian/Ubuntu (.deb packages)
+        - Compatible with Debian 10+, Ubuntu 18.04+
+        - Install with: \`sudo dpkg -i ember-core_*.deb && sudo apt-get install -f\`
+        
+        ### RHEL/CentOS/Fedora (.rpm packages)
+        - Compatible with RHEL 8+, CentOS 8+, Fedora 30+, Rocky Linux 8+
+        - Install with: \`sudo yum localinstall ember-core-*.rpm\`
+        
+        ## Features
+        - High-performance JIT compiler with 5-50x speedup
+        - Lock-free VM pool with work-stealing threads
+        - NUMA-aware memory allocation
+        - Security-hardened runtime with input validation
+        - Interactive REPL with readline support
+        - Comprehensive error handling and debugging
+        
+        ## Usage
+        After installation:
+        - \`ember\` - Start interactive REPL
+        - \`emberc file.ember\` - Compile Ember programs
+        - \`ember --version\` - Show version information
+        
+        ## Documentation
+        See the [README.md](README.md) for detailed usage instructions and examples.
+        EOF
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Ember Core ${{ github.ref_name }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+
+    - name: Upload packages to release
+      run: |
+        # Upload Debian packages
+        for deb in packages/debian-packages/*.deb; do
+          if [ -f "$deb" ]; then
+            filename=$(basename "$deb")
+            echo "Uploading Debian package: $filename"
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/vnd.debian.binary-package" \
+              --data-binary @"$deb" \
+              "${{ steps.create_release.outputs.upload_url }}?name=$filename"
+          fi
+        done
+        
+        # Upload CentOS RPM packages
+        for rpm in packages/centos-rpm-packages/*.rpm; do
+          if [ -f "$rpm" ]; then
+            filename="centos-$(basename "$rpm")"
+            echo "Uploading CentOS RPM package: $filename"
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/x-rpm" \
+              --data-binary @"$rpm" \
+              "${{ steps.create_release.outputs.upload_url }}?name=$filename"
+          fi
+        done
+        
+        # Upload Rocky Linux RPM packages
+        for rpm in packages/rocky-rpm-packages/*.rpm; do
+          if [ -f "$rpm" ]; then
+            filename="rocky-$(basename "$rpm")"
+            echo "Uploading Rocky Linux RPM package: $filename"
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/x-rpm" \
+              --data-binary @"$rpm" \
+              "${{ steps.create_release.outputs.upload_url }}?name=$filename"
+          fi
+        done

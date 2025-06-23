@@ -103,7 +103,7 @@ void parse_loop_body(ember_vm* vm, ember_chunk* chunk) {
                 continue;
             }
             
-            // Parse a statement - statements handle their own stack management
+            // Parse statement inside loop
             statement(vm, chunk);
             
             // After statement, consume separator if present
@@ -148,7 +148,7 @@ void while_statement(ember_vm* vm, ember_chunk* chunk) {
     // Jump out of loop if condition is false
     write_chunk(chunk, OP_JUMP_IF_FALSE);
     int exit_jump = chunk->count;
-    write_chunk(chunk, 0xFF); // Placeholder for jump offset
+    write_chunk(chunk, 0); // Placeholder for jump offset (will be patched)
     
     // Parse body (supports both single expressions and block statements)
     parse_loop_body(vm, chunk);
@@ -159,7 +159,12 @@ void while_statement(ember_vm* vm, ember_chunk* chunk) {
     write_chunk(chunk, loop_offset);
     
     // Patch the exit jump - jump to after the loop
-    chunk->code[exit_jump] = chunk->count - exit_jump - 1;
+    int exit_offset = chunk->count - exit_jump - 1;
+    if (exit_offset < 0 || exit_offset > 255) {
+        error("Jump offset too large for while loop");
+        return;
+    }
+    chunk->code[exit_jump] = (uint8_t)exit_offset;
     
     // Patch all break statements to jump here
     for (int i = 0; i < loop_ctx->break_count; i++) {
@@ -169,6 +174,8 @@ void while_statement(ember_vm* vm, ember_chunk* chunk) {
     
     // Clean up loop context
     parser->loop_depth--;
+    
+    // While statements don't produce values - no need to push nil
 }
 
 void if_statement(ember_vm* vm, ember_chunk* chunk) {
@@ -178,7 +185,7 @@ void if_statement(ember_vm* vm, ember_chunk* chunk) {
     // Jump to else clause if condition is false
     write_chunk(chunk, OP_JUMP_IF_FALSE);
     int then_jump = chunk->count;
-    write_chunk(chunk, 0xFF); // Placeholder for jump offset
+    write_chunk(chunk, 0); // Placeholder for jump offset (will be patched)
     
     // Parse then body - support both single statement and block
     if (check(TOKEN_LBRACE)) {
@@ -186,7 +193,10 @@ void if_statement(ember_vm* vm, ember_chunk* chunk) {
         consume(TOKEN_LBRACE, "Expect '{' for if block");
         while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
             if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) continue;
+            
+            // Parse statement inside control block
             statement(vm, chunk);
+            
             // Handle statement separators within blocks
             if (!check(TOKEN_RBRACE)) {
                 if (!match(TOKEN_NEWLINE) && !match(TOKEN_SEMICOLON) && !check(TOKEN_EOF)) {
@@ -204,10 +214,15 @@ void if_statement(ember_vm* vm, ember_chunk* chunk) {
     // Jump over else clause
     write_chunk(chunk, OP_JUMP);
     int else_jump = chunk->count;
-    write_chunk(chunk, 0xFF); // Placeholder for jump offset
+    write_chunk(chunk, 0); // Placeholder for jump offset (will be patched)
     
     // Patch the then jump to here (start of else clause)
-    chunk->code[then_jump] = chunk->count - then_jump - 1;
+    int then_offset = chunk->count - then_jump - 1;
+    if (then_offset < 0 || then_offset > 255) {
+        error("Jump offset too large for if statement");
+        return;
+    }
+    chunk->code[then_jump] = (uint8_t)then_offset;
     
     // Parse optional else clause
     if (match(TOKEN_ELSE)) {
@@ -216,7 +231,10 @@ void if_statement(ember_vm* vm, ember_chunk* chunk) {
             consume(TOKEN_LBRACE, "Expect '{' for else block");
             while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
                 if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) continue;
+                
+                // Parse statement inside else block
                 statement(vm, chunk);
+                
                 // Handle statement separators within blocks
                 if (!check(TOKEN_RBRACE)) {
                     if (!match(TOKEN_NEWLINE) && !match(TOKEN_SEMICOLON) && !check(TOKEN_EOF)) {
@@ -233,7 +251,14 @@ void if_statement(ember_vm* vm, ember_chunk* chunk) {
     }
     
     // Patch the else jump to here (end of if statement)
-    chunk->code[else_jump] = chunk->count - else_jump - 1;
+    int else_offset = chunk->count - else_jump - 1;
+    if (else_offset < 0 || else_offset > 255) {
+        error("Jump offset too large for else clause");
+        return;
+    }
+    chunk->code[else_jump] = (uint8_t)else_offset;
+    
+    // If statements don't produce values - no need to push nil
 }
 
 void break_statement(ember_chunk* chunk) {
@@ -247,7 +272,7 @@ void break_statement(ember_chunk* chunk) {
     // Emit OP_BREAK with placeholder offset
     write_chunk(chunk, OP_BREAK);
     int break_jump = chunk->count;
-    write_chunk(chunk, 0xFF); // Placeholder for jump offset
+    write_chunk(chunk, 0); // Placeholder for jump offset (will be patched)
     
     // Store the break jump location for later patching
     loop_context* current_loop = &parser->loop_stack[parser->loop_depth - 1];
@@ -306,7 +331,7 @@ void for_statement(ember_vm* vm, ember_chunk* chunk) {
         expression(chunk);
         write_chunk(chunk, OP_JUMP_IF_FALSE);
         exit_jump = chunk->count;
-        write_chunk(chunk, 0xFF);  // Placeholder for jump offset
+        write_chunk(chunk, 0);  // Placeholder for jump offset (will be patched)
     }
     consume(TOKEN_SEMICOLON, "Expect ';' after for loop condition");
     
@@ -403,6 +428,8 @@ void for_statement(ember_vm* vm, ember_chunk* chunk) {
     
     // Clean up
     parser->loop_depth--;
+    
+    // For statements don't produce values - no need to push nil
 }
 
 void import_statement(ember_vm* vm, ember_chunk* chunk) {
@@ -477,11 +504,7 @@ void import_statement(ember_vm* vm, ember_chunk* chunk) {
         // Legacy module system not found, using modern package system (silent)
     }
     
-    // Import statements don't produce values, so push nil
-    ember_value nil_val = ember_make_nil();
-    int const_idx = add_constant(chunk, nil_val);
-    write_chunk(chunk, OP_PUSH_CONST);
-    write_chunk(chunk, const_idx);
+    // Import statements don't produce values - no need to push nil
     
     free(module_name);
 }
@@ -499,6 +522,9 @@ void statement(ember_vm* vm, ember_chunk* chunk) {
         } else {
             function_definition(vm, chunk);
         }
+    } else if (match(TOKEN_FUNCTION)) {
+        // Support for 'function' keyword
+        function_definition(vm, chunk);
     } else if (match(TOKEN_CLASS)) {
         class_declaration(vm, chunk);
     } else if (match(TOKEN_RETURN)) {
@@ -716,11 +742,7 @@ void function_definition(ember_vm* vm, ember_chunk* chunk) {
     vm->globals[vm->global_count].value = func_val;
     vm->global_count++;
     
-    // Function definition pushes nil to the main execution stack
-    ember_value nil_val = ember_make_nil();
-    int const_idx = add_constant(chunk, nil_val);
-    write_chunk(chunk, OP_PUSH_CONST);
-    write_chunk(chunk, const_idx);
+    // Function definition doesn't need to push values to main execution stack
 }
 
 void try_statement(ember_vm* vm, ember_chunk* chunk) {
@@ -919,12 +941,13 @@ void async_function_definition(ember_vm* vm, ember_chunk* chunk) {
     func_val.as.func_val.chunk = func_chunk;
     func_val.as.func_val.name = NULL; // Avoid use-after-free
     
-    int func_const_idx = add_constant(chunk, func_val);
-    write_chunk(chunk, OP_PUSH_CONST);
-    write_chunk(chunk, func_const_idx);
-    write_chunk(chunk, OP_SET_GLOBAL);
-    write_chunk(chunk, const_idx);
-    write_chunk(chunk, OP_POP);
+    // Store function directly in globals without stack operations
+    char* name_cstr = (name_val.type == EMBER_VAL_STRING && name_val.as.obj_val) ? 
+                      AS_CSTRING(name_val) : (char*)name_val.as.string_val;
+    vm->globals[vm->global_count].key = malloc(strlen(name_cstr) + 1);
+    strcpy(vm->globals[vm->global_count].key, name_cstr);
+    vm->globals[vm->global_count].value = func_val;
+    vm->global_count++;
 }
 
 // Generator function definition
@@ -996,10 +1019,11 @@ void generator_function_definition(ember_vm* vm, ember_chunk* chunk) {
     gen_constructor.as.func_val.chunk = func_chunk;
     gen_constructor.as.func_val.name = NULL; // Avoid use-after-free
     
-    int func_const_idx = add_constant(chunk, gen_constructor);
-    write_chunk(chunk, OP_PUSH_CONST);
-    write_chunk(chunk, func_const_idx);
-    write_chunk(chunk, OP_SET_GLOBAL);
-    write_chunk(chunk, const_idx);
-    write_chunk(chunk, OP_POP);
+    // Store generator function directly in globals without stack operations
+    char* name_cstr = (name_val.type == EMBER_VAL_STRING && name_val.as.obj_val) ? 
+                      AS_CSTRING(name_val) : (char*)name_val.as.string_val;
+    vm->globals[vm->global_count].key = malloc(strlen(name_cstr) + 1);
+    strcpy(vm->globals[vm->global_count].key, name_cstr);
+    vm->globals[vm->global_count].value = gen_constructor;
+    vm->global_count++;
 }

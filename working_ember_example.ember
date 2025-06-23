@@ -1,0 +1,60 @@
+// Working Ember Language Example
+// This demonstrates the features that actually work as of June 2025
+
+print("=== Ember Language - Working Features Demo ===")
+
+// Basic variables and arithmetic
+print("\n--- Variables and Arithmetic ---")
+x = 42
+y = 10
+z = x + y * 2
+print("x = " + str(x))
+print("y = " + str(y))  
+print("z = x + y * 2 = " + str(z))
+
+// String operations
+print("\n--- String Operations ---")
+name = "Ember"
+version = "2.0.3"
+message = "Welcome to " + name + " " + version
+print(message)
+
+// Type checking
+print("\n--- Type Checking ---")
+print("type(42) = " + type(42))
+print("type(\"hello\") = " + type("hello"))
+print("type(true) = " + type(true))
+
+// Arrays
+print("\n--- Arrays ---")
+numbers = [1, 2, 3, 4, 5]
+print("numbers = " + str(numbers))
+print("First element: " + str(numbers[0]))
+print("Last element: " + str(numbers[4]))
+
+// Math functions
+print("\n--- Math Functions ---")
+print("abs(-15) = " + str(abs(-15)))
+print("sqrt(25) = " + str(sqrt(25)))
+print("max(7, 3) = " + str(max(7, 3)))
+print("min(7, 3) = " + str(min(7, 3)))
+print("floor(3.7) = " + str(floor(3.7)))
+print("ceil(3.2) = " + str(ceil(3.2)))
+
+// Type conversion
+print("\n--- Type Conversion ---")
+number_str = "123"
+str_to_num = num(number_str)
+print("num(\"123\") = " + str(str_to_num))
+print("int(3.9) = " + str(int(3.9)))
+print("bool(\"true\") = " + str(bool("true")))
+
+// Boolean operations
+print("\n--- Boolean Operations ---")
+is_true = true
+is_false = false
+print("not(true) = " + str(not(is_true)))
+print("not(false) = " + str(not(is_false)))
+
+print("\n=== End of Working Features Demo ===")
+print("Note: Functions, loops, and conditionals are not yet working")

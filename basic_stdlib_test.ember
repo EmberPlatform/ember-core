@@ -1,0 +1,22 @@
+print("=== Basic Ember Standard Library Test ===")
+
+// Test crypto functions
+print("Testing crypto functions:")
+let test_hash = sha256("test")
+print("sha256 result:")
+print(test_hash)
+
+// Test math functions
+print("Testing math functions:")
+print("abs(-5) = " + str(abs(-5)))
+print("sqrt(16) = " + str(sqrt(16)))
+
+// Test string functions  
+print("Testing string functions:")
+print("len of hello = " + str(len("hello")))
+
+// Test file I/O functions
+print("Testing file I/O:")
+print("hostname file exists = " + str(file_exists("/etc/hostname")))
+
+print("=== Test Complete ===")

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    configure)
+        # Create ember user and group if they don't exist
+        if ! getent group ember >/dev/null; then
+            addgroup --system ember
+        fi
+        
+        if ! getent passwd ember >/dev/null; then
+            adduser --system --disabled-login --ingroup ember \
+                --home /var/lib/ember --no-create-home \
+                --gecos "Ember runtime" ember
+        fi
+        
+        # Set proper ownership and permissions for ember directories
+        if [ -d /var/lib/ember ]; then
+            chown -R ember:ember /var/lib/ember
+            chmod 755 /var/lib/ember
+        fi
+        
+        if [ -d /var/log/ember ]; then
+            chown -R ember:ember /var/log/ember
+            chmod 755 /var/log/ember
+        fi
+        
+        # Update shared library cache
+        ldconfig
+        
+        echo "Ember Core runtime installed successfully."
+        echo "Use 'ember' command to start the interactive REPL."
+        echo "Use 'emberc' command to compile Ember programs."
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,16 @@
+// Test builtin functions
+print("Testing builtin functions:")
+
+// Type checking
+x = 42
+print("type(x) = " + type(x))
+
+y = "hello"
+print("type(y) = " + type(y))
+
+z = true
+print("type(z) = " + type(z))
+
+// Math functions
+print("abs(-5) = " + str(abs(-5)))
+print("sqrt(16) = " + str(sqrt(16)))

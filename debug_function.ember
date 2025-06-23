@@ -1,0 +1,10 @@
+// Debug function storage
+print("Before function definition")
+
+fn test() {
+    print("In function")
+}
+
+print("After function definition")
+print("Type of test:")
+print(type(test))

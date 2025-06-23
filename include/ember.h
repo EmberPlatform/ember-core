@@ -180,6 +180,7 @@ typedef enum {
     TOKEN_WHILE,
     TOKEN_FOR,
     TOKEN_FN,
+    TOKEN_FUNCTION,
     TOKEN_RETURN,
     TOKEN_IMPORT,
     TOKEN_BREAK,

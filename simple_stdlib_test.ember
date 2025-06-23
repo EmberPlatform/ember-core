@@ -1,0 +1,27 @@
+print("=== Simple Ember Standard Library Test ===")
+
+// Test crypto functions
+print("Testing crypto functions:")
+print("sha256('test') = " + str(sha256("test")))
+print("sha512('test') = " + str(sha512("test")))
+
+// Test JSON functions
+print("\nTesting JSON functions:")
+print("json_parse('{\"test\":true}') = " + str(json_parse("{\"test\":true}")))
+
+// Test math functions
+print("\nTesting math functions:")
+print("abs(-5) = " + str(abs(-5)))
+print("sqrt(16) = " + str(sqrt(16)))
+print("max(10, 20) = " + str(max(10, 20)))
+
+// Test string functions
+print("\nTesting string functions:")
+print("len('hello') = " + str(len("hello")))
+print("substr('hello', 1, 3) = " + str(substr("hello", 1, 3)))
+
+// Test file I/O functions
+print("\nTesting file I/O functions:")
+print("file_exists('/etc/hostname') = " + str(file_exists("/etc/hostname")))
+
+print("\n=== Test Complete ===")

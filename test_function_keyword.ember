@@ -1,0 +1,6 @@
+// Test function keyword alone
+function test() {
+    print("function keyword works!")
+}
+
+test()

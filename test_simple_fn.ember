@@ -1,0 +1,10 @@
+// Simple function test
+print("Testing fn syntax...")
+
+fn test() {
+    print("In function!")
+}
+
+print("Calling test function...")
+test()
+print("Done.")

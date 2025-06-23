@@ -1,0 +1,9 @@
+print("Starting test")
+
+function test() {
+    print("Inside function")
+}
+
+print("Calling function")
+test()
+print("Done")

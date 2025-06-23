@@ -1,0 +1,99 @@
+// Test script to check if standard library functions are available
+// This should help identify what's working and what's missing
+
+print("Testing Ember standard library loading...")
+
+// Test basic import syntax variants
+try {
+    import http from "http"
+    print("SUCCESS: import http from \"http\" worked")
+} catch (e) {
+    print("FAILED: import http from \"http\" - " + str(e))
+}
+
+try {
+    import http from "stdlib/http"
+    print("SUCCESS: import http from \"stdlib/http\" worked")
+} catch (e) {
+    print("FAILED: import http from \"stdlib/http\" - " + str(e))
+}
+
+try {
+    import * as std from "stdlib"
+    print("SUCCESS: import * as std from \"stdlib\" worked")
+} catch (e) {
+    print("FAILED: import * as std from \"stdlib\" - " + str(e))
+}
+
+// Test if any standard library functions are globally available
+print("\nTesting global function availability:")
+
+// Test crypto functions
+try {
+    let result = crypto_hash_sha256("test")
+    print("SUCCESS: crypto_hash_sha256() is available")
+} catch (e) {
+    print("FAILED: crypto_hash_sha256() not available - " + str(e))
+}
+
+try {
+    let result = bcrypt_hash_password("test", 10)
+    print("SUCCESS: bcrypt_hash_password() is available")
+} catch (e) {
+    print("FAILED: bcrypt_hash_password() not available - " + str(e))
+}
+
+// Test HTTP functions
+try {
+    let result = http_get("http://example.com")
+    print("SUCCESS: http_get() is available")
+} catch (e) {
+    print("FAILED: http_get() not available - " + str(e))
+}
+
+try {
+    let server = http_create_server()
+    print("SUCCESS: http_create_server() is available")
+} catch (e) {
+    print("FAILED: http_create_server() not available - " + str(e))
+}
+
+// Test JSON functions
+try {
+    let result = json_parse("{\"test\":true}")
+    print("SUCCESS: json_parse() is available")
+} catch (e) {
+    print("FAILED: json_parse() not available - " + str(e))
+}
+
+try {
+    let result = json_stringify({"test": true})
+    print("SUCCESS: json_stringify() is available")
+} catch (e) {
+    print("FAILED: json_stringify() not available - " + str(e))
+}
+
+// Test math functions
+try {
+    let result = math_sqrt(4)
+    print("SUCCESS: math_sqrt() is available")
+} catch (e) {
+    print("FAILED: math_sqrt() not available - " + str(e))
+}
+
+try {
+    let result = math_random()
+    print("SUCCESS: math_random() is available")
+} catch (e) {
+    print("FAILED: math_random() not available - " + str(e))
+}
+
+// Test I/O functions
+try {
+    let result = file_read("/etc/hostname")
+    print("SUCCESS: file_read() is available")
+} catch (e) {
+    print("FAILED: file_read() not available - " + str(e))
+}
+
+print("\nStandard library loading test complete.")

@@ -1,0 +1,9 @@
+// Test comparison
+print("Testing comparison")
+
+// Direct comparison with literals
+if 5 > 3 {
+    print("5 is greater than 3")
+}
+
+print("Comparison test complete")

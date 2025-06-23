@@ -1,0 +1,11 @@
+// Debug test
+print("Testing variable assignment")
+
+x = 5
+print("After assignment")
+
+// Test variable reading
+print("Testing variable type")
+type(x)
+
+print("Debug test complete")

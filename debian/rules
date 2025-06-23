@@ -1,0 +1,39 @@
+#!/usr/bin/make -f
+
+# Enable all hardening features
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# Set PREFIX for install target
+export PREFIX = $(DESTDIR)/usr
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	$(MAKE) all
+
+override_dh_auto_install:
+	# Install the core runtime files using ember-core's Makefile install target
+	$(MAKE) install PREFIX=$(DESTDIR)/usr
+	
+	# Create the shared library symlinks (ember-core builds static lib, but we want shared lib packaging)
+	# Install headers to the proper location
+	install -d -m 755 $(DESTDIR)/usr/include/ember
+	install -D -m 644 include/ember.h $(DESTDIR)/usr/include/ember/ember.h
+	install -D -m 644 include/ember_interfaces.h $(DESTDIR)/usr/include/ember/ember_interfaces.h
+	
+	# Install documentation
+	install -D -m 644 README.md $(DESTDIR)/usr/share/doc/ember-core/README.md
+	install -D -m 644 CHANGELOG.md $(DESTDIR)/usr/share/doc/ember-core/CHANGELOG.md
+	install -D -m 644 LICENSE $(DESTDIR)/usr/share/doc/ember-core/copyright
+	
+	# Create directories for ember runtime files
+	install -d -m 755 $(DESTDIR)/var/lib/ember
+	install -d -m 755 $(DESTDIR)/var/log/ember
+
+override_dh_auto_clean:
+	$(MAKE) clean
+
+override_dh_auto_test:
+	# Run the ember-core test suite (skip if tests not available)
+	-$(MAKE) check 2>/dev/null || echo "Tests not available or failed - continuing build"

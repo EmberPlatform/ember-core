@@ -1,0 +1,22 @@
+// Comprehensive control flow tests - basic functionality
+
+// Test 1: Empty if statement  
+if (1) {
+}
+
+// Test 2: Empty if-else statement
+if (0) {
+} else {
+}
+
+// Test 3: Empty while loop
+count = 0
+while (count > 1) {
+    count = count - 1
+}
+
+// Test 4: Empty for loop  
+for (i = 0; i > 1; i = i + 1) {
+}
+
+print("All basic control flow tests passed")

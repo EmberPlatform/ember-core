@@ -1,0 +1,36 @@
+// Test Ember syntax systematically
+
+// Basic arithmetic
+print("=== Basic Arithmetic ===")
+x = 5
+y = 3
+print("x = " + str(x))
+print("y = " + str(y))
+print("x + y = " + str(x + y))
+print("x * y = " + str(x * y))
+
+// Variables and types
+print("\n=== Variables and Types ===")
+a = 42
+b = "hello"
+c = true
+print("a = " + str(a) + " (type: " + type(a) + ")")
+print("b = " + b + " (type: " + type(b) + ")")
+print("c = " + str(c) + " (type: " + type(c) + ")")
+
+// Arrays
+print("\n=== Arrays ===")
+arr = [1, 2, 3, 4, 5]
+print("Array: " + str(arr))
+print("Length: " + str(len(arr)))
+print("First element: " + str(arr[0]))
+
+// Control flow - while loop
+print("\n=== While Loop ===")
+i = 0
+while i < 3 {
+    print("i = " + str(i))
+    i = i + 1
+}
+
+print("\n=== Test Complete ===")

@@ -14,6 +14,8 @@ After comprehensive security auditing and performance optimization, Ember Core 2
 
 Ember Core is the foundational language runtime that powers the complete Ember platform. This repository contains the core language implementation including the virtual machine, parser, runtime system, and essential tools.
 
+> 📖 **For complete platform documentation**, visit the centralized **[Ember Platform Documentation](https://github.com/emberplatform/ember-docs)** repository.
+
 ## Key Features
 
 ### 🔥 Cutting-Edge Performance
@@ -44,25 +46,18 @@ Ember Core is the foundational language runtime that powers the complete Ember p
 
 ## 🏗️ Ember Platform Integration
 
-**Ember Core** is part of the modular [Ember Platform](https://github.com/EmberPlatform). For a complete development environment:
+**Ember Core** is part of the modular [Ember Platform](https://github.com/emberplatform/ember-docs). For complete setup instructions and platform documentation, see:
 
-```bash
-# Clone the complete platform
-mkdir ember-platform && cd ember-platform
-git clone https://github.com/EmberPlatform/ember-core.git
-git clone https://github.com/EmberPlatform/ember-stdlib.git
-git clone https://github.com/EmberPlatform/emberweb.git
-git clone https://github.com/EmberPlatform/ember-tools.git
-
-# Or see our [Platform Setup Guide](https://github.com/EmberPlatform/.github/blob/main/EMBER_PLATFORM_GUIDE.md)
-```
+- **📚 [Getting Started Guide](https://github.com/emberplatform/ember-docs/tree/main/getting-started)** - Complete platform setup and installation
+- **🔧 [Developer Guide](https://github.com/emberplatform/ember-docs/tree/main/contributing/development)** - Development environment setup
+- **📖 [Architecture Overview](https://github.com/emberplatform/ember-docs/blob/main/ARCHITECTURE.md)** - Platform architecture and component relationships
 
 ### Related Repositories
-- **[ember-stdlib](https://github.com/EmberPlatform/ember-stdlib)** - Standard library (depends on ember-core)
-- **[emberweb](https://github.com/EmberPlatform/emberweb)** - Web server (depends on ember-core + ember-stdlib)
-- **[ember-tools](https://github.com/EmberPlatform/ember-tools)** - Development tools (depends on ember-core)
-- **[ember-tests](https://github.com/EmberPlatform/ember-tests)** - Test suite (tests ember-core + ember-stdlib)
-- **[ember-registry](https://github.com/EmberPlatform/ember-registry)** - Package registry (standalone service)
+- **[ember-stdlib](../ember-stdlib)** - Standard library (depends on ember-core)
+- **[emberweb](../emberweb)** - Web server (depends on ember-core + ember-stdlib)
+- **[ember-tools](../ember-tools)** - Development tools (depends on ember-core)
+- **[ember-tests](../ember-tests)** - Test suite (tests ember-core + ember-stdlib)
+- **[ember-registry](../ember-registry)** - Package registry (standalone service)
 
 ## Quick Start
 
@@ -304,9 +299,10 @@ Licensed under the MIT License. See LICENSE file for details.
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/ember-lang/ember-core/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/ember-lang/ember-core/discussions)
-- **Documentation**: [Ember Core Docs](https://docs.ember-lang.org/core/)
+- **Documentation**: [Ember Platform Documentation](https://github.com/emberplatform/ember-docs)
+- **Issues**: GitHub Issues in this repository for core-specific issues
+- **General Questions**: [Platform Discussions](https://github.com/emberplatform/ember-docs/discussions)
+- **API Reference**: [Core API Documentation](https://github.com/emberplatform/ember-docs/tree/main/api/core)
 
 ---
 
