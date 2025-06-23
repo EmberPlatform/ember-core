@@ -1,230 +1,185 @@
 # Ember Core Language
 
-A high-performance, modern programming language with advanced virtual machine technology, designed for reliability, speed, and developer productivity.
+A programming language interpreter implementation with basic expression evaluation and built-in functions.
 
-## 🚀 Platform Status: Production Ready
+## 🚧 Development Status: Early Implementation
 
-After comprehensive security auditing and performance optimization, Ember Core 2.0 delivers:
-- **Zero security vulnerabilities** (validated by extensive testing)
-- **10x concurrent performance** via lock-free VM pool
-- **5-20x computational speedup** with JIT compilation
-- **Interface-based architecture** eliminating circular dependencies
+Ember Core is currently in early development with basic language features implemented:
+- ✅ **Basic expression evaluation** (arithmetic, string concatenation)
+- ✅ **Variables and arrays** (global scope only)
+- ✅ **Built-in functions** (print, type checking, math functions)
+- ⚠️ **Control flow** (if/else, loops - not yet working)
+- ⚠️ **Functions** (user-defined functions - not yet working)
+- ⚠️ **Objects/classes** (OOP features - not yet working)
 
 ## Overview
 
-Ember Core is the foundational language runtime that powers the complete Ember platform. This repository contains the core language implementation including the virtual machine, parser, runtime system, and essential tools.
+Ember Core is a basic programming language interpreter written in C. This repository contains the core language implementation including a virtual machine, parser, and runtime system with built-in functions.
 
-> 📖 **For complete platform documentation**, visit the centralized **[Ember Platform Documentation](https://github.com/emberplatform/ember-docs)** repository.
+> ⚠️ **Development Status**: This is an early-stage implementation with limited functionality. Many documented features are not yet working.
 
-## Key Features
+## Current Working Features
 
-### 🔥 Cutting-Edge Performance
-- **Lock-Free VM Pool**: 10x throughput improvement with linear scaling to 128+ cores
-- **JIT Compiler**: 5-20x speedup for hot code paths and computational workloads  
-- **NUMA-Aware Memory**: Optimized allocation for multi-socket systems
-- **Work-Stealing Scheduler**: Dynamic load balancing across threads
-- **Zero-Copy Strings**: Minimal allocation overhead via interning
+### ✅ Basic Language Support
+- **Expression Evaluation**: Arithmetic operations (`+`, `-`, `*`, `/`) with operator precedence
+- **Variables**: Global variable assignment and retrieval (no local scope)
+- **Data Types**: Numbers, strings, booleans, arrays, and nil values
+- **String Operations**: String concatenation with `+` operator
+- **Array Support**: Array literals and indexing (0-based)
 
-### 🛡️ Enterprise Security
-- **Memory Safety**: Bounds checking, ASAN/TSAN validated
-- **Stack Protection**: Canaries and control flow integrity
-- **Secure Defaults**: Automatic input validation and escaping
-- **Sandbox Isolation**: VM isolation with seccomp-bpf
-- **Cryptographic Security**: Constant-time operations, PBKDF2-SHA256
+### ✅ Built-in Functions
+- **Output**: `print()` function for displaying values
+- **Type System**: `type()` function for runtime type checking
+- **Type Conversion**: `str()`, `num()`, `int()`, `bool()` conversion functions
+- **Math Functions**: `abs()`, `sqrt()`, `max()`, `min()`, `floor()`, `ceil()`
+- **Boolean Logic**: `not()` function for boolean negation
 
-### Modern Language Design
-- **Object-Oriented Programming**: Full OOP support with classes, inheritance, and encapsulation
-- **Functional Programming**: First-class functions, closures, and functional programming constructs
-- **Exception Handling**: Robust exception system with stack unwinding and error propagation
-- **Module System**: Clean import/export system with interface-based architecture
+### ⚠️ Not Yet Implemented
+- **Control Flow**: if/else statements, loops (for, while)
+- **Functions**: User-defined functions and closures
+- **Objects/Classes**: Object-oriented programming features
+- **Module System**: Import/export functionality
+- **Exception Handling**: try/catch blocks
+- **Standard Library**: File I/O, networking, cryptography
 
-### Developer Experience
-- **Interactive REPL**: Full-featured REPL with readline support, command history, and tab completion
-- **Rich Built-ins**: Comprehensive standard library for math, strings, I/O, cryptography, and JSON
-- **Advanced Debugging**: Breakpoints, stack inspection, and performance profiling
-- **Hot Reload Support**: Development mode with instant code updates
+## 🏗️ Repository Structure
 
-## 🏗️ Ember Platform Integration
-
-**Ember Core** is part of the modular [Ember Platform](https://github.com/emberplatform/ember-docs). For complete setup instructions and platform documentation, see:
-
-- **📚 [Getting Started Guide](https://github.com/emberplatform/ember-docs/tree/main/getting-started)** - Complete platform setup and installation
-- **🔧 [Developer Guide](https://github.com/emberplatform/ember-docs/tree/main/contributing/development)** - Development environment setup
-- **📖 [Architecture Overview](https://github.com/emberplatform/ember-docs/blob/main/ARCHITECTURE.md)** - Platform architecture and component relationships
+This repository is part of a larger project structure:
 
 ### Related Repositories
-- **[ember-stdlib](../ember-stdlib)** - Standard library (depends on ember-core)
-- **[emberweb](../emberweb)** - Web server (depends on ember-core + ember-stdlib)
-- **[ember-tools](../ember-tools)** - Development tools (depends on ember-core)
-- **[ember-tests](../ember-tests)** - Test suite (tests ember-core + ember-stdlib)
-- **[ember-registry](../ember-registry)** - Package registry (standalone service)
+- **[ember-stdlib](../ember-stdlib)** - Standard library modules (in development)
+- **[emberweb](../emberweb)** - Web server integration (in development)
+- **[ember-tools](../ember-tools)** - Development tools (in development)
+- **[ember-tests](../ember-tests)** - Test suite and examples
+- **[ember-docs](../ember-docs)** - Platform documentation
 
 ## Quick Start
 
 ### Building Ember Core
 
+> ⚠️ **Build Status**: The build system currently has dependency issues and may not compile successfully.
+
 ```bash
-# Build the complete core system
-make all
+# Attempt to build (may fail due to missing dependencies)
+make clean
+make
 
-# Build optimized release version
-make release
-
-# Build with debug symbols
-make debug
-
-# Build with AddressSanitizer (recommended for development)
-make asan
+# Note: The build requires stdlib components that are not properly integrated
 ```
 
 ### Running Ember Code
 
-```bash
-# Interactive REPL
-./build/ember
+If the build succeeds, you can test basic functionality:
 
-# Execute a script file
+```bash
+# Execute a script file (if build works)
 ./build/ember script.ember
 
-# Compile to bytecode
-./build/emberc script.ember -o script.ebc
+# Note: Interactive REPL and compiler are not currently functional
 ```
 
-### Example Code
+### Example Code - Working Features
 
 ```ember
-// Object-oriented programming
-class Calculator {
-    constructor(initial) {
-        this.value = initial;
-    }
-    
-    add(n) {
-        this.value += n;
-        return this;
-    }
-    
-    multiply(n) {
-        this.value *= n;
-        return this;
-    }
-    
-    result() {
-        return this.value;
-    }
-}
+// Basic variables and arithmetic
+x = 42
+y = 10
+z = x + y * 2  // Result: 62
+print("z =", z)
 
-// Functional programming with closures
-function makeCounter(start) {
-    let count = start;
-    return function() {
-        return count++;
-    };
-}
+// String operations
+name = "Ember"
+version = "2.0.3"
+message = "Welcome to " + name + " " + version
+print(message)
 
-// Main program
-let calc = new Calculator(10);
-let result = calc.add(5).multiply(2).result();
-print("Calculator result:", result);
+// Arrays
+numbers = [1, 2, 3, 4, 5]
+print("First element:", numbers[0])
+print("Array:", numbers)
 
-let counter = makeCounter(1);
-print("Counter:", counter(), counter(), counter());
+// Type checking and conversion
+print("Type of 42:", type(42))        // "number"
+print("Type of 'hello':", type("hello"))  // "string"
+number_str = str(123)                 // Convert to string
+string_num = num("456")               // Convert to number
 
-// Built-in functions
-let data = {"name": "Ember", "version": "2.0.0"};
-let json = json_stringify(data);
-print("JSON:", json);
-
-let hash = crypto_hash("sha256", "Hello, Ember!");
-print("SHA256:", hash);
+// Math functions
+print("abs(-15):", abs(-15))          // 15
+print("sqrt(25):", sqrt(25))          // 5
+print("max(7, 3):", max(7, 3))        // 7
 ```
+
+**Note**: The following features are NOT yet implemented:
+- Functions, classes, if/else statements, loops
+- Standard library features (JSON, crypto, file I/O)
+- Module system and imports
 
 ## Architecture
 
 ### Core Components
 
-- **Virtual Machine (`src/core/vm.c`)**: Stack-based bytecode interpreter with advanced optimization
-- **VM Pool System (`src/core/vm_pool/`)**: Concurrent VM management with lockfree pools
-- **Parser (`src/frontend/parser/`)**: Recursive descent parser with error recovery
-- **Lexer (`src/frontend/lexer/`)**: Tokenizer with Unicode support
-- **Runtime (`src/runtime/`)**: Core runtime services and built-in functions
-- **Memory Management (`src/core/memory/`)**: Arena allocators and memory pools
+- **Virtual Machine (`src/core/vm.c`)**: Basic stack-based bytecode interpreter
+- **Parser (`src/frontend/parser/`)**: Recursive descent parser for expressions and statements  
+- **Lexer (`src/frontend/lexer/`)**: Token scanner for source code
+- **Runtime (`src/runtime/`)**: Built-in functions and basic runtime services
+- **Memory Management (`src/core/memory.c`)**: Basic memory allocation
 
-### Performance Features
+### Implementation Notes
 
-- **Lockfree VM Pool**: Eliminates thread contention for maximum scalability
-- **Work-Stealing Scheduler**: Optimal CPU utilization for parallel workloads
-- **String Interning**: Reduces memory usage and improves string comparison performance
-- **Bytecode Caching**: Compiled bytecode caching for faster startup times
-- **Optimization Passes**: Multi-level optimization including dead code elimination
-
-### Memory Safety
-
-- **Bounds Checking**: Array and string access bounds checking
-- **Memory Leak Detection**: Built-in memory leak detection and reporting
-- **Stack Overflow Protection**: Stack depth monitoring and overflow prevention
-- **Safe String Handling**: Buffer overflow protection for all string operations
+- **Single-threaded**: No concurrency or parallel execution
+- **Global scope**: All variables are global, no local scoping
+- **Basic types**: Numbers, strings, booleans, arrays supported
+- **Expression evaluation**: Arithmetic and string operations work
+- **Limited error handling**: Basic error reporting without recovery
 
 ## API Reference
 
-### Core Functions
+### Currently Working Functions
 
 ```ember
-// I/O Operations
-print(message)              // Output to stdout
-input()                     // Read from stdin
-file_read(path)            // Read file contents
-file_write(path, content)  // Write file contents
+// Output
+print(value1, value2, ...)     // Print values to stdout
 
-// Data Types
-array_length(arr)          // Get array length
-object_keys(obj)           // Get object property names
-type_of(value)             // Get value type
+// Type checking
+type(value)                    // Get type: "number", "string", "bool", "array", "nil"
 
-// Math Operations
-math_abs(n)                // Absolute value
-math_floor(n)              // Floor function
-math_random()              // Random number [0,1)
-math_sin(n)                // Sine function
+// Type conversion  
+str(value)                     // Convert to string
+num(string)                    // Convert string to number
+int(number)                    // Convert to integer
+bool(value)                    // Convert to boolean
 
-// String Operations
-string_length(str)         // String length
-string_substring(str, start, end)  // Extract substring
-string_split(str, delimiter)       // Split string
-string_join(arr, separator)        // Join array elements
+// Math functions
+abs(number)                    // Absolute value
+sqrt(number)                   // Square root
+max(a, b)                      // Maximum of two values
+min(a, b)                      // Minimum of two values
+floor(number)                  // Floor (round down)
+ceil(number)                   // Ceiling (round up)
 
-// Cryptography
-crypto_hash(algorithm, data)       // Hash function (md5, sha1, sha256)
-crypto_random_bytes(length)        // Secure random bytes
-
-// JSON Processing
-json_parse(json_string)            // Parse JSON
-json_stringify(object)             // Convert to JSON
+// Boolean logic
+not(bool_value)                // Boolean negation
 ```
 
-### Exception Handling
+### Not Yet Implemented
 
-```ember
-try {
-    let result = risky_operation();
-    print("Success:", result);
-} catch (error) {
-    print("Error occurred:", error.message);
-    print("Stack trace:", error.stack);
-} finally {
-    print("Cleanup operations");
-}
-```
+The following functions exist in the codebase but are not working:
+- File I/O functions (`file_read`, `file_write`)
+- String manipulation (`string_length`, `string_split`)
+- JSON functions (`json_parse`, `json_stringify`) 
+- Cryptography functions (`crypto_hash`)
+- Array functions (`array_length`)
+- Network/HTTP functions
 
-## Performance Benchmarks
+## Current Limitations
 
-Ember Core achieves exceptional performance across key metrics:
-
-- **Script Execution**: < 10ms cold start time
-- **Function Calls**: > 10M calls/second
-- **Object Creation**: > 1M objects/second
-- **String Operations**: > 5M concatenations/second
-- **JSON Processing**: > 100MB/second throughput
+- **No exception handling**: try/catch blocks are not implemented
+- **No user-defined functions**: Function definitions don't work
+- **No control flow**: if/else, loops not working
+- **No objects/classes**: OOP features not implemented
+- **No modules**: import/export system not working
+- **Build issues**: Dependencies not properly organized
 
 ## Development
 
@@ -234,76 +189,41 @@ Ember Core achieves exceptional performance across key metrics:
 # Install dependencies (Ubuntu/Debian)
 sudo apt-get install build-essential libreadline-dev libssl-dev
 
-# Build with optimizations
-make release
+# Attempt to build (currently has issues)
+make clean
+make
 
-# Run test suite
-make check
-
-# Run benchmarks
-make bench
-
-# Memory safety testing
-make asan && make asan-check
+# Note: Build currently fails due to missing stdlib.h and other dependency issues
 ```
 
-### Testing
+### Current Development Status
 
-```bash
-# Unit tests
-make test
-
-# Fuzzing tests
-make fuzz && make fuzz-run
-
-# Performance tests
-make bench-comprehensive
-
-# Memory leak detection
-valgrind ./build/ember script.ember
-```
-
-### Code Quality
-
-```bash
-# Static analysis
-make analyze
-
-# Code coverage
-make coverage && make coverage-report
-
-# Thread safety testing
-make BUILD_TYPE=asan test-threading
-```
+- **Build system**: Needs dependency reorganization
+- **Test suite**: Limited tests available in parent repository
+- **Documentation**: Being updated to reflect actual implementation
+- **Architecture**: Needs refactoring for clean component separation
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes with tests
-4. Run the test suite: `make check`
-5. Run performance benchmarks: `make bench`
-6. Submit a pull request
+This is an early-stage language implementation. Current priorities:
+
+1. **Fix build system** - Resolve dependency issues between core and stdlib
+2. **Implement control flow** - Add if/else statements and loops
+3. **Add function support** - Enable user-defined functions
+4. **Improve error handling** - Better error messages and recovery
+5. **Organize architecture** - Clean separation between components
 
 ### Code Style
 
-- Use C99/C11 standard
-- 4-space indentation
+- Use C99 standard
+- 4-space indentation  
 - Function names: `module_function` pattern
-- Always check return values
-- Use arena allocators for performance-critical code
+- Check return values for all operations
 
 ## License
 
 Licensed under the MIT License. See LICENSE file for details.
 
-## Support
-
-- **Documentation**: [Ember Platform Documentation](https://github.com/emberplatform/ember-docs)
-- **Issues**: GitHub Issues in this repository for core-specific issues
-- **General Questions**: [Platform Discussions](https://github.com/emberplatform/ember-docs/discussions)
-- **API Reference**: [Core API Documentation](https://github.com/emberplatform/ember-docs/tree/main/api/core)
-
 ---
 
-**Ember Core** - High-performance language runtime for modern applications.
+**Ember Core** - A basic programming language interpreter in early development.

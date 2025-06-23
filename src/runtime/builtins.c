@@ -2,7 +2,7 @@
 #include "ember.h"
 #include "../vm.h"
 #include "value/value.h"
-#include "../stdlib/stdlib.h"
+#include "../stdlib/include/ember_stdlib.h"
 #include "../stdlib/common.h"
 #include "../stdlib/http_native.h"
 #include "../stdlib/websocket_native.h"
