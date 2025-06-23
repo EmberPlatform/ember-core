@@ -18,8 +18,9 @@ VM_POOL_FLAGS = -DENABLE_VM_POOL_SECURE -DENABLE_ADAPTIVE_POOL_SIZING -lnuma
 # Note: Security flags now included in ENHANCED_SECURITY_FLAGS above
 # SECURITY_FLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
 
-# JIT compilation flags
+# JIT compilation flags - temporarily disabled due to integration issues
 JIT_FLAGS = -DENABLE_JIT_COMPILER
+ENABLE_JIT ?= 0
 ifeq ($(ENABLE_JIT),1)
     CFLAGS += $(JIT_FLAGS)
 endif
@@ -105,7 +106,7 @@ LIBOBJ = $(BUILDDIR)/api.o
 LIBOBJ += $(BUILDDIR)/lexer.o $(BUILDDIR)/parser.o $(BUILDDIR)/parser_core.o $(BUILDDIR)/parser_expressions.o $(BUILDDIR)/parser_statements.o $(BUILDDIR)/parser_oop.o $(BUILDDIR)/import_parser.o
 LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_secure.o $(BUILDDIR)/core_vm_pool_vm_memory_integration.o $(BUILDDIR)/vm_pool_api.o $(BUILDDIR)/core_async.o $(BUILDDIR)/core_vm_async.o $(BUILDDIR)/core_vm_collections.o $(BUILDDIR)/core_vm_regex.o
 LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o $(BUILDDIR)/math_stdlib.o $(BUILDDIR)/string_stdlib.o $(BUILDDIR)/crypto_simple.o $(BUILDDIR)/json_simple.o $(BUILDDIR)/io_simple.o $(BUILDDIR)/module_system.o $(BUILDDIR)/import_parser.o
-# JIT disabled for container build compatibility
+# JIT temporarily disabled due to integration issues - will be Phase 3.1 priority
 # LIBOBJ += $(BUILDDIR)/jit_compiler.o $(BUILDDIR)/jit_x86_64.o $(BUILDDIR)/jit_integration.o $(BUILDDIR)/jit_arithmetic.o
 
 # Core tools (essential tools only)
