@@ -38,6 +38,8 @@ static void generate_postfix_increment(ember_chunk* chunk, ember_token* identifi
     // Store new value
     write_chunk(chunk, OP_SET_GLOBAL);
     write_chunk(chunk, const_idx);
+    // Note: OP_SET_GLOBAL leaves the value on stack, we should pop it
+    // However, this needs to be conditional for for-loop continue statements
     write_chunk(chunk, OP_POP); // Pop the stored value
 }
 
@@ -603,6 +605,8 @@ void statement(ember_vm* vm, ember_chunk* chunk) {
         try_statement(vm, chunk);
     } else if (match(TOKEN_THROW)) {
         throw_statement(chunk);
+    } else if (match(TOKEN_SWITCH)) {
+        switch_statement(vm, chunk);
     } else {
         expression_statement(chunk);
     }
@@ -1087,4 +1091,101 @@ void generator_function_definition(ember_vm* vm, ember_chunk* chunk) {
     strcpy(vm->globals[vm->global_count].key, name_cstr);
     vm->globals[vm->global_count].value = gen_constructor;
     vm->global_count++;
+}
+
+// Switch statement implementation
+void switch_statement(ember_vm* vm, ember_chunk* chunk) {
+    parser_state* parser = get_parser_state();
+    
+    // Parse switch expression
+    consume(TOKEN_LPAREN, "Expect '(' after 'switch'");
+    expression(chunk);
+    consume(TOKEN_RPAREN, "Expect ')' after switch expression");
+    
+    // Set up switch context for case tracking
+    if (parser->loop_depth >= 8) {
+        error("Maximum nesting depth exceeded");
+        return;
+    }
+    
+    loop_context* switch_ctx = &parser->loop_stack[parser->loop_depth++];
+    switch_ctx->break_count = 0;
+    
+    // Parse switch body
+    consume(TOKEN_LBRACE, "Expect '{' before switch body");
+    
+    int case_count = 0;
+    int case_jumps[32];  // Store case jump locations
+    int default_jump = -1;
+    
+    while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+        if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) continue;
+        
+        if (match(TOKEN_CASE)) {
+            // Parse case value
+            expression(chunk);
+            
+            // Emit case comparison
+            write_chunk(chunk, OP_CASE);
+            case_jumps[case_count] = chunk->count;
+            write_chunk(chunk, 0); // Placeholder for jump offset
+            case_count++;
+            
+            consume(TOKEN_COLON, "Expect ':' after case value");
+            
+            // Parse case body
+            while (!check(TOKEN_CASE) && !check(TOKEN_DEFAULT) && 
+                   !check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+                if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) continue;
+                statement(vm, chunk);
+                if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) {
+                    // Consumed separator
+                } else if (!check(TOKEN_CASE) && !check(TOKEN_DEFAULT) && 
+                          !check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+                    error("Expect newline, semicolon, or next case after statement");
+                    break;
+                }
+            }
+        } else if (match(TOKEN_DEFAULT)) {
+            consume(TOKEN_COLON, "Expect ':' after 'default'");
+            
+            // Mark default case location
+            default_jump = chunk->count;
+            
+            // Parse default body
+            while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+                if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) continue;
+                statement(vm, chunk);
+                if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) {
+                    // Consumed separator
+                } else if (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+                    error("Expect newline, semicolon, or '}' after statement");
+                    break;
+                }
+            }
+            break; // Default should be last
+        } else {
+            error("Expect 'case' or 'default' in switch statement");
+            break;
+        }
+    }
+    
+    consume(TOKEN_RBRACE, "Expect '}' after switch body");
+    
+    // Emit default case jump if needed
+    if (default_jump != -1) {
+        write_chunk(chunk, OP_DEFAULT);
+        write_chunk(chunk, default_jump - chunk->count - 1);
+    }
+    
+    // Patch all break statements to jump here
+    for (int i = 0; i < switch_ctx->break_count; i++) {
+        int break_jump = switch_ctx->break_jumps[i];
+        chunk->code[break_jump] = chunk->count - break_jump - 1;
+    }
+    
+    // Clean up switch context
+    parser->loop_depth--;
+    
+    // Switch statements don't produce values
 }

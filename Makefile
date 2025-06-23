@@ -56,6 +56,13 @@ else
     endif
 endif
 
+# Ember Native Standard Library (optional for advanced features)
+EMBER_NATIVE_DIR = ../ember-native
+EMBER_NATIVE_LIB = $(EMBER_NATIVE_DIR)/build/libember_stdlib.a
+EMBER_NATIVE_INCLUDES = -I$(EMBER_NATIVE_DIR)/include -I$(EMBER_NATIVE_DIR)
+EMBER_NATIVE_LIBS = $(EMBER_NATIVE_DIR)/build/libember_stdlib.a -lsqlite3 -lpq -lmysqlclient -lpcre2-8 -lmagic
+# CFLAGS += $(EMBER_NATIVE_INCLUDES)  # Disabled - basic stdlib now in ember-core
+
 # Default to release build
 BUILD_TYPE ?= release
 ifeq ($(BUILD_TYPE),debug)
@@ -88,7 +95,7 @@ JIT_DIR = $(CORE_DIR)/jit
 # Core library source files
 FRONTEND_MODULES = $(FRONTEND_DIR)/lexer/lexer.c $(FRONTEND_DIR)/parser/parser.c $(FRONTEND_DIR)/parser/core.c $(FRONTEND_DIR)/parser/expressions.c $(FRONTEND_DIR)/parser/statements.c $(FRONTEND_DIR)/parser/oop.c
 CORE_MODULES = $(CORE_DIR)/vm.c $(CORE_DIR)/vm_arithmetic.c $(CORE_DIR)/vm_comparison.c $(CORE_DIR)/vm_stack.c $(CORE_DIR)/string_intern_optimized.c $(CORE_DIR)/bytecode.c $(CORE_DIR)/memory.c $(CORE_DIR)/error.c $(CORE_DIR)/optimizer.c $(CORE_DIR)/memory/memory_pool.c $(CORE_DIR)/vm_pool/vm_pool_secure.c $(CORE_DIR)/vm_pool/vm_memory_integration.c src/vm_pool_api.c
-RUNTIME_MODULES = $(RUNTIME_DIR)/builtins.c $(RUNTIME_DIR)/value/value.c $(RUNTIME_DIR)/vfs/vfs.c $(RUNTIME_DIR)/package/package.c $(RUNTIME_DIR)/package/http_stubs.c $(RUNTIME_DIR)/template_stubs.c $(RUNTIME_DIR)/stdlib_stubs.c
+RUNTIME_MODULES = $(RUNTIME_DIR)/builtins.c $(RUNTIME_DIR)/value/value.c $(RUNTIME_DIR)/vfs/vfs.c $(RUNTIME_DIR)/package/package.c $(RUNTIME_DIR)/package/http_stubs.c $(RUNTIME_DIR)/template_stubs.c $(RUNTIME_DIR)/math_stdlib.c $(RUNTIME_DIR)/string_stdlib.c
 JIT_MODULES = $(JIT_DIR)/jit_compiler.c $(JIT_DIR)/jit_x86_64.c $(JIT_DIR)/jit_integration.c $(JIT_DIR)/jit_arithmetic.c
 
 LIBSRC = $(SRCDIR)/api.c $(FRONTEND_MODULES) $(CORE_MODULES) $(RUNTIME_MODULES) $(JIT_MODULES)
@@ -97,7 +104,7 @@ LIBSRC = $(SRCDIR)/api.c $(FRONTEND_MODULES) $(CORE_MODULES) $(RUNTIME_MODULES) 
 LIBOBJ = $(BUILDDIR)/api.o
 LIBOBJ += $(BUILDDIR)/lexer.o $(BUILDDIR)/parser.o $(BUILDDIR)/parser_core.o $(BUILDDIR)/parser_expressions.o $(BUILDDIR)/parser_statements.o $(BUILDDIR)/parser_oop.o
 LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_secure.o $(BUILDDIR)/core_vm_pool_vm_memory_integration.o $(BUILDDIR)/vm_pool_api.o $(BUILDDIR)/core_async.o $(BUILDDIR)/core_vm_async.o $(BUILDDIR)/core_vm_collections.o
-LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o $(BUILDDIR)/stdlib_stubs.o $(BUILDDIR)/crypto_simple.o $(BUILDDIR)/json_simple.o $(BUILDDIR)/io_simple.o
+LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o $(BUILDDIR)/math_stdlib.o $(BUILDDIR)/string_stdlib.o $(BUILDDIR)/crypto_simple.o $(BUILDDIR)/json_simple.o $(BUILDDIR)/io_simple.o
 # JIT disabled for container build compatibility
 # LIBOBJ += $(BUILDDIR)/jit_compiler.o $(BUILDDIR)/jit_x86_64.o $(BUILDDIR)/jit_integration.o $(BUILDDIR)/jit_arithmetic.o
 
@@ -128,6 +135,11 @@ $(BUILDDIR):
 # Core library
 $(BUILDDIR)/$(LIBNAME): $(LIBOBJ) | $(BUILDDIR)
 	ar rcs $@ $^
+
+# Ember Native Standard Library dependency
+$(EMBER_NATIVE_LIB):
+	@echo "Building Ember Native Standard Library..."
+	@cd $(EMBER_NATIVE_DIR) && $(MAKE)
 
 # Build object files
 $(BUILDDIR)/api.o: $(SRCDIR)/api.c | $(BUILDDIR)
@@ -218,6 +230,12 @@ $(BUILDDIR)/json_simple.o: $(RUNTIME_DIR)/json_simple.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/io_simple.o: $(RUNTIME_DIR)/io_simple.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/math_stdlib.o: $(RUNTIME_DIR)/math_stdlib.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/string_stdlib.o: $(RUNTIME_DIR)/string_stdlib.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/value.o: $(RUNTIME_DIR)/value/value.c | $(BUILDDIR)

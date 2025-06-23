@@ -85,6 +85,7 @@ void try_statement(ember_vm* vm, ember_chunk* chunk);
 void throw_statement(ember_chunk* chunk);
 void class_declaration(ember_vm* vm, ember_chunk* chunk);
 void method_definition(ember_vm* vm, ember_chunk* chunk);
+void switch_statement(ember_vm* vm, ember_chunk* chunk);
 
 // Async/await and generator support
 void async_function_definition(ember_vm* vm, ember_chunk* chunk);

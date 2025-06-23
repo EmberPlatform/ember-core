@@ -3,15 +3,7 @@
 #include "../vm.h"
 #include "value/value.h"
 #include "stdlib_working.h"
-#include "../native/common.h"
-#include "../native/http_native.h"
-#include "../native/websocket_native.h"
-#include "../native/upload_native.h"
-#include "../native/streaming_native.h"
-#include "../native/router_native.h"
-#include "../native/session_native.h"
-#include "../native/template_native.h"
-#include "stdlib_working.h"
+#include "ember_native_functions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -250,7 +242,7 @@ void register_builtin_functions(ember_vm* vm) {
     ember_register_func(vm, "int", ember_native_int);
     ember_register_func(vm, "bool", ember_native_bool);
     
-    // Math functions from stdlib/math_native.c
+    // Math functions from runtime/math_stdlib.c
     ember_register_func(vm, "abs", ember_native_abs);
     ember_register_func(vm, "sqrt", ember_native_sqrt);
     ember_register_func(vm, "max", ember_native_max);
@@ -260,7 +252,7 @@ void register_builtin_functions(ember_vm* vm) {
     ember_register_func(vm, "round", ember_native_round);
     ember_register_func(vm, "pow", ember_native_pow);
     
-    // String functions from stdlib/string_native.c
+    // String functions from runtime/string_stdlib.c
     ember_register_func(vm, "len", ember_native_len);
     ember_register_func(vm, "substr", ember_native_substr);
     ember_register_func(vm, "split", ember_native_split);
@@ -274,62 +266,32 @@ void register_builtin_functions(ember_vm* vm) {
     ember_register_func(vm, "append_file", ember_native_append_file_working);
     ember_register_func(vm, "file_exists", ember_native_file_exists_working);
     
-    // JSON functions (working implementations)
+    // JSON functions from runtime/json_simple.c (working implementations)
     ember_register_func(vm, "json_parse", ember_json_parse_working);
     ember_register_func(vm, "json_stringify", ember_json_stringify_working);
     ember_register_func(vm, "json_validate", ember_json_validate_working);
     
-    // Cryptographic functions (working implementations)
+    // Cryptographic functions from runtime/crypto_simple.c (working implementations)
     ember_register_func(vm, "sha256", ember_native_sha256_working);
     ember_register_func(vm, "sha512", ember_native_sha512_working);
     ember_register_func(vm, "hmac_sha256", ember_native_hmac_sha256_working);
     ember_register_func(vm, "secure_random", ember_native_secure_random_working);
-    // Note: hmac_sha512, secure_compare, bcrypt functions not implemented yet
+    // Additional crypto functions (some may need testing)
+    // ember_register_func(vm, "hmac_sha512", ember_native_hmac_sha512);
+    // ember_register_func(vm, "secure_compare", ember_native_secure_compare);
     // ember_register_func(vm, "bcrypt_hash", ember_native_bcrypt_hash);
     // ember_register_func(vm, "bcrypt_verify", ember_native_bcrypt_verify);
     
-    // Regular expression functions from stdlib/regex_native.c
-    // NOTE: Temporarily commented out - regex functions not implemented yet
+    // Regular expression functions from stdlib/regex_native.c (temporarily disabled)
     // ember_register_func(vm, "regex_match", ember_regex_match_func);
     // ember_register_func(vm, "regex_test", ember_regex_test);
     // ember_register_func(vm, "regex_replace", ember_regex_replace);
     // ember_register_func(vm, "regex_split", ember_regex_split);
     // ember_register_func(vm, "regex_find_all", ember_regex_find_all);
     
-    // Date/time functions from stdlib/datetime_native.c (not implemented yet)
+    // Date/time functions from stdlib/datetime_native.c (may need testing)
     // ember_register_func(vm, "datetime_now", ember_native_datetime_now);
     
-    // HTTP server functions from stdlib/http_native.c
-    ember_register_func(vm, "http_listen_and_serve", ember_native_http_listen_and_serve);
-    ember_register_func(vm, "http_stop_server", ember_native_http_stop_server);
-    
-    // HTTP request/response interface functions
-    ember_register_func(vm, "request_get_method", ember_native_request_get_method);
-    ember_register_func(vm, "request_get_path", ember_native_request_get_path);
-    ember_register_func(vm, "request_get_query", ember_native_request_get_query);
-    ember_register_func(vm, "request_get_header", ember_native_request_get_header);
-    ember_register_func(vm, "request_get_body", ember_native_request_get_body);
-    ember_register_func(vm, "response_set_status", ember_native_response_set_status);
-    ember_register_func(vm, "response_set_header", ember_native_response_set_header);
-    ember_register_func(vm, "response_write", ember_native_response_write);
-    ember_register_func(vm, "response_end", ember_native_response_end);
-    
-    // Note: WebSocket, upload, streaming, and router functions temporarily disabled
-    
-    // Session management functions
-    ember_register_session_native(vm);
-    
-    // Template engine functions
-    ember_register_func(vm, "html_render", ember_html_render);
-    ember_register_func(vm, "html_render_file", ember_html_render_file);
-    ember_register_func(vm, "markdown_render", ember_markdown_render);
-    ember_register_func(vm, "markdown_render_file", ember_markdown_render_file);
-    ember_register_func(vm, "template_render", ember_template_render);
-    ember_register_func(vm, "template_render_file", ember_template_render_file);
-    
-    // String utility functions
-    ember_register_func(vm, "html_escape", ember_html_escape);
-    ember_register_func(vm, "url_encode", ember_url_encode);
-    ember_register_func(vm, "replace_all", ember_replace_all);
-    ember_register_func(vm, "truncate", ember_template_truncate);
+    // Note: HTTP, WebSocket, upload, streaming, router, session, and template functions 
+    // temporarily disabled due to integration issues - focus on core stdlib first
 }

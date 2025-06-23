@@ -2,6 +2,7 @@
 #define EMBER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,6 +47,24 @@ extern "C" {
     #define EMBER_SYSTEM_LIB_PATH "./lib/ember"
     #define EMBER_USER_LIB_PATH "./lib/ember"
 #endif
+
+// Forward declarations for optimization support
+typedef struct ember_vm ember_vm;
+typedef struct ember_chunk ember_chunk;
+
+// Performance optimization API
+typedef struct ember_optimization_config ember_optimization_config_t;
+typedef struct ember_optimization_stats ember_optimization_stats_t;
+typedef struct ember_optimization_capabilities ember_optimization_capabilities_t;
+
+// Optimization management functions
+int ember_initialize_optimizations(ember_optimization_config_t* config);
+void ember_shutdown_optimizations(void);
+ember_vm* ember_create_optimized_vm(ember_optimization_config_t* config);
+int ember_run_optimized(ember_vm* vm);
+void ember_get_optimization_stats(ember_vm* vm, ember_optimization_stats_t* stats);
+void ember_print_optimization_stats(ember_vm* vm);
+ember_optimization_capabilities_t ember_get_optimization_capabilities(void);
 
 // Value types
 typedef enum {
@@ -147,6 +166,9 @@ typedef enum {
     OP_REGEX_MATCH,   // Get match details from regex
     OP_REGEX_REPLACE, // Replace matches in string
     OP_REGEX_SPLIT,   // Split string by regex
+    OP_SWITCH,        // Switch statement
+    OP_CASE,          // Case clause
+    OP_DEFAULT,       // Default clause
     OP_HALT           // Stop execution
 } ember_opcode;
 
@@ -215,6 +237,9 @@ typedef enum {
     TOKEN_ASYNC,
     TOKEN_AWAIT,
     TOKEN_YIELD,
+    TOKEN_SWITCH,
+    TOKEN_CASE,
+    TOKEN_DEFAULT,
     TOKEN_EOF,
     TOKEN_ERROR
 } ember_token_type;
@@ -606,6 +631,21 @@ struct ember_vm {
     
     // Generator support
     ember_generator* current_generator; // Currently executing generator (if any)
+    
+    // Performance optimization support
+    void* jit_integration;              // JIT compiler integration (jit_vm_integration_t*)
+    bool jit_enabled;                   // Whether JIT compilation is enabled
+    void* arena_allocator;              // Arena allocator for memory optimization
+    bool memory_optimized;              // Whether memory optimization is enabled
+    void* vm_pool_context;              // VM pool context for concurrent execution
+    bool vm_pool_enabled;               // Whether VM pool is enabled
+    
+    // Performance statistics
+    uint64_t instructions_executed;     // Total instructions executed
+    uint64_t function_calls;            // Total function calls made
+    uint64_t jit_compilations;          // Number of JIT compilations triggered
+    uint64_t memory_allocations;        // Number of memory allocations
+    uint64_t gc_collections;            // Number of garbage collections
 };
 
 // API functions

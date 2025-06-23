@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-// String utility functions (ember_get_string_value defined in template_stubs.c)
+// String utility functions 
 const char* ember_get_string_data(ember_value value) {
     if (value.type == EMBER_VAL_STRING) {
         ember_string* str = AS_STRING(value);
@@ -302,7 +302,9 @@ ember_value ember_native_file_exists(ember_vm* vm, int argc, ember_value* argv) 
     return ember_make_bool(0);
 }
 
-// JSON functions (stubs)
+// JSON functions (stubs) - NOTE: Real implementations are in ember-native
+// Commenting out conflicting stub functions to use real ember-native implementations
+/*
 ember_value ember_json_parse(ember_vm* vm, int argc, ember_value* argv) {
     (void)vm; (void)argc; (void)argv;
     printf("[STUB] json_parse function not implemented\n");
@@ -320,8 +322,11 @@ ember_value ember_json_validate(ember_vm* vm, int argc, ember_value* argv) {
     printf("[STUB] json_validate function not implemented\n");
     return ember_make_bool(0);
 }
+*/
 
-// Crypto functions (stubs)
+// Crypto functions (stubs) - NOTE: Real implementations are in ember-native
+// Commenting out conflicting stub functions to use real ember-native implementations
+/*
 ember_value ember_native_sha256(ember_vm* vm, int argc, ember_value* argv) {
     (void)vm; (void)argc; (void)argv;
     printf("[STUB] sha256 function not implemented\n");
@@ -351,9 +356,12 @@ ember_value ember_native_secure_random(ember_vm* vm, int argc, ember_value* argv
     printf("[STUB] secure_random function not implemented\n");
     return ember_make_nil();
 }
+*/
 
+/*
 ember_value ember_native_secure_compare(ember_vm* vm, int argc, ember_value* argv) {
     (void)vm; (void)argc; (void)argv;
     printf("[STUB] secure_compare function not implemented\n");
     return ember_make_bool(0);
 }
+*/

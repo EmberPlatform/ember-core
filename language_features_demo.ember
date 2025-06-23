@@ -1,0 +1,153 @@
+// Comprehensive Ember Language Features Demonstration
+// This file demonstrates the core language features that should be working
+
+print("=== Ember Language Features Demonstration ===")
+
+// 1. FUNCTION DEFINITIONS AND CALLS
+print("\n1. Function Definitions and Calls:")
+
+fn add(a, b) {
+    return a + b
+}
+
+fn greet(name) {
+    return "Hello, " + name + "!"
+}
+
+fn factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+print("add(5, 3) =", add(5, 3))
+print("greet('World') =", greet("World"))
+print("factorial(5) =", factorial(5))
+
+// 2. CONTROL FLOW STRUCTURES
+print("\n2. Control Flow:")
+
+// If/else statements
+x = 10
+if x > 5 {
+    print("x is greater than 5")
+} else {
+    print("x is not greater than 5")
+}
+
+// For loops
+print("For loop counting 1 to 5:")
+for i = 1; i <= 5; i = i + 1 {
+    print("  i =", i)
+}
+
+// While loops
+print("While loop countdown:")
+count = 3
+while count > 0 {
+    print("  count =", count)
+    count = count - 1
+}
+
+// 3. ARRAYS AND DATA STRUCTURES
+print("\n3. Arrays:")
+arr = [1, 2, 3, "hello", true]
+print("Array:", arr)
+print("arr[0] =", arr[0])
+print("arr[3] =", arr[3])
+
+arr[1] = "modified"
+print("After modification:", arr)
+
+// 4. VARIABLES AND EXPRESSIONS
+print("\n4. Variables and Expressions:")
+a = 10
+b = 20
+c = a * b + 5
+print("a =", a, ", b =", b, ", c = a * b + 5 =", c)
+
+// Boolean operations
+flag1 = true
+flag2 = false
+print("flag1 && !flag2 =", flag1 && !flag2)
+
+// 5. STRING OPERATIONS
+print("\n5. String Operations:")
+name = "Ember"
+version = "2.0"
+message = "Welcome to " + name + " v" + version
+print("String concatenation:", message)
+
+// 6. BASIC MATH AND COMPARISONS
+print("\n6. Math and Comparisons:")
+print("5 + 3 =", 5 + 3)
+print("10 - 4 =", 10 - 4)
+print("6 * 7 =", 6 * 7)
+print("15 / 3 =", 15 / 3)
+print("17 % 5 =", 17 % 5)
+
+print("5 == 5:", 5 == 5)
+print("3 != 4:", 3 != 4)
+print("10 > 8:", 10 > 8)
+print("2 <= 2:", 2 <= 2)
+
+// 7. NESTED FUNCTION CALLS
+print("\n7. Nested Function Calls:")
+result = add(add(1, 2), add(3, 4))
+print("add(add(1, 2), add(3, 4)) =", result)
+
+// 8. CONDITIONAL EXPRESSIONS IN FUNCTIONS
+print("\n8. Functions with Conditions:")
+fn max(a, b) {
+    if a > b {
+        return a
+    } else {
+        return b
+    }
+}
+
+fn abs(x) {
+    if x < 0 {
+        return -x
+    } else {
+        return x
+    }
+}
+
+print("max(15, 23) =", max(15, 23))
+print("abs(-42) =", abs(-42))
+
+// 9. TRY/CATCH ERROR HANDLING (if implemented)
+print("\n9. Exception Handling:")
+try {
+    print("Trying risky operation...")
+    // Simulate an error condition
+    result = 10 / 0  // This might throw an error
+    print("Result:", result)
+} catch (e) {
+    print("Caught exception:", e)
+} finally {
+    print("Finally block executed")
+}
+
+// 10. COMPLEX EXPRESSIONS
+print("\n10. Complex Expressions:")
+complex_result = (5 + 3) * 2 - 1
+print("(5 + 3) * 2 - 1 =", complex_result)
+
+// Test short-circuit evaluation
+fn side_effect() {
+    print("Side effect called!")
+    return true
+}
+
+print("Testing short-circuit AND:")
+result = false && side_effect()  // Should not call side_effect
+print("false && side_effect() =", result)
+
+print("Testing short-circuit OR:")
+result = true || side_effect()   // Should not call side_effect  
+print("true || side_effect() =", result)
+
+print("\n=== End of Language Features Demo ===")
