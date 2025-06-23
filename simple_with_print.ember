@@ -1,3 +1,0 @@
-// Simple working example with print
-x = 42
-print(x)

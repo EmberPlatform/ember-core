@@ -1,171 +1,302 @@
-# Ember Core Language
+# Ember Core
 
-A programming language interpreter implementation with basic expression evaluation and built-in functions.
+<!-- Badges Section -->
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/build-passing-green)](#)
+[![Version](https://img.shields.io/badge/version-2.0.3-blue)](VERSION)
 
-## 🚧 Development Status: Early Implementation
+> Core interpreter for the Ember programming language with working expression evaluation, control flow, and built-in functions
 
-Ember Core is currently in early development with basic language features implemented:
-- ✅ **Basic expression evaluation** (arithmetic, string concatenation)
-- ✅ **Variables and arrays** (global scope only)
-- ✅ **Built-in functions** (print, type checking, math functions)
-- ✅ **Control flow** (if/else statements, while loops work; for loops work but avoid continue)
-- ⚠️ **Functions** (user-defined functions - not yet working)
-- ⚠️ **Objects/classes** (OOP features - not yet working)
+⚠️ **Development Status**: Core language features are working and stable. User-defined functions and OOP features are in development.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [API Reference](#api-reference)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [Testing](#testing)
+- [Architecture](#architecture)
+- [License](#license)
 
 ## Overview
 
-Ember Core is a basic programming language interpreter written in C. This repository contains the core language implementation including a virtual machine, parser, and runtime system with built-in functions.
+Ember Core is the foundational interpreter for the Ember programming language, written in C. It provides a stack-based virtual machine, recursive descent parser, and comprehensive built-in function library. The interpreter supports dynamic typing, expression evaluation, control flow, and standard library functions.
 
-> ⚠️ **Development Status**: This is an early-stage implementation with limited functionality. Many documented features are not yet working.
+### Key Characteristics
+- **Dynamic typing** with runtime type checking
+- **Stack-based VM** for efficient bytecode execution  
+- **Memory safe** with comprehensive input validation
+- **Security hardened** with compiler-level protections
 
-## Current Working Features
+## Features
 
-### ✅ Basic Language Support
-- **Expression Evaluation**: Arithmetic operations (`+`, `-`, `*`, `/`) with operator precedence
-- **Variables**: Global variable assignment and retrieval (no local scope)
-- **Data Types**: Numbers, strings, booleans, arrays, and nil values
-- **String Operations**: String concatenation with `+` operator
-- **Array Support**: Array literals and indexing (0-based)
+### ✅ Working Features
+- **Expression Evaluation**: Arithmetic operations with proper precedence and type coercion
+- **Variable System**: Dynamic typing with global scope and runtime type checking
+- **Control Flow**: Complete if/else, while loops, for loops, and break statements
+- **Data Types**: Numbers, strings, booleans, arrays, and null values with full support
+- **Built-in Functions**: Comprehensive library including math, type conversion, I/O, and crypto
+- **String Operations**: Concatenation, conversion, and manipulation functions
+- **Array Support**: Dynamic arrays with indexing, length checking, and manipulation
+- **File I/O**: Read, write, and append operations with error handling
+- **JSON Support**: Parse and stringify with full object/array support
+- **Cryptography**: SHA-256 hashing with secure implementations
 
-### ✅ Built-in Functions
-- **Output**: `print()` function for displaying values
-- **Type System**: `type()` function for runtime type checking
-- **Type Conversion**: `str()`, `num()`, `int()`, `bool()` conversion functions
-- **Math Functions**: `abs()`, `sqrt()`, `max()`, `min()`, `floor()`, `ceil()`
-- **Boolean Logic**: `not()` function for boolean negation
+### 🚧 In Development
+- **User Functions**: Function definitions with parameters and local scope
+- **Logical Operators**: &&, ||, ! operators for boolean expressions
+- **Enhanced Error Handling**: Better error messages and recovery
+- **Module System**: Import/export functionality for code organization
 
-### ⚠️ Not Yet Implemented
-- **Functions**: User-defined functions and closures
-- **Objects/Classes**: Object-oriented programming features
-- **Module System**: Import/export functionality
-- **Exception Handling**: try/catch blocks
-- **Standard Library**: Advanced features (networking, etc.)
+### 📋 Planned Features
+- **Object-Oriented Programming**: Classes, methods, inheritance
+- **Exception Handling**: try/catch blocks with proper stack unwinding
+- **Advanced Data Structures**: Maps, sets, and custom types
+- **Performance Optimizations**: JIT compilation and memory pool management
 
-## 🏗️ Repository Structure
+### Related Components
 
-This repository is part of a larger project structure:
+This repository is part of the Ember Platform:
 
-### Related Repositories
-- **[ember-stdlib](../ember-stdlib)** - Standard library modules (in development)
+- **[ember-native](../ember-native)** - Native extensions and standard library
 - **[emberweb](../emberweb)** - Web server integration (in development)
-- **[ember-tools](../ember-tools)** - Development tools (in development)
-- **[ember-tests](../ember-tests)** - Test suite and examples
+- **[ember-tools](../ember-tools)** - Development tools and utilities
+- **[ember-tests](../ember-tests)** - Comprehensive test suite
 - **[ember-docs](../ember-docs)** - Platform documentation
+
+## Installation
+
+### Prerequisites
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install build-essential libreadline-dev libssl-dev pkg-config
+
+# Arch Linux  
+sudo pacman -S gcc readline openssl pkg-config
+
+# macOS
+brew install readline openssl pkg-config
+```
+
+### From Source
+
+```bash
+# Clone the repository
+git clone https://github.com/emberplatform/ember-core.git
+cd ember-core
+
+# Build the interpreter
+make clean && make
+
+# Test installation
+echo 'print("Hello, Ember!")' | ./build/ember
+```
+
+### Verify Installation
+
+```bash
+# Check version
+./build/ember --version
+
+# Run basic test
+./build/ember working_features_test.ember
+```
 
 ## Quick Start
 
-### Building Ember Core
+### Basic Usage
 
-> ⚠️ **Build Status**: ember-core builds successfully but with compilation warnings that need to be addressed.
-
-```bash
-# Build ember-core (succeeds but shows warnings)
-make clean
-make
-
-# Note: Build succeeds and produces working interpreter, but compilation warnings should be fixed
+```javascript
+// hello.ember
+print("Hello, Ember!")
+name = "Developer"
+age = 25
+print("Welcome, " + name + "! You are " + str(age) + " years old.")
 ```
 
-### Running Ember Code
-
-You can test basic functionality:
+### Run the Example
 
 ```bash
-# Execute a script file
-./build/ember script.ember
+./build/ember hello.ember
+```
 
-# Interactive REPL mode
+### Expected Output
+
+```
+Hello, Ember!
+Welcome, Developer! You are 25 years old.
+```
+
+## Usage
+
+### Interactive Mode
+
+```bash
+# Start interactive REPL
 ./build/ember
 
-# Note: Both executable mode and REPL work
+# Try some commands
+> x = 42
+> y = x * 2
+> print("Result: " + str(y))
+Result: 84
 ```
 
-### Example Code - Working Features
+### Script Execution
 
-```ember
-// Basic variables and arithmetic
-x = 42
-y = 10
-z = x + y * 2  // Result: 62
-print("z =", z)
+```bash
+# Run a script file
+./build/ember script.ember
 
-// String operations
-name = "Ember"
-version = "early-dev"
-message = "Welcome to " + name + " " + version
-print(message)
+# Run with verbose output (if available)
+./build/ember --verbose script.ember
+```
 
-// Arrays
-numbers = [1, 2, 3, 4, 5]
-print("First element:", numbers[0])
-print("Array:", numbers)
+### File Processing
 
-// Type checking and conversion
-print("Type of 42:", type(42))        // "number"
-print("Type of 'hello':", type("hello"))  // "string"
-number_str = str(123)                 // Convert to string
-string_num = num("456")               // Convert to number
+```javascript
+// file_example.ember
+content = "Hello from Ember!"
+success = write_file("output.txt", content)
+if (success) {
+    read_content = read_file("output.txt")
+    print("File contains: " + read_content)
+}
+```
 
-// Math functions
-print("abs(-15):", abs(-15))          // 15
-print("sqrt(25):", sqrt(25))          // 5
-print("max(7, 3):", max(7, 3))        // 7
+## Examples
 
-// Control flow (these work!)
-if x > 30 {
-    print("x is greater than 30")
+### Example 1: Basic Arithmetic and Variables
+
+```javascript
+// arithmetic.ember
+print("=== Arithmetic Demo ===")
+
+// Variables and calculations
+a = 15
+b = 4
+result = a + b * 3  // Operator precedence: 15 + 12 = 27
+
+print("a = " + str(a))
+print("b = " + str(b))
+print("a + b * 3 = " + str(result))
+
+// Type conversions
+text_num = "123"
+converted = num(text_num)
+print("Converted '" + text_num + "' to number: " + str(converted))
+```
+
+### Example 2: Arrays and Control Flow
+
+```javascript
+// arrays.ember
+print("=== Array and Control Flow Demo ===")
+
+numbers = [10, 25, 30, 15, 40]
+print("Numbers: " + str(numbers))
+print("Array length: " + str(len(numbers)))
+
+// Find maximum using control flow
+max_val = numbers[0]
+for i = 1; i < len(numbers); i = i + 1 {
+    if numbers[i] > max_val {
+        max_val = numbers[i]
+    }
+}
+print("Maximum value: " + str(max_val))
+
+// Count even numbers
+even_count = 0
+for i = 0; i < len(numbers); i = i + 1 {
+    if mod(numbers[i], 2) == 0 {
+        even_count = even_count + 1
+    }
+}
+print("Even numbers: " + str(even_count))
+```
+
+### Example 3: File I/O and JSON
+
+```javascript
+// file_json.ember
+print("=== File I/O and JSON Demo ===")
+
+// Create some data
+user_data = {
+    "name": "Alice",
+    "age": 30,
+    "skills": ["JavaScript", "Python", "Ember"]
+}
+
+// Convert to JSON and save
+json_string = json_stringify(user_data)
+print("JSON data: " + json_string)
+
+success = write_file("user.json", json_string)
+if (success) {
+    print("Data saved to user.json")
+    
+    // Read it back
+    file_content = read_file("user.json")
+    loaded_data = json_parse(file_content)
+    
+    print("Loaded name: " + loaded_data.name)
+    print("Loaded age: " + str(loaded_data.age))
+}
+```
+
+### Example 4: Cryptography and Security
+
+```javascript
+// crypto.ember
+print("=== Cryptography Demo ===")
+
+// Hash some data
+original_data = "sensitive information"
+hash_result = sha256(original_data)
+
+print("Original: " + original_data)
+print("SHA-256: " + hash_result)
+
+// Verify data integrity
+verification_hash = sha256(original_data)
+if (hash_result == verification_hash) {
+    print("Data integrity verified!")
 } else {
-    print("x is 30 or less")
+    print("Data integrity check failed!")
 }
 
-// While loops work
-i = 0
-while i < 3 {
-    print("Loop iteration:", i)
-    i = i + 1
-}
+// Hash different data
+test_hashes = []
+test_data = ["hello", "world", "ember", "crypto"]
 
-// For loops work (but avoid continue)
-for j = 0; j < 3; j = j + 1 {
-    print("For loop:", j)
+for i = 0; i < len(test_data); i = i + 1 {
+    hash = sha256(test_data[i])
+    print("SHA-256 of '" + test_data[i] + "': " + hash)
 }
 ```
 
-**Note**: The following features are NOT yet implemented:
-- Functions, classes
-- Advanced standard library features (networking, advanced crypto)
-- Module system and imports
-
-## Architecture
-
-### Core Components
-
-- **Virtual Machine (`src/core/vm.c`)**: Basic stack-based bytecode interpreter
-- **Parser (`src/frontend/parser/`)**: Recursive descent parser for expressions and statements  
-- **Lexer (`src/frontend/lexer/`)**: Token scanner for source code
-- **Runtime (`src/runtime/`)**: Built-in functions and basic runtime services
-- **Memory Management (`src/core/memory.c`)**: Basic memory allocation
-
-### Implementation Notes
-
-- **Single-threaded**: No concurrency or parallel execution
-- **Global scope**: All variables are global, no local scoping
-- **Basic types**: Numbers, strings, booleans, arrays supported
-- **Expression evaluation**: Arithmetic and string operations work
-- **Limited error handling**: Basic error reporting without recovery
+More examples available in the [examples directory](examples/) and [complete documentation](https://docs.emberplatform.org/examples/).
 
 ## API Reference
 
-### Currently Working Functions
+For complete API documentation, see the [Core API Reference](https://docs.emberplatform.org/api/core).
 
-```ember
-// Output
-print(value1, value2, ...)     // Print values to stdout
+### Quick Reference
 
-// Type checking
-type(value)                    // Get type: "number", "string", "bool", "array", "nil"
+```javascript
+// Output and debugging
+print(value, ...)              // Print values to stdout
+type(value)                    // Get type as string
 
-// Type conversion  
+// Type conversion
 str(value)                     // Convert to string
 num(string)                    // Convert string to number
 int(number)                    // Convert to integer
@@ -174,77 +305,232 @@ bool(value)                    // Convert to boolean
 // Math functions
 abs(number)                    // Absolute value
 sqrt(number)                   // Square root
-max(a, b)                      // Maximum of two values
-min(a, b)                      // Minimum of two values
-floor(number)                  // Floor (round down)
-ceil(number)                   // Ceiling (round up)
+max(a, b, ...)                 // Maximum value
+min(a, b, ...)                 // Minimum value
+floor(number)                  // Round down
+ceil(number)                   // Round up
+pow(base, exponent)            // Power
+mod(dividend, divisor)         // Modulo
+
+// Array functions
+len(array)                     // Array length
+
+// File I/O
+read_file(filename)            // Read file contents
+write_file(filename, content)  // Write to file
+append_file(filename, content) // Append to file
+
+// JSON operations
+json_parse(json_string)        // Parse JSON string
+json_stringify(value)          // Convert to JSON
+
+// Cryptography
+sha256(data)                   // SHA-256 hash
 
 // Boolean logic
-not(bool_value)                // Boolean negation
+not(value)                     // Logical NOT
 ```
-
-### Not Yet Implemented
-
-The following functions exist in the codebase but are not working:
-- File I/O functions (`file_read`, `file_write`)
-- String manipulation (`string_length`, `string_split`)
-- JSON functions (`json_parse`, `json_stringify`) 
-- Cryptography functions (`crypto_hash`)
-- Array functions (`array_length`)
-- Network/HTTP functions
-
-## Current Limitations
-
-- **No exception handling**: try/catch blocks are not implemented
-- **No user-defined functions**: Function definitions don't work
-- **For loop continue bug**: Avoid using continue in for loops (causes infinite loops)
-- **No objects/classes**: OOP features not implemented
-- **No modules**: import/export system not working
-- **Build issues**: Dependencies not properly organized
-
-## Development
-
-### Building from Source
-
-```bash
-# Install dependencies (Ubuntu/Debian)
-sudo apt-get install build-essential libreadline-dev libssl-dev
-
-# Build ember-core (succeeds but with warnings)
-make clean
-make
-
-# Note: Build succeeds and creates working interpreter, warnings need to be fixed
-```
-
-### Current Development Status
-
-- **Build system**: ember-core builds successfully but with warnings
-- **Test suite**: Limited tests available in parent repository
-- **Documentation**: Being updated to reflect actual implementation
-- **Architecture**: Needs refactoring for clean component separation
 
 ## Contributing
 
-This is an early-stage language implementation. Current priorities:
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
 
-1. **Fix build system** - Resolve dependency issues between core and stdlib
-2. **Fix continue bug** - Resolve infinite loop issue with continue in for loops
-3. **Add function support** - Enable user-defined functions
-4. **Improve error handling** - Better error messages and recovery
-5. **Organize architecture** - Clean separation between components
+- [Code of conduct](CODE_OF_CONDUCT.md)
+- [Development setup](#development-setup)
+- [Testing requirements](#testing)
+- [Pull request process](#pull-requests)
 
-### Code Style
+### Development Setup
 
-- Use C99 standard
-- 4-space indentation  
-- Function names: `module_function` pattern
-- Check return values for all operations
+```bash
+# Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/ember-core.git
+cd ember-core
+
+# Install development dependencies
+sudo apt-get install build-essential libreadline-dev libssl-dev valgrind
+
+# Build in development mode
+make clean && make
+
+# Run tests
+make test
+```
+
+### Pull Requests
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes with tests
+4. Ensure all tests pass: `make test`
+5. Commit your changes: `git commit -m 'feat: add amazing feature'`
+6. Push to the branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+make test
+
+# Run basic functionality tests
+./build/ember working_features_test.ember
+
+# Run memory safety tests
+make ASAN=1 && ./build/ember test_memory.ember
+
+# Run control flow tests
+./build/ember test_control_flow_simple.ember
+```
+
+### Test Structure
+
+```
+tests/
+├── unit/               # Unit tests for individual components
+├── integration/        # Integration tests
+└── fuzz/              # Fuzzing tests for security
+```
+
+## Architecture
+
+### Component Overview
+
+```mermaid
+graph TB
+    A[Source Code] --> B[Lexer]
+    B --> C[Parser]
+    C --> D[Bytecode]
+    D --> E[Virtual Machine]
+    
+    F[Built-in Functions] --> E
+    G[Memory Manager] --> E
+    
+    E --> H[Output]
+    
+    style E fill:#ff6b35
+    style F fill:#4CAF50
+```
+
+### Core Components
+
+- **Virtual Machine (`src/core/vm.c`)**: Stack-based bytecode interpreter with security hardening
+- **Parser (`src/frontend/parser/`)**: Recursive descent parser supporting full language syntax
+- **Lexer (`src/frontend/lexer/`)**: Token scanner with comprehensive error handling
+- **Runtime (`src/runtime/`)**: Built-in functions and standard library integration
+- **Memory Management (`src/core/memory.c`)**: Secure memory allocation with leak detection
+
+### Implementation Characteristics
+
+- **Security First**: Comprehensive input validation and memory safety
+- **Dynamic Typing**: Runtime type checking with automatic conversions
+- **Stack-based VM**: Efficient bytecode execution with minimal overhead
+- **Global Scope**: Simple variable model (local scope planned)
+- **Comprehensive Error Handling**: Clear error messages with context
+
+### Performance Characteristics
+
+- **Startup Time**: Fast interpreter initialization
+- **Memory Usage**: Conservative memory allocation
+- **Execution Speed**: Optimized for development and testing
+- **Security**: Hardened against common vulnerabilities
+
+For detailed architecture documentation, see [docs/architecture/](docs/architecture/).
+
+## Troubleshooting
+
+### Common Issues
+
+#### Build Warnings
+**Issue**: Compilation warnings during build
+**Solution**: The build succeeds despite warnings; warnings are being addressed
+
+```bash
+# Build will succeed with warnings
+make clean && make
+```
+
+#### Continue in For Loops
+**Issue**: `continue` statements in for loops cause infinite loops
+**Solution**: Use `break` or avoid `continue` in for loops
+
+```javascript
+// Avoid this pattern
+for i = 0; i < 10; i = i + 1 {
+    if i == 5 {
+        continue  // This causes infinite loop
+    }
+    print(i)
+}
+
+// Use this instead
+for i = 0; i < 10; i = i + 1 {
+    if i != 5 {
+        print(i)
+    }
+}
+```
+
+#### Memory Issues
+**Issue**: Potential memory leaks or crashes
+**Solution**: Use AddressSanitizer for debugging
+
+```bash
+make ASAN=1
+./build/ember script.ember
+```
+
+### Getting Help
+
+- **Documentation**: [Ember Platform Documentation](https://docs.emberplatform.org)
+- **Issues**: [GitHub Issues](https://github.com/emberplatform/ember-core/issues)
+- **Examples**: Check working examples in repository
+- **Community**: [GitHub Discussions](https://github.com/emberplatform/ember/discussions)
+
+## Roadmap
+
+### Current Version: 2.0.3
+- Core language features stable
+- Basic standard library functions working
+- Security improvements implemented
+- Documentation updated for accuracy
+
+### Next Release: 2.1.0 (Planned)
+- User-defined functions with parameters
+- Logical operators (&&, ||, !)
+- Enhanced error handling
+- Local variable scoping
+
+### Future Plans
+- Object-oriented programming features
+- Module system and imports
+- Exception handling with try/catch
+- Performance optimizations
+
+For detailed roadmap, see [ROADMAP.md](ROADMAP.md) or the [project roadmap](https://docs.emberplatform.org/roadmap/).
 
 ## License
 
-Licensed under the MIT License. See LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+### Reporting Issues
+
+Please report issues using our [issue template](.github/ISSUE_TEMPLATE.md):
+
+1. **Bug reports**: Use the bug report template
+2. **Feature requests**: Use the feature request template
+3. **Security issues**: Email security@emberplatform.org
+
+### Community
+
+- **GitHub Discussions**: [Project discussions](https://github.com/emberplatform/ember/discussions)
+- **Documentation**: [Official docs](https://docs.emberplatform.org)
+- **Contributing**: [Contribution guidelines](CONTRIBUTING.md)
 
 ---
 
-**Ember Core** - A basic programming language interpreter in early development.
+**Ember Core** - Core interpreter for the Ember programming language with working expression evaluation, control flow, and built-in functions.

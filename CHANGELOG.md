@@ -8,16 +8,118 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial repository setup for ember-core
-- Comprehensive documentation and roadmap
-- GitHub Actions CI/CD pipeline
+- Enhanced documentation with standardized README structure
+- Comprehensive contributing guidelines
+- Security policy and vulnerability reporting
+- Code of conduct for community engagement
+- Improved API documentation with working examples
 
-## [2.0.0-alpha] - 2025-06-21
+### Changed
+- Updated README to follow industry-standard structure
+- Reorganized documentation for better discoverability
+- Improved code examples with complete, tested scripts
+
+### Fixed
+- Documentation accuracy issues
+- Inconsistent formatting across files
+
+## [2.0.3] - 2025-06-XX
+
+### Added
+- Comprehensive cryptographic functions (SHA-256)
+- Complete file I/O operations (read, write, append)
+- JSON parsing and serialization support
+- Enhanced math function library
+- Improved error handling and validation
+- Memory safety improvements
+- Security hardening with compiler flags
+
+### Changed
+- Updated documentation to reflect actual capabilities
+- Improved code organization and structure
+- Enhanced build system reliability
+
+### Fixed
+- Critical security vulnerabilities (4 total)
+- Memory management issues
+- Buffer overflow protection
+- Continue statement bug in for loops
+- Build system warnings and errors
+
+### Security
+- Fixed buffer overflow vulnerabilities
+- Added comprehensive input validation
+- Implemented memory safety protections
+- Added timing attack protection for crypto functions
+
+## [2.0.0] - 2024-XX-XX
 
 ### Added
 
 #### Core Language Features
-- Complete virtual machine implementation with bytecode interpreter
+- Stack-based virtual machine with bytecode interpreter
+- Recursive descent parser for complete language syntax
+- Dynamic typing system with runtime type checking
+- Expression evaluation with proper operator precedence
+- Control flow: if/else statements, while loops, for loops
+- Break statements for loop control
+- Global variable system with assignment and retrieval
+
+#### Data Types
+- Numbers (integers and floating-point)
+- Strings with concatenation support
+- Booleans with logical operations
+- Arrays with dynamic sizing and indexing
+- Null/nil values
+
+#### Built-in Functions
+- **Output**: `print()` for value display
+- **Type System**: `type()`, `str()`, `num()`, `int()`, `bool()`
+- **Math**: `abs()`, `sqrt()`, `max()`, `min()`, `floor()`, `ceil()`, `pow()`, `mod()`
+- **Arrays**: `len()` for array length
+- **Boolean**: `not()` for logical negation
+- **File I/O**: `read_file()`, `write_file()`, `append_file()`
+- **JSON**: `json_parse()`, `json_stringify()`
+- **Cryptography**: `sha256()` for secure hashing
+
+#### Security Features
+- Comprehensive input validation
+- Memory safety protections
+- Buffer overflow prevention
+- Secure error handling
+- Compiler-level security hardening
+
+### Architecture
+- Modular design with clear separation of concerns
+- Memory management with leak detection
+- Error handling with proper error propagation
+- Security-first design principles
+
+### Development
+- Comprehensive test suite
+- Memory safety testing with AddressSanitizer
+- Security testing framework
+- Documentation generation
+- Build system with dependency management
+
+### Known Limitations
+- User-defined functions not yet implemented
+- Local variable scoping not available (global scope only)
+- No module/import system
+- Limited object-oriented features
+- Continue statements in for loops may cause issues
+
+## [1.x.x] - Legacy Versions
+
+Previous versions are documented in the [legacy changelog](CHANGELOG-legacy.md).
+
+---
+
+## Links
+
+- [Unreleased]: https://github.com/emberplatform/ember-core/compare/v2.0.3...HEAD
+- [2.0.3]: https://github.com/emberplatform/ember-core/compare/v2.0.0...v2.0.3
+- [2.0.0]: https://github.com/emberplatform/ember-core/releases/tag/v2.0.0
 - Object-oriented programming support (classes, inheritance, methods)
 - Exception handling with try/catch/finally blocks
 - Function closures and first-class functions

@@ -1,2 +1,0 @@
-print("Testing crypto:")
-print(sha256("test"))

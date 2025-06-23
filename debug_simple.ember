@@ -1,8 +1,0 @@
-// Super simple debug
-print("Before function definition")
-
-fn test() {
-    print("In function")
-}
-
-print("After function definition")

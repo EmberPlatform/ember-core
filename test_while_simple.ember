@@ -1,9 +1,0 @@
-// Simple while loop test
-i = 0
-
-while (i < 3) {
-    print("i is " + i)
-    i = i + 1
-}
-
-print("After while loop")

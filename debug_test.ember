@@ -1,2 +1,0 @@
-print("About to call sha256")
-print("Finished")

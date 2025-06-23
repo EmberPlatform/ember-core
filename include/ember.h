@@ -190,9 +190,11 @@ typedef enum {
     TOKEN_COMMA,
     TOKEN_COLON,
     TOKEN_AT,
-    TOKEN_AND,
-    TOKEN_OR,
-    TOKEN_NOT,
+    TOKEN_AND,          // "and" keyword
+    TOKEN_OR,           // "or" keyword  
+    TOKEN_NOT,          // "not" keyword or "!" operator
+    TOKEN_AND_AND,      // "&&" operator
+    TOKEN_OR_OR,        // "||" operator
     TOKEN_TRUE,
     TOKEN_FALSE,
     TOKEN_IDENTIFIER,

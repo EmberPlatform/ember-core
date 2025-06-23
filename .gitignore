@@ -80,3 +80,39 @@ __pycache__/
 # Test artifacts
 test_results/
 test_output/
+*_test.ember
+*test*.ember
+debug_*.ember
+simple_*.ember
+minimal_*.ember
+
+# Security test artifacts
+security_logs/
+security_results/
+security_final_report_*.md
+security_test_*.json
+
+# Compiled test executables
+*_test
+test_*
+*_benchmark
+benchmark_*
+*_demo
+demo_*
+
+# Obsolete documentation
+old-docs/
+*_REPORT.md
+*_STATUS.md
+*_SUMMARY.md
+AGENT-*.md
+ARCHITECTURE_*.md
+PERFORMANCE_*.md
+SECURITY_*.md
+
+# Experimental and duplicate files
+*.new
+*.old
+*.backup
+*.unified
+*.minimal

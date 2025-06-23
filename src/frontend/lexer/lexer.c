@@ -365,7 +365,7 @@ ember_token scan_token() {
                 advance();
                 return make_token(TOKEN_NOT_EQUAL);
             }
-            return error_token("Unexpected character '!'");
+            return make_token(TOKEN_NOT);
         case '<':
             if (peek_char() == '=') {
                 advance();
@@ -382,6 +382,18 @@ ember_token scan_token() {
         case '@': return make_token(TOKEN_AT);
         case ';': return make_token(TOKEN_SEMICOLON);
         case '.': return make_token(TOKEN_DOT);
+        case '&':
+            if (peek_char() == '&') {
+                advance();
+                return make_token(TOKEN_AND_AND);
+            }
+            return error_token("Unexpected character '&'");
+        case '|':
+            if (peek_char() == '|') {
+                advance();
+                return make_token(TOKEN_OR_OR);
+            }
+            return error_token("Unexpected character '|'");
         case '\n':
             scanner.line++;
             return make_token(TOKEN_NEWLINE);

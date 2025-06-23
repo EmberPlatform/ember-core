@@ -309,33 +309,19 @@ void binary(ember_chunk* chunk) {
 }
 
 void logical_and_binary(ember_chunk* chunk) {
-    write_chunk(chunk, OP_JUMP_IF_FALSE);
-    int end_jump = chunk->count - 1;
-    write_chunk(chunk, 0xFF); // Placeholder
+    // Parse the right-hand operand
+    parse_precedence((precedence)(PREC_AND + 1), chunk);
     
-    write_chunk(chunk, OP_POP);
-    parse_precedence(PREC_AND, chunk);
-    
-    // Patch the jump
-    chunk->code[end_jump + 1] = chunk->count - end_jump - 2;
+    // Emit AND instruction which will evaluate both operands
+    write_chunk(chunk, OP_AND);
 }
 
 void logical_or_binary(ember_chunk* chunk) {
-    write_chunk(chunk, OP_JUMP_IF_FALSE);
-    int else_jump = chunk->count - 1;
-    write_chunk(chunk, 0xFF); // Placeholder
-    write_chunk(chunk, OP_JUMP);
-    int end_jump = chunk->count - 1;
-    write_chunk(chunk, 0xFF); // Placeholder
+    // Parse the right-hand operand
+    parse_precedence((precedence)(PREC_OR + 1), chunk);
     
-    // Patch else jump
-    chunk->code[else_jump + 1] = chunk->count - end_jump - 2;
-    write_chunk(chunk, OP_POP);
-    
-    parse_precedence(PREC_OR, chunk);
-    
-    // Patch end jump
-    chunk->code[end_jump + 1] = chunk->count - end_jump - 2;
+    // Emit OR instruction which will evaluate both operands
+    write_chunk(chunk, OP_OR);
 }
 
 void logical_not_unary(ember_chunk* chunk) {
@@ -568,6 +554,8 @@ static parse_rule rules[] = {
     [TOKEN_AND]           = {NULL,       logical_and_binary, PREC_AND},
     [TOKEN_OR]            = {NULL,       logical_or_binary, PREC_OR},
     [TOKEN_NOT]           = {logical_not_unary, NULL,       PREC_NONE},
+    [TOKEN_AND_AND]       = {NULL,       logical_and_binary, PREC_AND},
+    [TOKEN_OR_OR]         = {NULL,       logical_or_binary, PREC_OR},
     [TOKEN_TRUE]          = {boolean_literal, NULL,        PREC_NONE},
     [TOKEN_FALSE]         = {boolean_literal, NULL,        PREC_NONE},
     [TOKEN_LBRACKET]      = {array_literal, array_index,   PREC_CALL},
