@@ -7,6 +7,9 @@ int main() {
     printf("Testing with correct parameter names...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) {
         fprintf(stderr, "Failed to create VM\n");
         return 1;
@@ -15,7 +18,9 @@ int main() {
     // Test with parameter names that should work according to the VM
     const char* script = 
         "fn test_a_b(a, b) {\n"
-        "    return a + b;\n"
+        "    return a + b;
+
+    UNUSED(script);\n"
         "}\n"
         "\n"
         "fn test_x_y(x, y) {\n"
@@ -32,6 +37,8 @@ int main() {
     
     printf("Defining functions...\n");
     int result = ember_eval(vm, script);
+
+    UNUSED(result);
     if (result != 0) {
         fprintf(stderr, "Failed to execute script with error code: %d\n", result);
         ember_free_vm(vm);
@@ -47,6 +54,8 @@ int main() {
     result = ember_call(vm, "test_a_b", 2, args1);
     if (result == 0) {
         ember_value result_val = ember_peek_stack_top(vm);
+
+        UNUSED(result_val);
         printf("Result: ");
         ember_print_value(result_val);
         printf("\n");
@@ -70,6 +79,8 @@ int main() {
     result = ember_call(vm, "test_x_y", 2, args2);
     if (result == 0) {
         ember_value result_val = ember_peek_stack_top(vm);
+
+        UNUSED(result_val);
         printf("Result: ");
         ember_print_value(result_val);
         printf("\n");
@@ -92,6 +103,8 @@ int main() {
     result = ember_call(vm, "greet_value", 1, args3);
     if (result == 0) {
         ember_value result_val = ember_peek_stack_top(vm);
+
+        UNUSED(result_val);
         printf("Result: ");
         ember_print_value(result_val);
         printf("\n");
@@ -110,6 +123,8 @@ int main() {
     result = ember_call(vm, "greet_name", 1, args4);
     if (result == 0) {
         ember_value result_val = ember_peek_stack_top(vm);
+
+        UNUSED(result_val);
         printf("Result: ");
         ember_print_value(result_val);
         printf("\n");

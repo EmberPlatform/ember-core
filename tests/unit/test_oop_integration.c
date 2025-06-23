@@ -8,6 +8,8 @@ int main(void) {
     
     // Create VM
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     if (!vm) {
         fprintf(stderr, "Failed to create VM\n");
         return 1;
@@ -22,6 +24,8 @@ int main(void) {
         "}\n"
         "obj = new TestClass(42)\n"
         "print(\"Object created successfully\")\n";
+
+    UNUSED(oop_code);
     
     printf("Running OOP test code:\n");
     printf("%s\n", oop_code);
@@ -29,6 +33,8 @@ int main(void) {
     
     // Try to compile and run the code
     int result = ember_eval(vm, oop_code);
+
+    UNUSED(result);
     
     if (result == 0) {
         printf("✓ OOP integration test passed!\n");
@@ -38,6 +44,8 @@ int main(void) {
         // Check for errors
         if (ember_vm_has_error(vm)) {
             ember_error* error = ember_vm_get_error(vm);
+
+            UNUSED(error);
             if (error) {
                 printf("Error details:\n");
                 ember_error_print(error);
@@ -49,11 +57,19 @@ int main(void) {
     printf("\nTesting direct OOP value creation:\n");
     
     ember_value class_val = ember_make_class(vm, "DirectTestClass");
+
+    
+    UNUSED(class_val);
     if (class_val.type == EMBER_VAL_CLASS) {
         printf("✓ Class creation successful\n");
         
         ember_class* klass = AS_CLASS(class_val);
+
+        
+        UNUSED(klass);
         ember_value instance_val = ember_make_instance(vm, klass);
+
+        UNUSED(instance_val);
         
         if (instance_val.type == EMBER_VAL_INSTANCE) {
             printf("✓ Instance creation successful\n");

@@ -1,4 +1,7 @@
 #include "test_ember_internal.h"
+
+// Macro to mark variables as intentionally unused
+#define UNUSED(x) ((void)(x))
 #include "../../src/stdlib/stdlib.h"
 #include <stdio.h>
 #include <string.h>
@@ -15,45 +18,64 @@ static void test_json_parse_basic() {
     printf("Testing basic JSON parsing...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test parsing null
     ember_value null_json = make_test_string(vm, "null");
+
+    UNUSED(null_json);
     ember_value result = ember_json_parse(vm, 1, &null_json);
+
+    UNUSED(result);
     assert(result.type == EMBER_VAL_NIL);
     
     // Test parsing boolean true
     ember_value true_json = make_test_string(vm, "true");
+
+    UNUSED(true_json);
     result = ember_json_parse(vm, 1, &true_json);
     assert(result.type == EMBER_VAL_BOOL);
     assert(result.as.bool_val == 1);
     
     // Test parsing boolean false
     ember_value false_json = make_test_string(vm, "false");
+
+    UNUSED(false_json);
     result = ember_json_parse(vm, 1, &false_json);
     assert(result.type == EMBER_VAL_BOOL);
     assert(result.as.bool_val == 0);
     
     // Test parsing positive number
     ember_value pos_num_json = make_test_string(vm, "42");
+
+    UNUSED(pos_num_json);
     result = ember_json_parse(vm, 1, &pos_num_json);
     assert(result.type == EMBER_VAL_NUMBER);
     assert(result.as.number_val == 42.0);
     
     // Test parsing negative number
     ember_value neg_num_json = make_test_string(vm, "-17.5");
+
+    UNUSED(neg_num_json);
     result = ember_json_parse(vm, 1, &neg_num_json);
     assert(result.type == EMBER_VAL_NUMBER);
     assert(result.as.number_val == -17.5);
     
     // Test parsing scientific notation
     ember_value sci_num_json = make_test_string(vm, "1.5e10");
+
+    UNUSED(sci_num_json);
     result = ember_json_parse(vm, 1, &sci_num_json);
     assert(result.type == EMBER_VAL_NUMBER);
     assert(result.as.number_val == 1.5e10);
     
     // Test parsing simple string
     ember_value str_json = make_test_string(vm, "\"hello world\"");
+
+    UNUSED(str_json);
     result = ember_json_parse(vm, 1, &str_json);
     assert(result.type == EMBER_VAL_STRING);
     assert(strcmp(AS_CSTRING(result), "hello world") == 0);
@@ -67,28 +89,41 @@ static void test_json_parse_strings() {
     printf("Testing JSON string parsing with escapes...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test escaped quotes
     ember_value escaped_quotes = make_test_string(vm, "\"He said \\\"Hello\\\"\"");
+
+    UNUSED(escaped_quotes);
     ember_value result = ember_json_parse(vm, 1, &escaped_quotes);
+
+    UNUSED(result);
     assert(result.type == EMBER_VAL_STRING);
     assert(strcmp(AS_CSTRING(result), "He said \"Hello\"") == 0);
     
     // Test escaped backslash
     ember_value escaped_backslash = make_test_string(vm, "\"C:\\\\path\\\\to\\\\file\"");
+
+    UNUSED(escaped_backslash);
     result = ember_json_parse(vm, 1, &escaped_backslash);
     assert(result.type == EMBER_VAL_STRING);
     assert(strcmp(AS_CSTRING(result), "C:\\path\\to\\file") == 0);
     
     // Test newline and tab escapes
     ember_value escaped_whitespace = make_test_string(vm, "\"line1\\nline2\\ttab\"");
+
+    UNUSED(escaped_whitespace);
     result = ember_json_parse(vm, 1, &escaped_whitespace);
     assert(result.type == EMBER_VAL_STRING);
     assert(strcmp(AS_CSTRING(result), "line1\nline2\ttab") == 0);
     
     // Test unicode escape (simplified)
     ember_value unicode_escape = make_test_string(vm, "\"\\u0041\"");
+
+    UNUSED(unicode_escape);
     result = ember_json_parse(vm, 1, &unicode_escape);
     assert(result.type == EMBER_VAL_STRING);
     // For our simplified implementation, we just use a placeholder
@@ -102,17 +137,28 @@ static void test_json_parse_arrays() {
     printf("Testing JSON array parsing...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test empty array
     ember_value empty_array = make_test_string(vm, "[]");
+
+    UNUSED(empty_array);
     ember_value result = ember_json_parse(vm, 1, &empty_array);
+
+    UNUSED(result);
     assert(result.type == EMBER_VAL_ARRAY);
     ember_array* arr = AS_ARRAY(result);
+
+    UNUSED(arr);
     assert(arr->length == 0);
     
     // Test array with numbers
     ember_value num_array = make_test_string(vm, "[1, 2, 3, 4.5]");
+
+    UNUSED(num_array);
     result = ember_json_parse(vm, 1, &num_array);
     assert(result.type == EMBER_VAL_ARRAY);
     arr = AS_ARRAY(result);
@@ -123,6 +169,8 @@ static void test_json_parse_arrays() {
     
     // Test mixed type array
     ember_value mixed_array = make_test_string(vm, "[true, \"hello\", 42, null]");
+
+    UNUSED(mixed_array);
     result = ember_json_parse(vm, 1, &mixed_array);
     assert(result.type == EMBER_VAL_ARRAY);
     arr = AS_ARRAY(result);
@@ -134,6 +182,8 @@ static void test_json_parse_arrays() {
     
     // Test nested arrays
     ember_value nested_array = make_test_string(vm, "[[1, 2], [3, 4]]");
+
+    UNUSED(nested_array);
     result = ember_json_parse(vm, 1, &nested_array);
     assert(result.type == EMBER_VAL_ARRAY);
     arr = AS_ARRAY(result);
@@ -150,17 +200,28 @@ static void test_json_parse_objects() {
     printf("Testing JSON object parsing...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test empty object
     ember_value empty_obj = make_test_string(vm, "{}");
+
+    UNUSED(empty_obj);
     ember_value result = ember_json_parse(vm, 1, &empty_obj);
+
+    UNUSED(result);
     assert(result.type == EMBER_VAL_HASH_MAP);
     ember_hash_map* map = AS_HASH_MAP(result);
+
+    UNUSED(map);
     assert(map->length == 0);
     
     // Test simple object
     ember_value simple_obj = make_test_string(vm, "{\"name\": \"John\", \"age\": 30}");
+
+    UNUSED(simple_obj);
     result = ember_json_parse(vm, 1, &simple_obj);
     assert(result.type == EMBER_VAL_HASH_MAP);
     map = AS_HASH_MAP(result);
@@ -168,6 +229,8 @@ static void test_json_parse_objects() {
     
     // Test nested object
     ember_value nested_obj = make_test_string(vm, "{\"user\": {\"name\": \"John\", \"id\": 123}}");
+
+    UNUSED(nested_obj);
     result = ember_json_parse(vm, 1, &nested_obj);
     assert(result.type == EMBER_VAL_HASH_MAP);
     map = AS_HASH_MAP(result);
@@ -182,40 +245,59 @@ static void test_json_parse_malformed() {
     printf("Testing malformed JSON handling...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test unclosed string
     ember_value unclosed_str = make_test_string(vm, "\"unclosed string");
+
+    UNUSED(unclosed_str);
     ember_value result = ember_json_parse(vm, 1, &unclosed_str);
+
+    UNUSED(result);
     assert(result.type == EMBER_VAL_NIL);
     
     // Test unclosed array
     ember_value unclosed_arr = make_test_string(vm, "[1, 2, 3");
+
+    UNUSED(unclosed_arr);
     result = ember_json_parse(vm, 1, &unclosed_arr);
     assert(result.type == EMBER_VAL_NIL);
     
     // Test unclosed object
     ember_value unclosed_obj = make_test_string(vm, "{\"key\": \"value\"");
+
+    UNUSED(unclosed_obj);
     result = ember_json_parse(vm, 1, &unclosed_obj);
     assert(result.type == EMBER_VAL_NIL);
     
     // Test invalid number
     ember_value invalid_num = make_test_string(vm, "12.34.56");
+
+    UNUSED(invalid_num);
     result = ember_json_parse(vm, 1, &invalid_num);
     assert(result.type == EMBER_VAL_NIL);
     
     // Test trailing comma in array
     ember_value trailing_comma_arr = make_test_string(vm, "[1, 2, 3,]");
+
+    UNUSED(trailing_comma_arr);
     result = ember_json_parse(vm, 1, &trailing_comma_arr);
     assert(result.type == EMBER_VAL_NIL);
     
     // Test trailing comma in object
     ember_value trailing_comma_obj = make_test_string(vm, "{\"key\": \"value\",}");
+
+    UNUSED(trailing_comma_obj);
     result = ember_json_parse(vm, 1, &trailing_comma_obj);
     assert(result.type == EMBER_VAL_NIL);
     
     // Test invalid escape sequence
     ember_value invalid_escape = make_test_string(vm, "\"invalid \\x escape\"");
+
+    UNUSED(invalid_escape);
     result = ember_json_parse(vm, 1, &invalid_escape);
     assert(result.type == EMBER_VAL_NIL);
     
@@ -228,10 +310,14 @@ static void test_json_size_limits() {
     printf("Testing JSON size limits...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Create a very large JSON string (exceeding MAX_JSON_SIZE)
-    const int large_size = 1048577; // 1MB + 1 byte
+    const int large_size = 1048577;
+ UNUSED(large_size); // 1MB + 1 byte
     char* large_json = malloc(large_size + 1);
     assert(large_json != NULL);
     
@@ -243,7 +329,12 @@ static void test_json_size_limits() {
     large_json[large_size] = '\0';
     
     ember_value large_str = make_test_string(vm, large_json);
+
+    
+    UNUSED(large_str);
     ember_value result = ember_json_parse(vm, 1, &large_str);
+
+    UNUSED(result);
     assert(result.type == EMBER_VAL_NIL); // Should fail due to size limit
     
     free(large_json);
@@ -256,14 +347,21 @@ static void test_json_nesting_limits() {
     printf("Testing JSON nesting depth limits...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Create deeply nested JSON (exceeding MAX_NESTING_DEPTH)
-    const int max_depth = 150; // Exceeds MAX_NESTING_DEPTH (100)
+    const int max_depth = 150;
+ UNUSED(max_depth); // Exceeds MAX_NESTING_DEPTH (100)
     char* deep_json = malloc(max_depth * 2 + 10);
     assert(deep_json != NULL);
     
     int pos = 0;
+
+    
+    UNUSED(pos);
     for (int i = 0; i < max_depth; i++) {
         deep_json[pos++] = '[';
     }
@@ -274,7 +372,12 @@ static void test_json_nesting_limits() {
     deep_json[pos] = '\0';
     
     ember_value deep_str = make_test_string(vm, deep_json);
+
+    
+    UNUSED(deep_str);
     ember_value result = ember_json_parse(vm, 1, &deep_str);
+
+    UNUSED(result);
     assert(result.type == EMBER_VAL_NIL); // Should fail due to depth limit
     
     free(deep_json);
@@ -287,27 +390,40 @@ static void test_json_stringify() {
     printf("Testing JSON stringify...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test stringifying nil
     ember_value nil_val = ember_make_nil();
+
+    UNUSED(nil_val);
     ember_value result = ember_json_stringify(vm, 1, &nil_val);
+
+    UNUSED(result);
     assert(result.type == EMBER_VAL_STRING);
     assert(strcmp(AS_CSTRING(result), "null") == 0);
     
     // Test stringifying boolean
     ember_value bool_val = ember_make_bool(1);
+
+    UNUSED(bool_val);
     result = ember_json_stringify(vm, 1, &bool_val);
     assert(result.type == EMBER_VAL_STRING);
     assert(strcmp(AS_CSTRING(result), "true") == 0);
     
     // Test stringifying number
     ember_value num_val = ember_make_number(42.5);
+
+    UNUSED(num_val);
     result = ember_json_stringify(vm, 1, &num_val);
     assert(result.type == EMBER_VAL_STRING);
     
     // Test stringifying string with escapes
     ember_value str_val = make_test_string(vm, "Hello \"World\"");
+
+    UNUSED(str_val);
     result = ember_json_stringify(vm, 1, &str_val);
     assert(result.type == EMBER_VAL_STRING);
     // Should contain escaped quotes
@@ -321,16 +437,25 @@ static void test_json_validate() {
     printf("Testing JSON validation...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test valid JSON
     ember_value valid_json = make_test_string(vm, "{\"key\": \"value\"}");
+
+    UNUSED(valid_json);
     ember_value result = ember_json_validate(vm, 1, &valid_json);
+
+    UNUSED(result);
     assert(result.type == EMBER_VAL_BOOL);
     assert(result.as.bool_val == 1);
     
     // Test invalid JSON
     ember_value invalid_json = make_test_string(vm, "{\"key\": value}");
+
+    UNUSED(invalid_json);
     result = ember_json_validate(vm, 1, &invalid_json);
     assert(result.type == EMBER_VAL_BOOL);
     assert(result.as.bool_val == 0);

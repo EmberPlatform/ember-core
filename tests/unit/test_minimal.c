@@ -6,6 +6,9 @@ int main() {
     printf("Testing minimal user function call...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) {
         fprintf(stderr, "Failed to create VM\n");
         return 1;
@@ -20,10 +23,15 @@ int main() {
     args[0] = ember_make_string("Hello from native!");
     
     int result = ember_call(vm, "test_native", 1, args);
+
+    
+    UNUSED(result);
     printf("Native function result: %d\n", result);
     
     // Now test with a very simple user function
-    const char* script = "fn simple() { return 123; }";
+    const char* script = "fn simple() { return 123;
+
+    UNUSED(script); }";
     
     printf("Defining user function...\n");
     result = ember_eval(vm, script);

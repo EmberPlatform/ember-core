@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 199309L
 #include "testing_framework.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +14,17 @@
 #define COLOR_MAGENTA "\x1b[35m"
 #define COLOR_CYAN    "\x1b[36m"
 #define COLOR_RESET   "\x1b[0m"
+
+// Custom strdup implementation for portability  
+static char* custom_strdup(const char* s) {
+    if (!s) return NULL;
+    size_t len = strlen(s) + 1;
+    char* dup = malloc(len);
+    if (dup) {
+        memcpy(dup, s, len);
+    }
+    return dup;
+}
 
 // Global test context for assertions
 static test_case* current_test = NULL;
@@ -76,7 +88,7 @@ test_suite* test_runner_add_suite(test_runner* runner, const char* name) {
     }
     
     test_suite* suite = &runner->suites[runner->suite_count++];
-    suite->name = strdup(name);
+    suite->name = custom_strdup(name);
     suite->tests = NULL;
     suite->test_count = 0;
     suite->test_capacity = 0;
@@ -103,7 +115,7 @@ void test_suite_add_test(test_suite* suite, const char* name, test_function func
     }
     
     test_case* test = &suite->tests[suite->test_count++];
-    test->name = strdup(name);
+    test->name = custom_strdup(name);
     test->status = TEST_PASS;
     test->message = NULL;
     test->duration_ms = 0.0;
@@ -130,10 +142,10 @@ void test_suite_add_test(test_suite* suite, const char* name, test_function func
     if (ember_vm_has_error(vm)) {
         test->status = TEST_ERROR;
         ember_error* error = ember_vm_get_error(vm);
-        if (error && error->message) {
-            test->message = strdup(error->message);
+        if (error && error->message[0] != '\0') {
+            test->message = custom_strdup(error->message);
         } else {
-            test->message = strdup("Unknown VM error occurred");
+            test->message = custom_strdup("Unknown VM error occurred");
         }
     }
     
@@ -201,6 +213,10 @@ void test_runner_run_all(test_runner* runner) {
                 case TEST_ERROR:
                     status_color = COLOR_MAGENTA;
                     status_text = "ERROR";
+                    break;
+                default:
+                    status_color = COLOR_RESET;
+                    status_text = "UNKNOWN";
                     break;
             }
             
@@ -275,7 +291,7 @@ static void set_test_failure(const char* message) {
         if (current_test->message) {
             free(current_test->message);
         }
-        current_test->message = strdup(message);
+        current_test->message = custom_strdup(message);
     }
 }
 
@@ -436,12 +452,12 @@ void test_assert_throws(ember_vm* vm, void (*func)(ember_vm*), const char* expec
     // Check error message if specified
     if (expected_error) {
         ember_error* error = ember_vm_get_error(vm);
-        if (!error || !error->message || strstr(error->message, expected_error) == NULL) {
+        if (!error || error->message[0] == '\0' || strstr(error->message, expected_error) == NULL) {
             char full_message[512];
             snprintf(full_message, sizeof(full_message), 
                      "Expected error containing '%s', got: '%s': %s", 
                      expected_error, 
-                     error && error->message ? error->message : "(no error message)",
+                     error && error->message[0] != '\0' ? error->message : "(no error message)",
                      message ? message : "");
             set_test_failure(full_message);
         }

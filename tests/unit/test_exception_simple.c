@@ -7,6 +7,9 @@ int main() {
     printf("Testing basic exception handling implementation...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) {
         printf("ERROR: Failed to create VM\n");
         return 1;
@@ -25,8 +28,13 @@ int main() {
         "    print(\"Caught: \" + e)\n"
         "}\n"
         "print(\"After try/catch\")\n";
+
+    UNUSED(test1);
     
     int result1 = ember_eval(vm, test1);
+
+    
+    UNUSED(result1);
     printf("Result: %s\n", result1 == 0 ? "SUCCESS" : "FAILED");
     
     // Test 2: Try/finally
@@ -38,8 +46,13 @@ int main() {
         "    print(\"In finally block\")\n"
         "}\n"
         "print(\"After try/finally\")\n";
+
+    UNUSED(test2);
     
     int result2 = ember_eval(vm, test2);
+
+    
+    UNUSED(result2);
     printf("Result: %s\n", result2 == 0 ? "SUCCESS" : "FAILED");
     
     // Test 3: Try/catch/finally
@@ -54,8 +67,13 @@ int main() {
         "    print(\"In finally block\")\n"
         "}\n"
         "print(\"All done\")\n";
+
+    UNUSED(test3);
     
     int result3 = ember_eval(vm, test3);
+
+    
+    UNUSED(result3);
     printf("Result: %s\n", result3 == 0 ? "SUCCESS" : "FAILED");
     
     ember_free_vm(vm);

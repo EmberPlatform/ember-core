@@ -4,10 +4,15 @@
 #include <string.h>
 #include "test_ember_internal.h"
 
+// Macro to mark variables as intentionally unused
+#define UNUSED(x) ((void)(x))
+
 // Test statement parsing functionality comprehensively
 
 void test_variable_declarations(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing variable declarations...\n");
@@ -49,6 +54,8 @@ void test_variable_declarations(void) {
     for (int i = 0; variable_tests[i] != NULL; i++) {
         printf("  Testing variable declaration: %s\n", variable_tests[i]);
         int result = ember_eval(vm, variable_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -58,6 +65,8 @@ void test_variable_declarations(void) {
 
 void test_assignment_statements(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing assignment statements...\n");
@@ -93,6 +102,8 @@ void test_assignment_statements(void) {
     for (int i = 0; assignment_tests[i] != NULL; i++) {
         printf("  Testing assignment: %s\n", assignment_tests[i]);
         int result = ember_eval(vm, assignment_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -102,6 +113,8 @@ void test_assignment_statements(void) {
 
 void test_if_statements(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing if statements...\n");
@@ -135,6 +148,8 @@ void test_if_statements(void) {
     for (int i = 0; if_tests[i] != NULL; i++) {
         printf("  Testing if statement: %s\n", if_tests[i]);
         int result = ember_eval(vm, if_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -148,6 +163,8 @@ void test_if_statements(void) {
 
 void test_while_loops(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing while loops...\n");
@@ -174,6 +191,8 @@ void test_while_loops(void) {
     for (int i = 0; while_tests[i] != NULL; i++) {
         printf("  Testing while loop: %s\n", while_tests[i]);
         int result = ember_eval(vm, while_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -187,6 +206,8 @@ void test_while_loops(void) {
 
 void test_for_loops(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing for loops...\n");
@@ -213,6 +234,8 @@ void test_for_loops(void) {
     for (int i = 0; for_tests[i] != NULL; i++) {
         printf("  Testing for loop: %s\n", for_tests[i]);
         int result = ember_eval(vm, for_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -226,6 +249,8 @@ void test_for_loops(void) {
 
 void test_break_continue(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing break and continue statements...\n");
@@ -252,6 +277,8 @@ void test_break_continue(void) {
     for (int i = 0; break_continue_tests[i] != NULL; i++) {
         printf("  Testing break/continue: %s\n", break_continue_tests[i]);
         int result = ember_eval(vm, break_continue_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -265,6 +292,8 @@ void test_break_continue(void) {
 
 void test_function_definitions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing function definitions...\n");
@@ -294,6 +323,8 @@ void test_function_definitions(void) {
     for (int i = 0; function_tests[i] != NULL; i++) {
         printf("  Testing function definition: %s\n", function_tests[i]);
         int result = ember_eval(vm, function_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -303,6 +334,8 @@ void test_function_definitions(void) {
 
 void test_return_statements(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing return statements...\n");
@@ -332,6 +365,8 @@ void test_return_statements(void) {
     for (int i = 0; return_tests[i] != NULL; i++) {
         printf("  Testing return statement: %s\n", return_tests[i]);
         int result = ember_eval(vm, return_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -345,6 +380,8 @@ void test_return_statements(void) {
 
 void test_try_catch_statements(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing try-catch statements...\n");
@@ -371,6 +408,8 @@ void test_try_catch_statements(void) {
     for (int i = 0; exception_tests[i] != NULL; i++) {
         printf("  Testing try-catch: %s\n", exception_tests[i]);
         int result = ember_eval(vm, exception_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -384,6 +423,8 @@ void test_try_catch_statements(void) {
 
 void test_import_statements(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing import statements...\n");
@@ -405,6 +446,8 @@ void test_import_statements(void) {
     for (int i = 0; import_tests[i] != NULL; i++) {
         printf("  Testing import: %s\n", import_tests[i]);
         int result = ember_eval(vm, import_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -414,6 +457,8 @@ void test_import_statements(void) {
 
 void test_expression_statements(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing expression statements...\n");
@@ -447,6 +492,8 @@ void test_expression_statements(void) {
     for (int i = 0; expr_stmt_tests[i] != NULL; i++) {
         printf("  Testing expression statement: %s\n", expr_stmt_tests[i]);
         int result = ember_eval(vm, expr_stmt_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -456,6 +503,8 @@ void test_expression_statements(void) {
 
 void test_block_statements(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing block statements...\n");
@@ -482,6 +531,8 @@ void test_block_statements(void) {
     for (int i = 0; block_tests[i] != NULL; i++) {
         printf("  Testing block statement: %s\n", block_tests[i]);
         int result = ember_eval(vm, block_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -495,6 +546,8 @@ void test_block_statements(void) {
 
 void test_statement_error_cases(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing statement error cases...\n");
@@ -531,6 +584,8 @@ void test_statement_error_cases(void) {
     for (int i = 0; error_tests[i] != NULL; i++) {
         printf("  Testing error case: %s\n", error_tests[i]);
         int result = ember_eval(vm, error_tests[i]);
+
+        UNUSED(result);
         printf("    Error result: %d (expected non-zero)\n", result);
         // Clear any error state
         ember_vm_clear_error(vm);
@@ -542,6 +597,8 @@ void test_statement_error_cases(void) {
 
 void test_complex_statement_combinations(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing complex statement combinations...\n");
@@ -565,6 +622,8 @@ void test_complex_statement_combinations(void) {
     for (int i = 0; complex_tests[i] != NULL; i++) {
         printf("  Testing complex combination %d\n", i + 1);
         int result = ember_eval(vm, complex_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test

@@ -82,6 +82,9 @@ void test_ember_add_module_path(void) {
     printf("Testing ember_add_module_path...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test adding valid module path
@@ -95,6 +98,8 @@ void test_ember_add_module_path(void) {
     
     // Test adding duplicate path (should be ignored)
     int initial_count = vm->module_path_count;
+
+    UNUSED(initial_count);
     ember_add_module_path(vm, "/tmp/ember_test_modules");
     assert(vm->module_path_count == initial_count);
     
@@ -115,6 +120,9 @@ void test_ember_import_module(void) {
     printf("Testing ember_import_module...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Add test module path
@@ -128,11 +136,15 @@ void test_ember_import_module(void) {
     
     // Test importing existing module
     int result = ember_import_module(vm, "math_utils");
+
+    UNUSED(result);
     assert(result == 0);
     
     // Verify module is loaded
     assert(vm->module_count > 0);
     int found = 0;
+
+    UNUSED(found);
     for (int i = 0; i < vm->module_count; i++) {
         if (strcmp(vm->modules[i].name, "math_utils") == 0) {
             assert(vm->modules[i].is_loaded == 1);
@@ -177,6 +189,8 @@ void test_ember_install_library(void) {
     
     // Test installing library
     int result = ember_install_library("test_lib", source_path);
+
+    UNUSED(result);
     assert(result == 0);
     
     // Verify library was installed
@@ -214,6 +228,9 @@ void test_module_integration(void) {
     printf("Testing module system integration...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Create and install a library
@@ -227,14 +244,21 @@ void test_module_integration(void) {
     fclose(source_file);
     
     int install_result = ember_install_library("integration_lib", source_path);
+
+    
+    UNUSED(install_result);
     assert(install_result == 0);
     
     // Now try to import the installed library
     int import_result = ember_import_module(vm, "integration_lib");
+
+    UNUSED(import_result);
     assert(import_result == 0);
     
     // Verify the module is loaded
     int found = 0;
+
+    UNUSED(found);
     for (int i = 0; i < vm->module_count; i++) {
         if (strcmp(vm->modules[i].name, "integration_lib") == 0) {
             assert(vm->modules[i].is_loaded == 1);
@@ -255,6 +279,9 @@ void test_module_error_handling(void) {
     printf("Testing module error handling...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test importing module with syntax error
@@ -262,6 +289,9 @@ void test_module_error_handling(void) {
     ember_add_module_path(vm, "/tmp/ember_test_modules");
     
     int result = ember_import_module(vm, "syntax_error");
+
+    
+    UNUSED(result);
     assert(result == -1); // Should fail due to syntax error
     
     // Test maximum module limit (if applicable)
@@ -285,10 +315,15 @@ void test_module_security(void) {
     printf("Testing module security...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test path traversal prevention in module names
     int result = ember_import_module(vm, "../../../etc/passwd");
+
+    UNUSED(result);
     assert(result == -1);
     
     result = ember_import_module(vm, "..\\..\\windows\\system32\\calc.exe");

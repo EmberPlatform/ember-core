@@ -23,6 +23,9 @@ void test_syntax_error_handling() {
     printf("Testing syntax error handling...\\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test various syntax errors
@@ -40,13 +43,20 @@ void test_syntax_error_handling() {
     };
     
     int error_count = 0;
+
+    
+    UNUSED(error_count);
     int handled_gracefully = 0;
+
+    UNUSED(handled_gracefully);
     
     for (int i = 0; syntax_errors[i] != NULL; i++) {
         printf("  Testing: %s\\n", syntax_errors[i]);
         
         if (setjmp(recovery_point) == 0) {
             int result = ember_eval(vm, syntax_errors[i]);
+
+            UNUSED(result);
             if (result != 0) {
                 error_count++;
                 handled_gracefully++;
@@ -72,6 +82,9 @@ void test_runtime_error_handling() {
     printf("Testing runtime error handling...\\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test various runtime errors
@@ -85,13 +98,20 @@ void test_runtime_error_handling() {
     };
     
     int error_count = 0;
+
+    
+    UNUSED(error_count);
     int handled_gracefully = 0;
+
+    UNUSED(handled_gracefully);
     
     for (int i = 0; runtime_errors[i] != NULL; i++) {
         printf("  Testing: %s\\n", runtime_errors[i]);
         
         if (setjmp(recovery_point) == 0) {
             int result = ember_eval(vm, runtime_errors[i]);
+
+            UNUSED(result);
             if (result != 0) {
                 error_count++;
                 handled_gracefully++;
@@ -116,6 +136,9 @@ void test_memory_pressure_handling() {
     printf("Testing memory pressure handling...\\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test memory pressure scenarios
@@ -130,13 +153,20 @@ void test_memory_pressure_handling() {
     };
     
     int tests_run = 0;
+
+    
+    UNUSED(tests_run);
     int successful = 0;
+
+    UNUSED(successful);
     
     for (int i = 0; memory_pressure_scripts[i] != NULL; i++) {
         printf("  Testing memory pressure scenario %d...\\n", i + 1);
         
         if (setjmp(recovery_point) == 0) {
             int result = ember_eval(vm, memory_pressure_scripts[i]);
+
+            UNUSED(result);
             tests_run++;
             if (result == 0) {
                 successful++;
@@ -164,6 +194,8 @@ void test_null_pointer_handling() {
     printf("  Testing ember_eval with null VM...\\n");
     if (setjmp(recovery_point) == 0) {
         int result = ember_eval(NULL, "print(42)");
+
+        UNUSED(result);
         printf("    Result: %d (should be non-zero error)\\n", result);
         assert(result != 0);
         printf("    ✓ Null VM handled gracefully\\n");
@@ -172,11 +204,16 @@ void test_null_pointer_handling() {
     }
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("  Testing ember_eval with null script...\\n");
     if (setjmp(recovery_point) == 0) {
         int result = ember_eval(vm, NULL);
+
+        UNUSED(result);
         printf("    Result: %d (should be non-zero error)\\n", result);
         assert(result != 0);
         printf("    ✓ Null script handled gracefully\\n");
@@ -195,6 +232,8 @@ void test_vm_lifecycle_edge_cases() {
     // Test double-free protection
     printf("  Testing double-free protection...\\n");
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     ember_free_vm(vm);
@@ -210,7 +249,9 @@ void test_vm_lifecycle_edge_cases() {
     // Test using VM after free
     printf("  Testing use-after-free protection...\\n");
     if (setjmp(recovery_point) == 0) {
-        int result = ember_eval(vm, "print(42)"); // Use after free
+        int result = ember_eval(vm, "print(42)");
+
+        UNUSED(result); // Use after free
         printf("    Result: %d (should be error or handled)\\n", result);
         printf("    ✓ Use-after-free handled\\n");
     } else {

@@ -6,6 +6,9 @@ int main() {
     printf("Testing simple print statement...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) {
         printf("Failed to create VM\n");
         return 1;
@@ -13,6 +16,8 @@ int main() {
     
     // Enable verbose error reporting
     const char* code = "print(5)";
+
+    UNUSED(code);
     printf("\nExecuting: %s\n", code);
     
     // Add debugging to see VM state
@@ -27,6 +32,9 @@ int main() {
     }
     
     int result = ember_eval(vm, code);
+
+    
+    UNUSED(result);
     printf("Result: %d\n", result);
     
     if (result != 0) {

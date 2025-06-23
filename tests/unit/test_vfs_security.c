@@ -10,12 +10,16 @@
 // Test VFS security functions to improve coverage of critical path validation
 void test_vfs_path_traversal_prevention(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing VFS path traversal prevention...\n");
     
     // Test basic mounting
     int result = ember_vfs_mount(vm, "/test", "/tmp", EMBER_MOUNT_RW);
+
+    UNUSED(result);
     assert(result == 0);
     
     // Test path resolution (should prevent directory traversal)
@@ -39,20 +43,28 @@ void test_vfs_path_traversal_prevention(void) {
 
 void test_vfs_access_control(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing VFS access control...\n");
     
     // Mount read-only directory
     int result = ember_vfs_mount(vm, "/readonly", "/tmp", EMBER_MOUNT_RO);
+
+    UNUSED(result);
     assert(result == 0);
     
     // Test read access (should succeed)
     int read_access = ember_vfs_check_access(vm, "/readonly/test.txt", 0);
+
+    UNUSED(read_access);
     printf("Read access check result: %d\n", read_access);
     
     // Test write access (should fail for read-only mount)
     int write_access = ember_vfs_check_access(vm, "/readonly/test.txt", 1);
+
+    UNUSED(write_access);
     printf("Write access check result: %d\n", write_access);
     
     // For read-only mount, write should be denied
@@ -64,6 +76,8 @@ void test_vfs_access_control(void) {
 
 void test_vfs_mount_limits(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing VFS mount limits...\n");
@@ -73,6 +87,8 @@ void test_vfs_mount_limits(void) {
         char virtual_path[32];
         snprintf(virtual_path, sizeof(virtual_path), "/mount%d", i);
         int result = ember_vfs_mount(vm, virtual_path, "/tmp", EMBER_MOUNT_RW);
+
+        UNUSED(result);
         if (result != 0) {
             printf("Mount failed at iteration %d (expected if limit reached)\n", i);
             break;
@@ -85,12 +101,16 @@ void test_vfs_mount_limits(void) {
 
 void test_vfs_path_sanitization(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing VFS path sanitization...\n");
     
     // Mount a test directory
     int result = ember_vfs_mount(vm, "/test", "/tmp", EMBER_MOUNT_RW);
+
+    UNUSED(result);
     assert(result == 0);
     
     // Test various malicious path patterns
@@ -123,12 +143,16 @@ void test_vfs_path_sanitization(void) {
 
 void test_vfs_unmount_functionality(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing VFS unmount functionality...\n");
     
     // Mount a directory
     int result = ember_vfs_mount(vm, "/testmount", "/tmp", EMBER_MOUNT_RW);
+
+    UNUSED(result);
     assert(result == 0);
     
     // Verify it's mounted by trying to resolve a path

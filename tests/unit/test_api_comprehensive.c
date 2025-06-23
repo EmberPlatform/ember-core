@@ -38,8 +38,11 @@
 
 // Test results tracking
 static int tests_run = 0;
+ UNUSED(tests_run);
 static int tests_passed = 0;
+ UNUSED(tests_passed);
 static int tests_failed = 0;
+ UNUSED(tests_failed);
 
 #define RUN_TEST(test_func) do { \
     printf("Running %s...\n", #test_func); \
@@ -81,6 +84,8 @@ static bool test_vm_lifecycle_management(void) {
     
     // Test standard VM creation
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     if (!vm) return false;
     
     // Verify initial state
@@ -91,10 +96,15 @@ static bool test_vm_lifecycle_management(void) {
     
     // Test optimized VM creation
     ember_vm* vm_opt = ember_new_vm_optimized(0);
+
+    UNUSED(vm_opt);
     if (!vm_opt) return false;
     ember_free_vm(vm_opt);
     
     ember_vm* vm_lazy = ember_new_vm_optimized(1);
+
+    
+    UNUSED(vm_lazy);
     if (!vm_lazy) return false;
     ember_free_vm(vm_lazy);
     
@@ -107,22 +117,33 @@ static bool test_value_creation_and_types(void) {
     printf("  Testing value creation for all types...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) return false;
     
     // Test primitive types
     ember_value num = ember_make_number(42.5);
+
+    UNUSED(num);
     if (num.type != EMBER_VAL_NUMBER || num.as.number_val != 42.5) {
         ember_free_vm(vm);
         return false;
     }
     
     ember_value bool_val = ember_make_bool(1);
+
+    
+    UNUSED(bool_val);
     if (bool_val.type != EMBER_VAL_BOOL || bool_val.as.bool_val != 1) {
         ember_free_vm(vm);
         return false;
     }
     
     ember_value nil_val = ember_make_nil();
+
+    
+    UNUSED(nil_val);
     if (nil_val.type != EMBER_VAL_NIL) {
         ember_free_vm(vm);
         return false;
@@ -130,24 +151,35 @@ static bool test_value_creation_and_types(void) {
     
     // Test GC-managed types
     ember_value str_val = ember_make_string_gc(vm, "Test String");
+
+    UNUSED(str_val);
     if (str_val.type != EMBER_VAL_STRING || !IS_STRING(str_val)) {
         ember_free_vm(vm);
         return false;
     }
     
     ember_value array_val = ember_make_array(vm, 10);
+
+    
+    UNUSED(array_val);
     if (array_val.type != EMBER_VAL_ARRAY || !IS_ARRAY(array_val)) {
         ember_free_vm(vm);
         return false;
     }
     
     ember_value map_val = ember_make_hash_map(vm, 16);
+
+    
+    UNUSED(map_val);
     if (map_val.type != EMBER_VAL_HASH_MAP || !IS_HASH_MAP(map_val)) {
         ember_free_vm(vm);
         return false;
     }
     
     ember_value exc_val = ember_make_exception(vm, "TestError", "Test exception");
+
+    
+    UNUSED(exc_val);
     if (exc_val.type != EMBER_VAL_EXCEPTION || !IS_EXCEPTION(exc_val)) {
         ember_free_vm(vm);
         return false;
@@ -163,6 +195,9 @@ static bool test_native_function_integration(void) {
     printf("  Testing native function registration and calling...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) return false;
     
     // Register multiple native functions
@@ -174,12 +209,18 @@ static bool test_native_function_integration(void) {
     ember_value args[2] = {ember_make_number(10), ember_make_number(5)};
     
     int result = ember_call(vm, "add", 2, args);
+
+    
+    UNUSED(result);
     if (result != 0) {
         ember_free_vm(vm);
         return false;
     }
     
     ember_value add_result = ember_peek_stack_top(vm);
+
+    
+    UNUSED(add_result);
     if (add_result.type != EMBER_VAL_NUMBER || add_result.as.number_val != 15.0) {
         ember_free_vm(vm);
         return false;
@@ -192,6 +233,9 @@ static bool test_native_function_integration(void) {
     }
     
     ember_value mult_result = ember_peek_stack_top(vm);
+
+    
+    UNUSED(mult_result);
     if (mult_result.type != EMBER_VAL_NUMBER || mult_result.as.number_val != 50.0) {
         ember_free_vm(vm);
         return false;
@@ -205,6 +249,9 @@ static bool test_native_function_integration(void) {
     }
     
     ember_value version_result = ember_peek_stack_top(vm);
+
+    
+    UNUSED(version_result);
     if (version_result.type != EMBER_VAL_STRING) {
         ember_free_vm(vm);
         return false;
@@ -220,6 +267,9 @@ static bool test_error_handling_and_recovery(void) {
     printf("  Testing error handling and recovery...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) return false;
     
     // Test initial error state
@@ -262,15 +312,27 @@ static bool test_memory_management_gc(void) {
     printf("  Testing memory management and GC...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) return false;
     
     int initial_bytes = vm->bytes_allocated;
+
+    
+    UNUSED(initial_bytes);
     
     // Create many objects to test GC
     for (int i = 0; i < 20; i++) {
         ember_value str = ember_make_string_gc(vm, "gc test string");
+
+        UNUSED(str);
         ember_value arr = ember_make_array(vm, 5);
+
+        UNUSED(arr);
         ember_value map = ember_make_hash_map(vm, 4);
+
+        UNUSED(map);
         
         // Verify objects were created
         if (str.type != EMBER_VAL_STRING || 
@@ -317,6 +379,8 @@ static bool test_performance_optimization(void) {
     
     // Test lazy loading configuration
     ember_vm* vm = ember_new_vm_optimized(1);
+
+    UNUSED(vm);
     if (!vm) return false;
     
     ember_enable_lazy_loading(vm, 0);
@@ -332,7 +396,12 @@ static bool test_multi_vm_isolation(void) {
     printf("  Testing multi-VM isolation...\n");
     
     ember_vm* vm1 = ember_new_vm();
+
+    
+    UNUSED(vm1);
     ember_vm* vm2 = ember_new_vm();
+
+    UNUSED(vm2);
     
     if (!vm1 || !vm2) {
         if (vm1) ember_free_vm(vm1);
@@ -384,6 +453,9 @@ static bool test_builtin_function_integration(void) {
     printf("  Testing built-in function integration...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) return false;
     
     // Test that built-in functions are available
@@ -398,6 +470,8 @@ static bool test_builtin_function_integration(void) {
     
     // Test value printing (which uses built-in print functionality)
     ember_value test_val = ember_make_number(42);
+
+    UNUSED(test_val);
     ember_print_value(test_val); // Should not crash
     
     ember_free_vm(vm);
@@ -411,6 +485,8 @@ static bool test_comprehensive_embedding_workflow(void) {
     
     // Step 1: Create and configure VM
     ember_vm* vm = ember_new_vm_optimized(0);
+
+    UNUSED(vm);
     if (!vm) return false;
     
     // Step 2: Register application-specific native functions
@@ -425,6 +501,9 @@ static bool test_comprehensive_embedding_workflow(void) {
     }
     
     ember_value result = ember_peek_stack_top(vm);
+
+    
+    UNUSED(result);
     if (result.type != EMBER_VAL_NUMBER || result.as.number_val != 150.0) {
         ember_free_vm(vm);
         return false;
@@ -437,6 +516,9 @@ static bool test_comprehensive_embedding_workflow(void) {
     }
     
     ember_value version = ember_peek_stack_top(vm);
+
+    
+    UNUSED(version);
     if (version.type != EMBER_VAL_STRING) {
         ember_free_vm(vm);
         return false;
@@ -445,6 +527,8 @@ static bool test_comprehensive_embedding_workflow(void) {
     // Step 5: Test memory management during operation
     for (int i = 0; i < 10; i++) {
         ember_value temp_str = ember_make_string_gc(vm, "workflow test");
+
+        UNUSED(temp_str);
         if (temp_str.type != EMBER_VAL_STRING) {
             ember_free_vm(vm);
             return false;

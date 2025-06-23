@@ -44,6 +44,8 @@
 // Test fixture setup
 static ember_vm* setup_test_vm() {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     return vm;
 }
@@ -56,6 +58,8 @@ static void teardown_test_vm(ember_vm* vm) {
 void test_addition_basic() {
     printf("Testing basic addition...\n");
     ember_vm* vm = setup_test_vm();
+
+    UNUSED(vm);
     
     // Push two numbers onto stack
     push(vm, ember_make_number(5.0));
@@ -78,6 +82,8 @@ void test_addition_basic() {
 void test_addition_string_concatenation() {
     printf("Testing string concatenation...\n");
     ember_vm* vm = setup_test_vm();
+
+    UNUSED(vm);
     
     // Push two strings onto stack
     push(vm, ember_make_string("Hello "));
@@ -99,6 +105,8 @@ void test_addition_string_concatenation() {
 void test_addition_type_mismatch() {
     printf("Testing addition type mismatch...\n");
     ember_vm* vm = setup_test_vm();
+
+    UNUSED(vm);
     
     // Push incompatible types onto stack
     push(vm, ember_make_number(5.0));
@@ -119,6 +127,8 @@ void test_addition_type_mismatch() {
 void test_addition_stack_underflow() {
     printf("Testing addition stack underflow...\n");
     ember_vm* vm = setup_test_vm();
+
+    UNUSED(vm);
     
     // Push only one value (need two for addition)
     push(vm, ember_make_number(5.0));
@@ -138,6 +148,8 @@ void test_addition_stack_underflow() {
 void test_division_by_zero() {
     printf("Testing division by zero...\n");
     ember_vm* vm = setup_test_vm();
+
+    UNUSED(vm);
     
     // Push dividend and zero divisor
     push(vm, ember_make_number(10.0));
@@ -158,6 +170,8 @@ void test_division_by_zero() {
 void test_modulo_by_zero() {
     printf("Testing modulo by zero...\n");
     ember_vm* vm = setup_test_vm();
+
+    UNUSED(vm);
     
     // Push dividend and zero divisor
     push(vm, ember_make_number(10.0));
@@ -178,6 +192,8 @@ void test_modulo_by_zero() {
 void test_all_arithmetic_operations() {
     printf("Testing all arithmetic operations...\n");
     ember_vm* vm = setup_test_vm();
+
+    UNUSED(vm);
     
     // Test subtraction
     push(vm, ember_make_number(10.0));
@@ -215,6 +231,8 @@ void test_all_arithmetic_operations() {
 void test_stack_overflow_protection() {
     printf("Testing stack overflow protection...\n");
     ember_vm* vm = setup_test_vm();
+
+    UNUSED(vm);
     
     // Fill stack to maximum
     for (int i = 0; i < EMBER_STACK_MAX; i++) {

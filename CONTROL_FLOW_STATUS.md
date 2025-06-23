@@ -105,6 +105,12 @@ for (i = 0; i < 10; i++) {
 - Issue appears to be with jump target calculation for increment section
 - While loop continue statements work correctly
 
+#### Logical Operators Not Implemented
+- **Logical AND (&&)**: Not implemented in parser - causes syntax errors
+- **Logical OR (||)**: Not implemented in parser - causes syntax errors  
+- **Logical NOT (!)**: Not implemented in parser - causes syntax errors
+- **Workaround**: Use nested if statements or bitwise operations where applicable
+
 #### Minor Issues
 - Some edge cases with very deeply nested structures (>8 levels) may hit limits
 - Error messages could be more descriptive for malformed control structures
@@ -130,6 +136,7 @@ A comprehensive test suite `test_control_flow_simple.ember` validates:
 - **Break statements**: 100% working ✅
 - **Continue in while**: 100% working ✅
 - **Continue in for**: Has infinite loop issue ⚠️
+- **Logical operators (&&, ||, !)**: Not implemented ❌
 
 ## Performance Impact
 
@@ -163,9 +170,10 @@ All jump offsets are calculated correctly:
 
 ### Planned Enhancements
 1. **Fix continue in for loops**: Resolve infinite loop issue with proper jump target calculation
-2. **Enhanced error messages**: Better diagnostics for malformed control structures
-3. **Optimization opportunities**: Compile-time jump optimization for known constant conditions
-4. **Switch statements**: Add switch/case control flow (not yet implemented)
+2. **Implement logical operators**: Add &&, ||, and ! operators to parser and VM
+3. **Enhanced error messages**: Better diagnostics for malformed control structures
+4. **Optimization opportunities**: Compile-time jump optimization for known constant conditions
+5. **Switch statements**: Add switch/case control flow (not yet implemented)
 
 ### Architectural Improvements
 1. **Complete dispatch table**: Implement all missing VM operation handlers

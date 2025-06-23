@@ -4,10 +4,15 @@
 #include <string.h>
 #include "test_ember_internal.h"
 
+// Macro to mark variables as intentionally unused
+#define UNUSED(x) ((void)(x))
+
 // Test core parser functionality comprehensively
 
 void test_basic_parsing(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing basic parsing functionality...\n");
@@ -15,6 +20,8 @@ void test_basic_parsing(void) {
     // Test empty input
     printf("  Testing empty input...\n");
     int result = ember_eval(vm, "");
+
+    UNUSED(result);
     printf("    Empty input result: %d\n", result);
     
     // Test whitespace only
@@ -44,6 +51,8 @@ void test_basic_parsing(void) {
 
 void test_token_recognition(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing token recognition...\n");
@@ -70,6 +79,8 @@ void test_token_recognition(void) {
     for (int i = 0; operator_tests[i] != NULL; i++) {
         printf("  Testing operator: %s\n", operator_tests[i]);
         int result = ember_eval(vm, operator_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -85,6 +96,8 @@ void test_token_recognition(void) {
     for (int i = 0; punctuation_tests[i] != NULL; i++) {
         printf("  Testing punctuation: %s\n", punctuation_tests[i]);
         int result = ember_eval(vm, punctuation_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -94,6 +107,8 @@ void test_token_recognition(void) {
 
 void test_keyword_recognition(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing keyword recognition...\n");
@@ -129,6 +144,8 @@ void test_keyword_recognition(void) {
     for (int i = 0; keyword_tests[i] != NULL; i++) {
         printf("  Testing keyword: %s\n", keyword_tests[i]);
         int result = ember_eval(vm, keyword_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -142,6 +159,8 @@ void test_keyword_recognition(void) {
 
 void test_number_parsing(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing number parsing...\n");
@@ -171,6 +190,8 @@ void test_number_parsing(void) {
     for (int i = 0; number_tests[i] != NULL; i++) {
         printf("  Testing number: %s\n", number_tests[i]);
         int result = ember_eval(vm, number_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -180,6 +201,8 @@ void test_number_parsing(void) {
 
 void test_string_parsing(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing string parsing...\n");
@@ -207,6 +230,8 @@ void test_string_parsing(void) {
     for (int i = 0; string_tests[i] != NULL; i++) {
         printf("  Testing string: %s\n", string_tests[i]);
         int result = ember_eval(vm, string_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -216,6 +241,8 @@ void test_string_parsing(void) {
 
 void test_identifier_parsing(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing identifier parsing...\n");
@@ -247,6 +274,8 @@ void test_identifier_parsing(void) {
     for (int i = 0; identifier_tests[i] != NULL; i++) {
         printf("  Testing identifier: %s\n", identifier_tests[i]);
         int result = ember_eval(vm, identifier_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -260,6 +289,8 @@ void test_identifier_parsing(void) {
 
 void test_statement_separation(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing statement separation...\n");
@@ -292,6 +323,8 @@ void test_statement_separation(void) {
     for (int i = 0; separation_tests[i] != NULL; i++) {
         printf("  Testing separation: %s\n", separation_tests[i]);
         int result = ember_eval(vm, separation_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test
@@ -305,6 +338,8 @@ void test_statement_separation(void) {
 
 void test_nested_structures(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing nested structures parsing...\n");
@@ -335,6 +370,8 @@ void test_nested_structures(void) {
     for (int i = 0; nested_tests[i] != NULL; i++) {
         printf("  Testing nested: %s\n", nested_tests[i]);
         int result = ember_eval(vm, nested_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -344,6 +381,8 @@ void test_nested_structures(void) {
 
 void test_whitespace_handling(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing whitespace handling...\n");
@@ -376,6 +415,8 @@ void test_whitespace_handling(void) {
     for (int i = 0; whitespace_tests[i] != NULL; i++) {
         printf("  Testing whitespace: %s\n", whitespace_tests[i]);
         int result = ember_eval(vm, whitespace_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear VM state for next test  
@@ -389,6 +430,8 @@ void test_whitespace_handling(void) {
 
 void test_error_recovery(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing error recovery...\n");
@@ -423,6 +466,8 @@ void test_error_recovery(void) {
     for (int i = 0; error_tests[i] != NULL; i++) {
         printf("  Testing error case: %s\n", error_tests[i]);
         int result = ember_eval(vm, error_tests[i]);
+
+        UNUSED(result);
         printf("    Error result: %d (expected non-zero)\n", result);
         
         // Clear any error state
@@ -439,6 +484,8 @@ void test_error_recovery(void) {
 
 void test_large_input_handling(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing large input handling...\n");
@@ -452,6 +499,8 @@ void test_large_input_handling(void) {
     
     printf("  Testing long arithmetic expression...\n");
     int result = ember_eval(vm, long_expr);
+
+    UNUSED(result);
     printf("    Long expression result: %d\n", result);
     
     // Test with deep nesting
@@ -481,6 +530,8 @@ void test_large_input_handling(void) {
 
 void test_parser_state_management(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing parser state management...\n");
@@ -489,18 +540,30 @@ void test_parser_state_management(void) {
     printf("  Testing state reset...\n");
     
     int result1 = ember_eval(vm, "x = 42");
+
+    
+    UNUSED(result1);
     printf("    First eval result: %d\n", result1);
     
     int result2 = ember_eval(vm, "x");
+
+    
+    UNUSED(result2);
     printf("    Second eval result: %d\n", result2);
     
     // Test error state doesn't persist
     printf("  Testing error state isolation...\n");
     
-    int error_result = ember_eval(vm, "1 +");  // Should cause error
+    int error_result = ember_eval(vm, "1 +");
+
+    
+    UNUSED(error_result);  // Should cause error
     printf("    Error eval result: %d\n", error_result);
     
-    int recovery_result = ember_eval(vm, "2 + 2");  // Should work
+    int recovery_result = ember_eval(vm, "2 + 2");
+
+    
+    UNUSED(recovery_result);  // Should work
     printf("    Recovery eval result: %d\n", recovery_result);
     
     // Test with complex nested structures
@@ -515,8 +578,14 @@ void test_parser_state_management(void) {
         "  }\n"
         "}\n"
         "result = data[\"numbers\"][0] + data[\"nested\"][\"inner\"][0]";
+
+    
+    UNUSED(complex_code);
     
     int complex_result = ember_eval(vm, complex_code);
+
+    
+    UNUSED(complex_result);
     printf("    Complex parsing result: %d\n", complex_result);
     
     printf("Parser state management test completed\n");
@@ -525,6 +594,8 @@ void test_parser_state_management(void) {
 
 void test_edge_cases(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing edge cases...\n");
@@ -562,6 +633,8 @@ void test_edge_cases(void) {
     for (int i = 0; edge_tests[i] != NULL; i++) {
         printf("  Testing edge case: %s\n", edge_tests[i]);
         int result = ember_eval(vm, edge_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
         
         // Clear any error state

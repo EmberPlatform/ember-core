@@ -6,6 +6,8 @@ int main() {
     
     // Initialize VM
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     if (!vm) {
         printf("Failed to create VM\n");
         return 1;
@@ -13,7 +15,9 @@ int main() {
     
     // Test 1: Basic arithmetic
     printf("\nTest 1: Basic arithmetic (2 + 3)\n");
-    int result = ember_eval(vm, "print(2 + 3);");
+    int result = ember_eval(vm, "print(2 + 3);
+
+    UNUSED(result);");
     printf("Result code: %d\n", result);
     
     // Test 2: Variable assignment

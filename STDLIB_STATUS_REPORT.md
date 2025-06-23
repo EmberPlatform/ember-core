@@ -95,6 +95,13 @@ Comprehensive testing shows:
 ### ❌ Template Functions
 - Template engine functions - Would require template parser implementation
 
+### ⚠️ Router Functions (ember-stdlib)
+- **router_native.c**: Comprehensive HTTP routing implementation exists in ember-stdlib
+- **Integration status**: Built successfully with ember-stdlib but not linked to ember-core
+- **Functionality**: Express.js-like routing with middleware support, parameter extraction, and constraints
+- **Dependencies**: Requires emberweb integration for full functionality
+- **Usage**: Available when building with ember-stdlib shared library
+
 ## Usage Example
 
 ```ember

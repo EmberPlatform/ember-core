@@ -1,0 +1,25 @@
+// Specific test for continue statement bug in for loops
+print("Testing continue statement in various scenarios...")
+
+// Test 1: Continue in for loop without strings (suspected working case)
+print("Test 1: Continue in for loop (simple)")
+for (i = 0; i < 5; i++) {
+    if i == 2 {
+        continue
+    }
+    print(i)
+}
+
+// Test 2: Continue in while loop for comparison  
+print("Test 2: Continue in while loop")
+j = 0
+while j < 5 {
+    if j == 2 {
+        j = j + 1
+        continue
+    }
+    print(j)
+    j = j + 1
+}
+
+print("Continue tests completed")

@@ -1,22 +1,53 @@
-// Comprehensive control flow tests - basic functionality
+# Comprehensive Control Flow Testing
 
-// Test 1: Empty if statement  
-if (1) {
-}
-
-// Test 2: Empty if-else statement
-if (0) {
+print("=== Testing if/else statements ===")
+x = 10
+if x > 5 {
+    print("x is greater than 5")
 } else {
+    print("x is not greater than 5")
 }
 
-// Test 3: Empty while loop
-count = 0
-while (count > 1) {
-    count = count - 1
+print("=== Testing while loops ===")
+i = 0
+while i < 3 {
+    print("while loop iteration:", i)
+    i = i + 1
 }
 
-// Test 4: Empty for loop  
-for (i = 0; i > 1; i = i + 1) {
+print("=== Testing for loops (basic) ===")
+for j = 0; j < 3; j = j + 1 {
+    print("for loop iteration:", j)
 }
 
-print("All basic control flow tests passed")
+print("=== Testing nested control flow ===")
+for k = 0; k < 2; k = k + 1 {
+    if k == 0 {
+        print("First iteration")
+    } else {
+        print("Second iteration")
+    }
+}
+
+print("=== Testing break in while loop ===")
+n = 0
+while n < 10 {
+    if n == 2 {
+        print("Breaking at n =", n)
+        break
+    }
+    print("n =", n)
+    n = n + 1
+}
+
+print("=== Testing break in for loop ===")
+for m = 0; m < 10; m = m + 1 {
+    if m == 2 {
+        print("Breaking at m =", m)
+        break
+    }
+    print("m =", m)
+}
+
+print("=== All control flow tests completed ===")
+EOF < /dev/null

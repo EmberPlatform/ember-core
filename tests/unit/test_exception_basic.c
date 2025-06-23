@@ -9,6 +9,9 @@ void test_basic_try_catch() {
     printf("Testing basic try/catch...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test 1: Basic exception throwing and catching
@@ -20,8 +23,13 @@ void test_basic_try_catch() {
         "    print(\"Caught exception: \" + e)\n"
         "}\n"
         "print(\"After try/catch\")\n";
+
+    UNUSED(source1);
         
     int result1 = ember_eval(vm, source1);
+
+        
+    UNUSED(result1);
     assert(result1 == 0); // Should succeed
     
     // Test 2: Try without exception
@@ -32,8 +40,13 @@ void test_basic_try_catch() {
         "    print(\"This should not execute\")\n"
         "}\n"
         "print(\"After safe try/catch\")\n";
+
+    UNUSED(source2);
         
     int result2 = ember_eval(vm, source2);
+
+        
+    UNUSED(result2);
     assert(result2 == 0); // Should succeed
     
     ember_free_vm(vm);
@@ -45,6 +58,9 @@ void test_finally_blocks() {
     printf("Testing finally blocks...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test 1: Finally with exception
@@ -57,8 +73,13 @@ void test_finally_blocks() {
         "    print(\"In finally block\")\n"
         "}\n"
         "print(\"After try/catch/finally\")\n";
+
+    UNUSED(source1);
         
     int result1 = ember_eval(vm, source1);
+
+        
+    UNUSED(result1);
     assert(result1 == 0); // Should succeed
     
     // Test 2: Finally without exception
@@ -69,8 +90,13 @@ void test_finally_blocks() {
         "    print(\"Finally always runs\")\n"
         "}\n"
         "print(\"After try/finally\")\n";
+
+    UNUSED(source2);
         
     int result2 = ember_eval(vm, source2);
+
+        
+    UNUSED(result2);
     assert(result2 == 0); // Should succeed
     
     ember_free_vm(vm);
@@ -82,6 +108,9 @@ void test_nested_exceptions() {
     printf("Testing nested try/catch blocks...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     const char* source = 
@@ -102,8 +131,14 @@ void test_nested_exceptions() {
         "    print(\"Outer finally\")\n"
         "}\n"
         "print(\"After nested try/catch\")\n";
+
+    
+    UNUSED(source);
         
     int result = ember_eval(vm, source);
+
+        
+    UNUSED(result);
     assert(result == 0); // Should succeed
     
     ember_free_vm(vm);
@@ -115,6 +150,9 @@ void test_exception_objects() {
     printf("Testing exception objects...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test different exception types
@@ -124,8 +162,13 @@ void test_exception_objects() {
         "} catch (e) {\n"
         "    print(\"Caught number: \" + str(e))\n"
         "}\n";
+
+    UNUSED(source1);
         
     int result1 = ember_eval(vm, source1);
+
+        
+    UNUSED(result1);
     assert(result1 == 0); // Should succeed
     
     const char* source2 = 
@@ -134,8 +177,14 @@ void test_exception_objects() {
         "} catch (e) {\n"
         "    print(\"Caught boolean: \" + str(e))\n"
         "}\n";
+
+    
+    UNUSED(source2);
         
     int result2 = ember_eval(vm, source2);
+
+        
+    UNUSED(result2);
     assert(result2 == 0); // Should succeed
     
     ember_free_vm(vm);
@@ -147,16 +196,27 @@ void test_error_conditions() {
     printf("Testing error conditions...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test 1: Try without catch or finally should fail to compile
     const char* source1 = "try { print(\"test\") }";
+
+    UNUSED(source1);
     int result1 = ember_eval(vm, source1);
+
+    UNUSED(result1);
     assert(result1 != 0); // Should fail
     
     // Test 2: Uncaught exception should terminate
     const char* source2 = "throw \"Uncaught exception\"";
+
+    UNUSED(source2);
     int result2 = ember_eval(vm, source2);
+
+    UNUSED(result2);
     assert(result2 != 0); // Should fail
     
     ember_free_vm(vm);

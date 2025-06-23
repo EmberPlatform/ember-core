@@ -26,7 +26,9 @@ ember_value ember_native_datetime_yearday(ember_vm* vm, int argc, ember_value* a
 
 // Test result counter
 static int tests_passed = 0;
+ UNUSED(tests_passed);
 static int tests_failed = 0;
+ UNUSED(tests_failed);
 
 // Helper macro for tests
 #define TEST_ASSERT(condition, message) \
@@ -50,6 +52,8 @@ static const char* get_string_value(ember_value val) {
     if (val.type != EMBER_VAL_STRING) return NULL;
     // Use the proper API to get string value
     ember_string* str = AS_STRING(val);
+
+    UNUSED(str);
     return str ? str->chars : NULL;
 }
 
@@ -59,6 +63,8 @@ static void test_datetime_now(ember_vm* vm) {
     
     // Test with no arguments
     ember_value result = ember_native_datetime_now(vm, 0, NULL);
+
+    UNUSED(result);
     TEST_ASSERT(result.type == EMBER_VAL_NUMBER, "datetime_now returns number");
     
     double timestamp = get_number_value(result);
@@ -68,6 +74,8 @@ static void test_datetime_now(ember_vm* vm) {
     
     // Test with wrong argument count
     ember_value arg = ember_make_number(123);
+
+    UNUSED(arg);
     result = ember_native_datetime_now(vm, 1, &arg);
     TEST_ASSERT(result.type == EMBER_VAL_NIL, "datetime_now with arguments returns nil");
 }
@@ -77,6 +85,9 @@ static void test_datetime_timestamp(ember_vm* vm) {
     printf("\n=== Testing datetime_timestamp ===\n");
     
     ember_value result = ember_native_datetime_timestamp(vm, 0, NULL);
+
+    
+    UNUSED(result);
     TEST_ASSERT(result.type == EMBER_VAL_NUMBER, "datetime_timestamp returns number");
     
     double timestamp = get_number_value(result);
@@ -91,10 +102,17 @@ static void test_datetime_format(ember_vm* vm) {
     
     // Test known timestamp (Unix epoch: 1970-01-01 00:00:00 UTC)
     ember_value timestamp = ember_make_number(0.0);
+
+    UNUSED(timestamp);
     ember_value result = ember_native_datetime_format(vm, 1, &timestamp);
+
+    UNUSED(result);
     TEST_ASSERT(result.type == EMBER_VAL_STRING, "datetime_format returns string");
     
     const char* formatted = get_string_value(result);
+
+    
+    UNUSED(formatted);
     TEST_ASSERT(strcmp(formatted, "1970-01-01T00:00:00Z") == 0, 
                 "datetime_format with epoch returns correct ISO format");
     
@@ -105,16 +123,23 @@ static void test_datetime_format(ember_vm* vm) {
     result = ember_native_datetime_format(vm, 2, args);
     
     const char* custom_formatted = get_string_value(result);
+
+    
+    UNUSED(custom_formatted);
     TEST_ASSERT(strcmp(custom_formatted, "1970-01-01") == 0, 
                 "datetime_format with custom format works");
     
     // Test with invalid timestamp (out of range)
     ember_value invalid_timestamp = ember_make_number(1e20);
+
+    UNUSED(invalid_timestamp);
     result = ember_native_datetime_format(vm, 1, &invalid_timestamp);
     TEST_ASSERT(result.type == EMBER_VAL_NIL, "datetime_format with invalid timestamp returns nil");
     
     // Test with non-number argument
     ember_value non_number = ember_make_string("not a number");
+
+    UNUSED(non_number);
     result = ember_native_datetime_format(vm, 1, &non_number);
     TEST_ASSERT(result.type == EMBER_VAL_NIL, "datetime_format with non-number returns nil");
 }
@@ -129,6 +154,9 @@ static void test_datetime_add(ember_vm* vm) {
     args[1] = ember_make_number(3600.0); // Add 1 hour
     
     ember_value result = ember_native_datetime_add(vm, 2, args);
+
+    
+    UNUSED(result);
     TEST_ASSERT(result.type == EMBER_VAL_NUMBER, "datetime_add returns number");
     
     double new_timestamp = get_number_value(result);
@@ -160,6 +188,9 @@ static void test_datetime_diff(ember_vm* vm) {
     args[1] = ember_make_number(0.0);    // Unix epoch
     
     ember_value result = ember_native_datetime_diff(vm, 2, args);
+
+    
+    UNUSED(result);
     TEST_ASSERT(result.type == EMBER_VAL_NUMBER, "datetime_diff returns number");
     
     double diff = get_number_value(result);
@@ -185,9 +216,13 @@ static void test_datetime_components(ember_vm* vm) {
     
     // Test with Unix epoch (1970-01-01 00:00:00 UTC = Thursday)
     ember_value timestamp = ember_make_number(0.0);
+
+    UNUSED(timestamp);
     
     // Test year extraction
     ember_value result = ember_native_datetime_year(vm, 1, &timestamp);
+
+    UNUSED(result);
     TEST_ASSERT(result.type == EMBER_VAL_NUMBER, "datetime_year returns number");
     TEST_ASSERT(get_number_value(result) == 1970.0, "datetime_year returns correct year for epoch");
     
@@ -228,6 +263,8 @@ static void test_datetime_components(ember_vm* vm) {
     
     // Test with invalid timestamp
     ember_value invalid_timestamp = ember_make_number(1e20);
+
+    UNUSED(invalid_timestamp);
     result = ember_native_datetime_year(vm, 1, &invalid_timestamp);
     TEST_ASSERT(result.type == EMBER_VAL_NIL, "datetime_year with invalid timestamp returns nil");
 }
@@ -236,10 +273,15 @@ static void test_datetime_components(ember_vm* vm) {
 static void test_timezone_functions(ember_vm* vm) {
     printf("\n=== Testing timezone functions ===\n");
     
-    ember_value timestamp = ember_make_number(0.0); // Unix epoch
+    ember_value timestamp = ember_make_number(0.0);
+
+    
+    UNUSED(timestamp); // Unix epoch
     
     // Test datetime_to_utc
     ember_value result = ember_native_datetime_to_utc(vm, 1, &timestamp);
+
+    UNUSED(result);
     TEST_ASSERT(result.type == EMBER_VAL_NUMBER, "datetime_to_utc returns number");
     // Note: exact result depends on system timezone
     
@@ -249,6 +291,8 @@ static void test_timezone_functions(ember_vm* vm) {
     
     // Test with invalid timestamp
     ember_value invalid_timestamp = ember_make_number(1e20);
+
+    UNUSED(invalid_timestamp);
     result = ember_native_datetime_to_utc(vm, 1, &invalid_timestamp);
     TEST_ASSERT(result.type == EMBER_VAL_NIL, "datetime_to_utc with invalid timestamp returns nil");
     
@@ -262,11 +306,17 @@ static void test_error_conditions(ember_vm* vm) {
     
     // Test with extremely large timestamps (security check)
     ember_value huge_timestamp = ember_make_number(1e50);
+
+    UNUSED(huge_timestamp);
     ember_value result = ember_native_datetime_format(vm, 1, &huge_timestamp);
+
+    UNUSED(result);
     TEST_ASSERT(result.type == EMBER_VAL_NIL, "Extremely large timestamp rejected");
     
     // Test with extremely small timestamps
     ember_value tiny_timestamp = ember_make_number(-1e50);
+
+    UNUSED(tiny_timestamp);
     result = ember_native_datetime_format(vm, 1, &tiny_timestamp);
     TEST_ASSERT(result.type == EMBER_VAL_NIL, "Extremely small timestamp rejected");
     
@@ -295,9 +345,14 @@ static void test_integration_scenarios(ember_vm* vm) {
     
     // Test: Get current time, format it, add time, format again
     ember_value now = ember_native_datetime_now(vm, 0, NULL);
+
+    UNUSED(now);
     TEST_ASSERT(now.type == EMBER_VAL_NUMBER, "Get current timestamp");
     
     ember_value formatted = ember_native_datetime_format(vm, 1, &now);
+
+    
+    UNUSED(formatted);
     TEST_ASSERT(formatted.type == EMBER_VAL_STRING, "Format current timestamp");
     
     ember_value args[2];
@@ -305,13 +360,18 @@ static void test_integration_scenarios(ember_vm* vm) {
     args[1] = ember_make_number(3600.0); // Add 1 hour
     
     ember_value later = ember_native_datetime_add(vm, 2, args);
+
+    
+    UNUSED(later);
     TEST_ASSERT(later.type == EMBER_VAL_NUMBER, "Add time to current timestamp");
     
     double diff_result = get_number_value(ember_native_datetime_diff(vm, 2, args));
     TEST_ASSERT(fabs(diff_result - 3600.0) < 0.001, "Difference calculation matches added time");
     
     // Test: Extract components from known timestamp
-    ember_value known_time = ember_make_number(1609459200.0); // 2021-01-01 00:00:00 UTC
+    ember_value known_time = ember_make_number(1609459200.0);
+
+    UNUSED(known_time); // 2021-01-01 00:00:00 UTC
     
     double year = get_number_value(ember_native_datetime_year(vm, 1, &known_time));
     double month = get_number_value(ember_native_datetime_month(vm, 1, &known_time));
@@ -327,6 +387,8 @@ int main() {
     
     // Initialize Ember VM
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     if (!vm) {
         printf("ERROR: Failed to create Ember VM\n");
         return 1;

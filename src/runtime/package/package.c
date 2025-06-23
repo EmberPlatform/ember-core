@@ -121,6 +121,7 @@ bool ember_package_discover(const char* package_name, EmberPackage* package) {
     
     if (access(local_path, F_OK) == 0) {
         strncpy(package->local_path, local_path, EMBER_PACKAGE_MAX_PATH_LEN - 1);
+        package->local_path[EMBER_PACKAGE_MAX_PATH_LEN - 1] = '\0';
         strncpy(package->version, "local", EMBER_PACKAGE_MAX_VERSION_LEN - 1);
         package->verified = true;
         package->loaded = false;
@@ -168,8 +169,12 @@ bool ember_package_download(EmberPackage* package) {
     }
     
     // Set local path for downloaded package
-    snprintf(package->local_path, EMBER_PACKAGE_MAX_PATH_LEN, 
-             "%s/%s", packages_dir, package->name);
+    int path_len = snprintf(package->local_path, EMBER_PACKAGE_MAX_PATH_LEN, 
+                           "%s/%s", packages_dir, package->name);
+    if (path_len >= EMBER_PACKAGE_MAX_PATH_LEN) {
+        printf("[PACKAGE] ERROR: Package path too long\n");
+        return -1;
+    }
     
     // SECURITY FIX: Replace system() call with secure mkdir() implementation
     // Create package directory safely using mkdir() syscalls
@@ -704,8 +709,12 @@ bool ember_package_fetch_from_repository(const char* package_name, const char* v
     
     // Download package archive
     char archive_path[600];
-    snprintf(archive_path, sizeof(archive_path), "%s/%s-%s.tar.gz", 
-             packages_dir, package_name, version);
+    int archive_path_len = snprintf(archive_path, sizeof(archive_path), "%s/%s-%s.tar.gz", 
+                                   packages_dir, package_name, version);
+    if (archive_path_len >= (int)sizeof(archive_path)) {
+        printf("[REPOSITORY] ERROR: Archive path too long\n");
+        return false;
+    }
     
     printf("[REPOSITORY] Downloading package archive...\n");
     
@@ -757,9 +766,13 @@ bool ember_package_fetch_from_repository(const char* package_name, const char* v
     
     // Extract archive using tar command (secure implementation)
     char extract_cmd[1024];
-    snprintf(extract_cmd, sizeof(extract_cmd), 
-             "cd \"%s\" && tar -xzf \"%s\" --strip-components=1 2>/dev/null", 
-             package_dir, archive_path);
+    int cmd_len = snprintf(extract_cmd, sizeof(extract_cmd), 
+                          "cd \"%s\" && tar -xzf \"%s\" --strip-components=1 2>/dev/null", 
+                          package_dir, archive_path);
+    if (cmd_len >= (int)sizeof(extract_cmd)) {
+        printf("[REPOSITORY] ERROR: Command too long\n");
+        return false;
+    }
     
     printf("[REPOSITORY] Extracting package archive...\n");
     int extract_result = system(extract_cmd);
@@ -833,16 +846,26 @@ bool ember_package_publish_to_repository(const EmberPackage* package, const char
     
     // Create package archive
     char archive_path[600];
-    snprintf(archive_path, sizeof(archive_path), "%s/%s-%s.tar.gz", 
-             temp_dir, package->name, package->version);
+    int archive_len = snprintf(archive_path, sizeof(archive_path), "%s/%s-%s.tar.gz", 
+                              temp_dir, package->name, package->version);
+    if (archive_len >= (int)sizeof(archive_path)) {
+        printf("[REPOSITORY] ERROR: Archive path too long\n");
+        ember_http_cleanup();
+        return false;
+    }
     
     printf("[REPOSITORY] Creating package archive...\n");
     
     // Create tar.gz archive from package directory
     char create_cmd[1024];
-    snprintf(create_cmd, sizeof(create_cmd), 
-             "cd \"%s\" && tar -czf \"%s\" * 2>/dev/null", 
-             package->local_path, archive_path);
+    int create_len = snprintf(create_cmd, sizeof(create_cmd), 
+                             "cd \"%s\" && tar -czf \"%s\" * 2>/dev/null", 
+                             package->local_path, archive_path);
+    if (create_len >= (int)sizeof(create_cmd)) {
+        printf("[REPOSITORY] ERROR: Create command too long\n");
+        ember_http_cleanup();
+        return false;
+    }
     
     int create_result = system(create_cmd);
     if (create_result != 0) {
@@ -910,7 +933,9 @@ bool ember_package_publish_to_repository(const EmberPackage* package, const char
     // Remove temporary directory
     char cleanup_cmd[600];
     snprintf(cleanup_cmd, sizeof(cleanup_cmd), "rm -rf \"%s\"", temp_dir);
-    system(cleanup_cmd);
+    if (system(cleanup_cmd) != 0) {
+        printf("[REPOSITORY] Warning: Failed to cleanup temporary directory\n");
+    }
     
     if (upload_result != 0) {
         printf("[REPOSITORY] ERROR: Failed to upload package\n");
@@ -977,7 +1002,11 @@ bool ember_package_validate_structure(const char* package_path) {
             if (manifest_size > 0 && manifest_size < 64 * 1024) { // 64KB limit
                 char* manifest_content = malloc(manifest_size + 1);
                 if (manifest_content) {
-                    fread(manifest_content, 1, manifest_size, manifest_fp);
+                    if (fread(manifest_content, 1, manifest_size, manifest_fp) != (size_t)manifest_size) {
+                        free(manifest_content);
+                        fclose(manifest_fp);
+                        return false;
+                    }
                     manifest_content[manifest_size] = '\0';
                     
                     // Basic TOML validation - check for required fields
@@ -1011,7 +1040,11 @@ bool ember_package_validate_structure(const char* package_path) {
         if (file_size > 0 && file_size < 1024 * 1024) { // 1MB limit
             char* source_code = malloc(file_size + 1);
             if (source_code) {
-                fread(source_code, 1, file_size, ember_file);
+                if (fread(source_code, 1, file_size, ember_file) != (size_t)file_size) {
+                    free(source_code);
+                    fclose(ember_file);
+                    return false;
+                }
                 source_code[file_size] = '\0';
                 
                 // Basic syntax validation - check for common patterns
@@ -1326,7 +1359,9 @@ bool ember_project_load_from_file(const char* filepath, EmberProject** project) 
                     return false;
                 }
                 strncpy(proj->description, description, 255);
+                proj->description[255] = '\0';
                 strncpy(proj->author, author, 127);
+                proj->author[127] = '\0';
             }
             
             ember_project_add_dependency(proj, key, value);
@@ -1339,7 +1374,9 @@ bool ember_project_load_from_file(const char* filepath, EmberProject** project) 
         proj = ember_project_init(project_name, project_version);
         if (proj) {
             strncpy(proj->description, description, 255);
+            proj->description[255] = '\0';
             strncpy(proj->author, author, 127);
+            proj->author[127] = '\0';
         }
     }
     

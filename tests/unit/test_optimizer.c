@@ -9,9 +9,14 @@
 #include <math.h>
 #include "test_ember_internal.h"
 
+// Macro to mark variables as intentionally unused
+#define UNUSED(x) ((void)(x))
+
 // Helper function to create a test chunk
 ember_chunk* create_test_chunk(void) {
     ember_chunk* chunk = malloc(sizeof(ember_chunk));
+
+    UNUSED(chunk);
     if (!chunk) return NULL;
     
     init_chunk(chunk);
@@ -77,14 +82,25 @@ void test_optimization_stats_init(void) {
 // Test constant folding optimization for addition
 void test_constant_folding_addition(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create constants 5.0 and 3.0
     ember_value val1 = {EMBER_VAL_NUMBER, {.number_val = 5.0}};
+
+    UNUSED(val1);
     ember_value val2 = {EMBER_VAL_NUMBER, {.number_val = 3.0}};
+
+    UNUSED(val2);
     
     int const1_idx = add_constant(chunk, val1);
+
+    
+    UNUSED(const1_idx);
     int const2_idx = add_constant(chunk, val2);
+
+    UNUSED(const2_idx);
     
     // Add pattern: PUSH_CONST 5, PUSH_CONST 3, ADD
     add_instruction_with_param(chunk, OP_PUSH_CONST, const1_idx);
@@ -95,6 +111,9 @@ void test_constant_folding_addition(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_constant_folding(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.constant_folded > 0);
@@ -117,14 +136,25 @@ void test_constant_folding_addition(void) {
 // Test constant folding optimization for multiplication
 void test_constant_folding_multiplication(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create constants 4.0 and 2.5
     ember_value val1 = {EMBER_VAL_NUMBER, {.number_val = 4.0}};
+
+    UNUSED(val1);
     ember_value val2 = {EMBER_VAL_NUMBER, {.number_val = 2.5}};
+
+    UNUSED(val2);
     
     int const1_idx = add_constant(chunk, val1);
+
+    
+    UNUSED(const1_idx);
     int const2_idx = add_constant(chunk, val2);
+
+    UNUSED(const2_idx);
     
     // Add pattern: PUSH_CONST 4, PUSH_CONST 2.5, MUL
     add_instruction_with_param(chunk, OP_PUSH_CONST, const1_idx);
@@ -135,6 +165,9 @@ void test_constant_folding_multiplication(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_constant_folding(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.constant_folded > 0);
@@ -155,14 +188,25 @@ void test_constant_folding_multiplication(void) {
 // Test constant folding with division by zero (should not optimize)
 void test_constant_folding_division_by_zero(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create constants 5.0 and 0.0
-    ember_value val1 = {EMBER_VAL_NUMBER, {.number_val = 5.0}};  
+    ember_value val1 = {EMBER_VAL_NUMBER, {.number_val = 5.0}};
+
+    UNUSED(val1);  
     ember_value val2 = {EMBER_VAL_NUMBER, {.number_val = 0.0}};
+  
+    UNUSED(val2);
     
     int const1_idx = add_constant(chunk, val1);
+
+    
+    UNUSED(const1_idx);
     int const2_idx = add_constant(chunk, val2);
+
+    UNUSED(const2_idx);
     
     // Add pattern: PUSH_CONST 5, PUSH_CONST 0, DIV
     add_instruction_with_param(chunk, OP_PUSH_CONST, const1_idx);
@@ -170,11 +214,17 @@ void test_constant_folding_division_by_zero(void) {
     add_instruction(chunk, OP_DIV);
     
     int original_count = chunk->count;
+
+    
+    UNUSED(original_count);
     
     ember_optimization_stats stats;
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_constant_folding(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     // Should not optimize division by zero
     assert(chunk->count == original_count);
@@ -186,14 +236,25 @@ void test_constant_folding_division_by_zero(void) {
 // Test constant folding for comparison operations
 void test_constant_folding_comparison(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create constants 5.0 and 3.0
     ember_value val1 = {EMBER_VAL_NUMBER, {.number_val = 5.0}};
+
+    UNUSED(val1);
     ember_value val2 = {EMBER_VAL_NUMBER, {.number_val = 3.0}};
+
+    UNUSED(val2);
     
     int const1_idx = add_constant(chunk, val1);
+
+    
+    UNUSED(const1_idx);
     int const2_idx = add_constant(chunk, val2);
+
+    UNUSED(const2_idx);
     
     // Add pattern: PUSH_CONST 5, PUSH_CONST 3, GREATER
     add_instruction_with_param(chunk, OP_PUSH_CONST, const1_idx);
@@ -204,6 +265,9 @@ void test_constant_folding_comparison(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_constant_folding(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.constant_folded > 0);
@@ -224,11 +288,17 @@ void test_constant_folding_comparison(void) {
 // Test redundant push/pop optimization
 void test_redundant_pushpop_optimization(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create a constant
     ember_value val = {EMBER_VAL_NUMBER, {.number_val = 42.0}};
+
+    UNUSED(val);
     int const_idx = add_constant(chunk, val);
+
+    UNUSED(const_idx);
     
     // Add pattern: PUSH_CONST, POP (dead code)
     add_instruction_with_param(chunk, OP_PUSH_CONST, const_idx);
@@ -238,6 +308,9 @@ void test_redundant_pushpop_optimization(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_redundant_pushpop(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.redundant_push_pop > 0);
@@ -253,6 +326,8 @@ void test_redundant_pushpop_optimization(void) {
 // Test jump optimization - jump to next instruction
 void test_jump_optimization_next_instruction(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Add pattern: JUMP 0 (jump to next instruction)
@@ -263,6 +338,9 @@ void test_jump_optimization_next_instruction(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_jump_optimization(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.eliminated_jumps > 0);
@@ -279,6 +357,8 @@ void test_jump_optimization_next_instruction(void) {
 // Test jump optimization - conditional jump to next instruction
 void test_jump_optimization_conditional_next(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Add pattern: JUMP_IF_FALSE 0 (conditional jump to next instruction)
@@ -289,6 +369,9 @@ void test_jump_optimization_conditional_next(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_jump_optimization(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.eliminated_jumps > 0);
@@ -306,15 +389,25 @@ void test_jump_optimization_conditional_next(void) {
 // Test strength reduction - multiplication by power of 2
 void test_strength_reduction_multiplication(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create constant 8.0 (power of 2)
     ember_value val = {EMBER_VAL_NUMBER, {.number_val = 8.0}};
+
+    UNUSED(val);
     int const_idx = add_constant(chunk, val);
+
+    UNUSED(const_idx);
     
     // Add some operand first
     ember_value operand = {EMBER_VAL_NUMBER, {.number_val = 5.0}};
+
+    UNUSED(operand);
     int operand_idx = add_constant(chunk, operand);
+
+    UNUSED(operand_idx);
     add_instruction_with_param(chunk, OP_PUSH_CONST, operand_idx);
     
     // Add pattern: PUSH_CONST 8, MUL
@@ -325,6 +418,9 @@ void test_strength_reduction_multiplication(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_strength_reduction(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.strength_reduced > 0);
@@ -336,15 +432,25 @@ void test_strength_reduction_multiplication(void) {
 // Test strength reduction - multiplication by zero
 void test_strength_reduction_multiplication_by_zero(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create constant 0.0
     ember_value zero_val = {EMBER_VAL_NUMBER, {.number_val = 0.0}};
+
+    UNUSED(zero_val);
     int zero_idx = add_constant(chunk, zero_val);
+
+    UNUSED(zero_idx);
     
     // Add some operand first
     ember_value operand = {EMBER_VAL_NUMBER, {.number_val = 5.0}};
+
+    UNUSED(operand);
     int operand_idx = add_constant(chunk, operand);
+
+    UNUSED(operand_idx);
     add_instruction_with_param(chunk, OP_PUSH_CONST, operand_idx);
     
     // Add pattern: PUSH_CONST 0, MUL
@@ -355,6 +461,9 @@ void test_strength_reduction_multiplication_by_zero(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_strength_reduction(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.strength_reduced > 0);
@@ -371,11 +480,17 @@ void test_strength_reduction_multiplication_by_zero(void) {
 // Test instruction fusion - increment pattern
 void test_instruction_fusion_increment(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create constant 1.0
     ember_value one_val = {EMBER_VAL_NUMBER, {.number_val = 1.0}};
+
+    UNUSED(one_val);
     int one_idx = add_constant(chunk, one_val);
+
+    UNUSED(one_idx);
     
     // Add pattern: GET_LOCAL 0, PUSH_CONST 1, ADD, SET_LOCAL 0
     add_instruction_with_param(chunk, OP_GET_LOCAL, 0);
@@ -387,6 +502,9 @@ void test_instruction_fusion_increment(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_instruction_fusion(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.instruction_fused > 0);
@@ -398,6 +516,8 @@ void test_instruction_fusion_increment(void) {
 // Test pattern matching utility
 void test_pattern_matching(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create a simple pattern
@@ -415,6 +535,8 @@ void test_pattern_matching(void) {
     
     // Should match at position 0
     int match_result = ember_match_pattern(chunk->code, 0, chunk->count, &pattern);
+
+    UNUSED(match_result);
     assert(match_result == 1);
     
     // Should not match at position 1 (MUL, SUB != ADD, MUL)
@@ -428,11 +550,17 @@ void test_pattern_matching(void) {
 // Test pattern matching with wildcards
 void test_pattern_matching_wildcards(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create bytecode: PUSH_CONST 5, ADD
     ember_value val = {EMBER_VAL_NUMBER, {.number_val = 5.0}};
+
+    UNUSED(val);
     int const_idx = add_constant(chunk, val);
+
+    UNUSED(const_idx);
     add_instruction_with_param(chunk, OP_PUSH_CONST, const_idx);
     add_instruction(chunk, OP_ADD);
     
@@ -446,6 +574,8 @@ void test_pattern_matching_wildcards(void) {
     
     // Should match at position 0
     int match_result = ember_match_pattern(chunk->code, 0, chunk->count, &pattern);
+
+    UNUSED(match_result);
     assert(match_result == 1);
     
     free_test_chunk(chunk);
@@ -455,11 +585,17 @@ void test_pattern_matching_wildcards(void) {
 // Test loop optimization detection
 void test_loop_optimization(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create a simple loop pattern with constant inside
     ember_value val = {EMBER_VAL_NUMBER, {.number_val = 10.0}};
+
+    UNUSED(val);
     int const_idx = add_constant(chunk, val);
+
+    UNUSED(const_idx);
     
     // Simple loop: some instructions then LOOP back
     add_instruction_with_param(chunk, OP_PUSH_CONST, const_idx); // Loop invariant
@@ -470,6 +606,9 @@ void test_loop_optimization(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_loop_optimization(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.loop_optimized > 0);
@@ -481,6 +620,8 @@ void test_loop_optimization(void) {
 // Test control flow optimization - jump chains
 void test_control_flow_optimization(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create jump chain: JUMP to JUMP
@@ -493,6 +634,9 @@ void test_control_flow_optimization(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_control_flow(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.control_flow_optimized > 0);
@@ -504,11 +648,17 @@ void test_control_flow_optimization(void) {
 // Test register allocation simulation
 void test_register_allocation(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create simple stack operations
     ember_value val = {EMBER_VAL_NUMBER, {.number_val = 42.0}};
+
+    UNUSED(val);
     int const_idx = add_constant(chunk, val);
+
+    UNUSED(const_idx);
     
     add_instruction_with_param(chunk, OP_PUSH_CONST, const_idx);
     add_instruction_with_param(chunk, OP_PUSH_CONST, const_idx);
@@ -519,6 +669,9 @@ void test_register_allocation(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_register_allocation(chunk, &stats);
+
+    
+    UNUSED(optimizations);
     
     // Should succeed as we don't exceed stack limits
     assert(optimizations > 0);
@@ -531,16 +684,31 @@ void test_register_allocation(void) {
 // Test comprehensive optimization with all flags
 void test_comprehensive_optimization(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create complex bytecode with multiple optimization opportunities
     ember_value val1 = {EMBER_VAL_NUMBER, {.number_val = 5.0}};
+
+    UNUSED(val1);
     ember_value val2 = {EMBER_VAL_NUMBER, {.number_val = 3.0}};
+
+    UNUSED(val2);
     ember_value val3 = {EMBER_VAL_NUMBER, {.number_val = 1.0}};
+
+    UNUSED(val3);
     
     int const1_idx = add_constant(chunk, val1);
+
+    
+    UNUSED(const1_idx);
     int const2_idx = add_constant(chunk, val2);
+
+    UNUSED(const2_idx);
     int const3_idx = add_constant(chunk, val3);
+
+    UNUSED(const3_idx);
     
     // Constant folding opportunity
     add_instruction_with_param(chunk, OP_PUSH_CONST, const1_idx);
@@ -560,6 +728,9 @@ void test_comprehensive_optimization(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_chunk(chunk, OPT_ALL, &stats);
+
+    
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.optimization_passes > 0);
@@ -569,6 +740,8 @@ void test_comprehensive_optimization(void) {
     int total_specific_optimizations = stats.constant_folded + 
                                       stats.redundant_push_pop + 
                                       stats.eliminated_jumps;
+
+    UNUSED(total_specific_optimizations);
     assert(total_specific_optimizations > 0);
     
     free_test_chunk(chunk);
@@ -578,6 +751,8 @@ void test_comprehensive_optimization(void) {
 // Test optimization with no opportunities
 void test_no_optimization_opportunities(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create bytecode with no optimization opportunities
@@ -587,6 +762,9 @@ void test_no_optimization_opportunities(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_chunk(chunk, OPT_ALL, &stats);
+
+    
+    UNUSED(optimizations);
     
     // Should complete but find no optimizations
     assert(optimizations == 0);
@@ -599,6 +777,8 @@ void test_no_optimization_opportunities(void) {
 // Test edge case - empty chunk optimization
 void test_empty_chunk_optimization(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Empty chunk
@@ -608,6 +788,9 @@ void test_empty_chunk_optimization(void) {
     ember_init_optimization_stats(&stats);
     
     int optimizations = ember_optimize_chunk(chunk, OPT_ALL, &stats);
+
+    
+    UNUSED(optimizations);
     
     // Should handle empty chunk gracefully
     assert(optimizations == 0);
@@ -620,14 +803,25 @@ void test_empty_chunk_optimization(void) {
 // Test specific optimization flags
 void test_specific_optimization_flags(void) {
     ember_chunk* chunk = create_test_chunk();
+
+    UNUSED(chunk);
     assert(chunk != NULL);
     
     // Create bytecode with constant folding opportunity
     ember_value val1 = {EMBER_VAL_NUMBER, {.number_val = 2.0}};
+
+    UNUSED(val1);
     ember_value val2 = {EMBER_VAL_NUMBER, {.number_val = 3.0}};
+
+    UNUSED(val2);
     
     int const1_idx = add_constant(chunk, val1);
+
+    
+    UNUSED(const1_idx);
     int const2_idx = add_constant(chunk, val2);
+
+    UNUSED(const2_idx);
     
     add_instruction_with_param(chunk, OP_PUSH_CONST, const1_idx);
     add_instruction_with_param(chunk, OP_PUSH_CONST, const2_idx);
@@ -638,6 +832,8 @@ void test_specific_optimization_flags(void) {
     
     // Only enable constant folding
     int optimizations = ember_optimize_chunk(chunk, OPT_CONSTANT_FOLDING, &stats);
+
+    UNUSED(optimizations);
     
     assert(optimizations > 0);
     assert(stats.constant_folded > 0);
@@ -649,17 +845,34 @@ void test_specific_optimization_flags(void) {
 // Test optimization performance improvements
 void test_optimization_performance_verification(void) {
     ember_chunk* original_chunk = create_test_chunk();
+
+    UNUSED(original_chunk);
     ember_chunk* optimized_chunk = create_test_chunk();
+
+    UNUSED(optimized_chunk);
     assert(original_chunk != NULL && optimized_chunk != NULL);
     
     // Create identical complex bytecode in both chunks
     ember_value val1 = {EMBER_VAL_NUMBER, {.number_val = 10.0}};
+
+    UNUSED(val1);
     ember_value val2 = {EMBER_VAL_NUMBER, {.number_val = 5.0}};
+
+    UNUSED(val2);
     
     int const1_idx_orig = add_constant(original_chunk, val1);
+
+    
+    UNUSED(const1_idx_orig);
     int const2_idx_orig = add_constant(original_chunk, val2);
+
+    UNUSED(const2_idx_orig);
     int const1_idx_opt = add_constant(optimized_chunk, val1);
+
+    UNUSED(const1_idx_opt);
     int const2_idx_opt = add_constant(optimized_chunk, val2);
+
+    UNUSED(const2_idx_opt);
     
     // Add multiple constant folding opportunities
     for (int i = 0; i < 3; i++) {
@@ -675,12 +888,17 @@ void test_optimization_performance_verification(void) {
     }
     
     int original_count = original_chunk->count;
+
+    
+    UNUSED(original_count);
     
     ember_optimization_stats stats;
     ember_init_optimization_stats(&stats);
     
     // Optimize only the second chunk
     int optimizations = ember_optimize_chunk(optimized_chunk, OPT_ALL, &stats);
+
+    UNUSED(optimizations);
     
     // Verify performance improvement
     assert(optimizations > 0);

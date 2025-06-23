@@ -1,7 +1,7 @@
 #ifndef EMBER_TESTING_FRAMEWORK_H
 #define EMBER_TESTING_FRAMEWORK_H
 
-#include "../../include/ember.h"
+#include "../../../include/ember.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,6 +107,9 @@ void test_benchmark(const char* name, void (*func)(ember_vm*), ember_vm* vm, int
 
 #define TEST_ASSERT_NUM_EQ(expected, actual, tolerance, message) \
     test_assert_number_equal(vm, (expected), (actual), (tolerance), (message))
+
+#define TEST_ASSERT_THROWS(func, expected_error, message) \
+    test_assert_throws(vm, (func), (expected_error), (message))
 
 #define TEST_DEFINE(test_name) \
     void test_##test_name(ember_vm* vm)

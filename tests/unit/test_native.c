@@ -15,10 +15,14 @@ static ember_value native_print_mock(ember_vm* vm, int argc, ember_value* argv) 
 
 void test_native_function_registration(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Store the initial global count (built-in functions)
     int initial_count = vm->global_count;
+
+    UNUSED(initial_count);
     
     // Register a function with a new name (this will add to globals)
     ember_register_func(vm, "test_print", native_print_mock);
@@ -28,6 +32,8 @@ void test_native_function_registration(void) {
     
     // Find the test_print function in globals and verify it
     bool found_test_print = false;
+
+    UNUSED(found_test_print);
     for (int i = 0; i < vm->global_count; i++) {
         if (strcmp(vm->globals[i].key, "test_print") == 0) {
             assert(vm->globals[i].value.type == EMBER_VAL_NATIVE);
@@ -43,12 +49,19 @@ void test_native_function_registration(void) {
 
 void test_native_function_call(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     ember_register_func(vm, "test_func", native_print_mock);
     
     ember_value arg = ember_make_number(42.0);
+
+    
+    UNUSED(arg);
     int result = ember_call(vm, "test_func", 1, &arg);
+
+    UNUSED(result);
     (void)result;
     assert(result == 0);
     printf("Native function call test passed\n");

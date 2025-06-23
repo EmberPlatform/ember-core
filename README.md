@@ -8,7 +8,7 @@ Ember Core is currently in early development with basic language features implem
 - ✅ **Basic expression evaluation** (arithmetic, string concatenation)
 - ✅ **Variables and arrays** (global scope only)
 - ✅ **Built-in functions** (print, type checking, math functions)
-- ⚠️ **Control flow** (if/else, loops - not yet working)
+- ✅ **Control flow** (if/else statements, while loops work; for loops work but avoid continue)
 - ⚠️ **Functions** (user-defined functions - not yet working)
 - ⚠️ **Objects/classes** (OOP features - not yet working)
 
@@ -35,12 +35,11 @@ Ember Core is a basic programming language interpreter written in C. This reposi
 - **Boolean Logic**: `not()` function for boolean negation
 
 ### ⚠️ Not Yet Implemented
-- **Control Flow**: if/else statements, loops (for, while)
 - **Functions**: User-defined functions and closures
 - **Objects/Classes**: Object-oriented programming features
 - **Module System**: Import/export functionality
 - **Exception Handling**: try/catch blocks
-- **Standard Library**: File I/O, networking, cryptography
+- **Standard Library**: Advanced features (networking, etc.)
 
 ## 🏗️ Repository Structure
 
@@ -57,25 +56,28 @@ This repository is part of a larger project structure:
 
 ### Building Ember Core
 
-> ⚠️ **Build Status**: The build system currently has dependency issues and may not compile successfully.
+> ⚠️ **Build Status**: ember-core builds successfully but with compilation warnings that need to be addressed.
 
 ```bash
-# Attempt to build (may fail due to missing dependencies)
+# Build ember-core (succeeds but shows warnings)
 make clean
 make
 
-# Note: The build requires stdlib components that are not properly integrated
+# Note: Build succeeds and produces working interpreter, but compilation warnings should be fixed
 ```
 
 ### Running Ember Code
 
-If the build succeeds, you can test basic functionality:
+You can test basic functionality:
 
 ```bash
-# Execute a script file (if build works)
+# Execute a script file
 ./build/ember script.ember
 
-# Note: Interactive REPL and compiler are not currently functional
+# Interactive REPL mode
+./build/ember
+
+# Note: Both executable mode and REPL work
 ```
 
 ### Example Code - Working Features
@@ -89,7 +91,7 @@ print("z =", z)
 
 // String operations
 name = "Ember"
-version = "2.0.3"
+version = "early-dev"
 message = "Welcome to " + name + " " + version
 print(message)
 
@@ -108,11 +110,30 @@ string_num = num("456")               // Convert to number
 print("abs(-15):", abs(-15))          // 15
 print("sqrt(25):", sqrt(25))          // 5
 print("max(7, 3):", max(7, 3))        // 7
+
+// Control flow (these work!)
+if x > 30 {
+    print("x is greater than 30")
+} else {
+    print("x is 30 or less")
+}
+
+// While loops work
+i = 0
+while i < 3 {
+    print("Loop iteration:", i)
+    i = i + 1
+}
+
+// For loops work (but avoid continue)
+for j = 0; j < 3; j = j + 1 {
+    print("For loop:", j)
+}
 ```
 
 **Note**: The following features are NOT yet implemented:
-- Functions, classes, if/else statements, loops
-- Standard library features (JSON, crypto, file I/O)
+- Functions, classes
+- Advanced standard library features (networking, advanced crypto)
 - Module system and imports
 
 ## Architecture
@@ -176,7 +197,7 @@ The following functions exist in the codebase but are not working:
 
 - **No exception handling**: try/catch blocks are not implemented
 - **No user-defined functions**: Function definitions don't work
-- **No control flow**: if/else, loops not working
+- **For loop continue bug**: Avoid using continue in for loops (causes infinite loops)
 - **No objects/classes**: OOP features not implemented
 - **No modules**: import/export system not working
 - **Build issues**: Dependencies not properly organized
@@ -189,16 +210,16 @@ The following functions exist in the codebase but are not working:
 # Install dependencies (Ubuntu/Debian)
 sudo apt-get install build-essential libreadline-dev libssl-dev
 
-# Attempt to build (currently has issues)
+# Build ember-core (succeeds but with warnings)
 make clean
 make
 
-# Note: Build currently fails due to missing stdlib.h and other dependency issues
+# Note: Build succeeds and creates working interpreter, warnings need to be fixed
 ```
 
 ### Current Development Status
 
-- **Build system**: Needs dependency reorganization
+- **Build system**: ember-core builds successfully but with warnings
 - **Test suite**: Limited tests available in parent repository
 - **Documentation**: Being updated to reflect actual implementation
 - **Architecture**: Needs refactoring for clean component separation
@@ -208,7 +229,7 @@ make
 This is an early-stage language implementation. Current priorities:
 
 1. **Fix build system** - Resolve dependency issues between core and stdlib
-2. **Implement control flow** - Add if/else statements and loops
+2. **Fix continue bug** - Resolve infinite loop issue with continue in for loops
 3. **Add function support** - Enable user-defined functions
 4. **Improve error handling** - Better error messages and recovery
 5. **Organize architecture** - Clean separation between components

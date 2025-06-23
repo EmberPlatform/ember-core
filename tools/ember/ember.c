@@ -332,7 +332,6 @@ int main(int argc, char* argv[]) {
     
     const char* mount_spec = NULL;
     const char* script_file = NULL;
-    int arg_offset = 1;
     
     // Handle help and version flags first
     if (argc > 1) {
@@ -364,10 +363,8 @@ int main(int argc, char* argv[]) {
             }
             mount_spec = argv[2];
             script_file = argv[3];
-            arg_offset = 4;
         } else if (argc > 1) {
             script_file = argv[1];
-            arg_offset = 2;
         }
     }
 
@@ -507,7 +504,13 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         
-        fread(source, 1, length, file);
+        if (fread(source, 1, length, file) != (size_t)length) {
+            printf("Error: Failed to read file completely\n");
+            free(source);
+            fclose(file);
+            ember_free_vm(vm);
+            return 1;
+        }
         source[length] = '\0';
         fclose(file);
 

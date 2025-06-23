@@ -5,10 +5,15 @@
 #include <math.h>
 #include "test_ember_internal.h"
 
+// Macro to mark variables as intentionally unused
+#define UNUSED(x) ((void)(x))
+
 // Test expression parsing functionality comprehensively
 
 void test_basic_literals(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing basic literals...\n");
@@ -27,6 +32,8 @@ void test_basic_literals(void) {
     for (int i = 0; number_tests[i] != NULL; i++) {
         printf("  Testing number literal: %s\n", number_tests[i]);
         int result = ember_eval(vm, number_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -43,6 +50,8 @@ void test_basic_literals(void) {
     for (int i = 0; string_tests[i] != NULL; i++) {
         printf("  Testing string literal: %s\n", string_tests[i]);
         int result = ember_eval(vm, string_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -56,6 +65,8 @@ void test_basic_literals(void) {
     for (int i = 0; bool_tests[i] != NULL; i++) {
         printf("  Testing boolean literal: %s\n", bool_tests[i]);
         int result = ember_eval(vm, bool_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -65,6 +76,8 @@ void test_basic_literals(void) {
 
 void test_arithmetic_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing arithmetic expressions...\n");
@@ -99,6 +112,8 @@ void test_arithmetic_expressions(void) {
     for (int i = 0; arithmetic_tests[i] != NULL; i++) {
         printf("  Testing arithmetic: %s\n", arithmetic_tests[i]);
         int result = ember_eval(vm, arithmetic_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -108,6 +123,8 @@ void test_arithmetic_expressions(void) {
 
 void test_comparison_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing comparison expressions...\n");
@@ -148,6 +165,8 @@ void test_comparison_expressions(void) {
     for (int i = 0; comparison_tests[i] != NULL; i++) {
         printf("  Testing comparison: %s\n", comparison_tests[i]);
         int result = ember_eval(vm, comparison_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -157,6 +176,8 @@ void test_comparison_expressions(void) {
 
 void test_logical_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing logical expressions...\n");
@@ -198,6 +219,8 @@ void test_logical_expressions(void) {
     for (int i = 0; logical_tests[i] != NULL; i++) {
         printf("  Testing logical: %s\n", logical_tests[i]);
         int result = ember_eval(vm, logical_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -207,6 +230,8 @@ void test_logical_expressions(void) {
 
 void test_unary_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing unary expressions...\n");
@@ -233,6 +258,8 @@ void test_unary_expressions(void) {
     for (int i = 0; unary_tests[i] != NULL; i++) {
         printf("  Testing unary: %s\n", unary_tests[i]);
         int result = ember_eval(vm, unary_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -242,6 +269,8 @@ void test_unary_expressions(void) {
 
 void test_grouping_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing grouping expressions...\n");
@@ -268,6 +297,8 @@ void test_grouping_expressions(void) {
     for (int i = 0; grouping_tests[i] != NULL; i++) {
         printf("  Testing grouping: %s\n", grouping_tests[i]);
         int result = ember_eval(vm, grouping_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -277,6 +308,8 @@ void test_grouping_expressions(void) {
 
 void test_variable_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing variable expressions...\n");
@@ -308,6 +341,8 @@ void test_variable_expressions(void) {
     for (int i = 0; variable_tests[i] != NULL; i++) {
         printf("  Testing variable: %s\n", variable_tests[i]);
         int result = ember_eval(vm, variable_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -317,6 +352,8 @@ void test_variable_expressions(void) {
 
 void test_array_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing array expressions...\n");
@@ -342,6 +379,8 @@ void test_array_expressions(void) {
     for (int i = 0; array_tests[i] != NULL; i++) {
         printf("  Testing array: %s\n", array_tests[i]);
         int result = ember_eval(vm, array_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -365,6 +404,8 @@ void test_array_expressions(void) {
     for (int i = 0; indexing_tests[i] != NULL; i++) {
         printf("  Testing array indexing: %s\n", indexing_tests[i]);
         int result = ember_eval(vm, indexing_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -374,6 +415,8 @@ void test_array_expressions(void) {
 
 void test_hash_map_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing hash map expressions...\n");
@@ -397,6 +440,8 @@ void test_hash_map_expressions(void) {
     for (int i = 0; hash_map_tests[i] != NULL; i++) {
         printf("  Testing hash map: %s\n", hash_map_tests[i]);
         int result = ember_eval(vm, hash_map_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -406,6 +451,8 @@ void test_hash_map_expressions(void) {
 
 void test_function_call_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing function call expressions...\n");
@@ -416,6 +463,8 @@ void test_function_call_expressions(void) {
     // Test mathematical functions
     args[0] = ember_make_number(25.0);
     int result = ember_call(vm, "sqrt", 1, args);
+
+    UNUSED(result);
     printf("  sqrt(25) call result: %d\n", result);
     
     args[0] = ember_make_number(-42.0);
@@ -455,6 +504,8 @@ void test_function_call_expressions(void) {
 
 void test_complex_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing complex expressions...\n");
@@ -488,6 +539,8 @@ void test_complex_expressions(void) {
     for (int i = 0; complex_tests[i] != NULL; i++) {
         printf("  Testing complex: %s\n", complex_tests[i]);
         int result = ember_eval(vm, complex_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     
@@ -497,6 +550,8 @@ void test_complex_expressions(void) {
 
 void test_expression_error_cases(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing expression error cases...\n");
@@ -534,6 +589,8 @@ void test_expression_error_cases(void) {
     for (int i = 0; error_tests[i] != NULL; i++) {
         printf("  Testing error case: %s\n", error_tests[i]);
         int result = ember_eval(vm, error_tests[i]);
+
+        UNUSED(result);
         printf("    Error result: %d (expected non-zero)\n", result);
         // Clear any error state
         ember_vm_clear_error(vm);
@@ -545,6 +602,8 @@ void test_expression_error_cases(void) {
 
 void test_operator_precedence(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing operator precedence...\n");
@@ -580,6 +639,8 @@ void test_operator_precedence(void) {
     for (int i = 0; precedence_tests[i] != NULL; i++) {
         printf("  Testing precedence: %s\n", precedence_tests[i]);
         int result = ember_eval(vm, precedence_tests[i]);
+
+        UNUSED(result);
         printf("    Result: %d\n", result);
     }
     

@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "testing_framework.h"
 
 // Test Regex creation

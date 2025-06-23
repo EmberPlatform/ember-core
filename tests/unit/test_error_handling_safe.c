@@ -16,12 +16,16 @@ void test_null_pointer_handling() {
     // Test ember_eval with null VM
     printf("  Testing ember_eval with null VM...\\n");
     int result = ember_eval(NULL, "print(42)");
+
+    UNUSED(result);
     assert(result != 0);
     printf("    ✓ Null VM handled gracefully (returned %d)\\n", result);
     
     // Test ember_eval with null script
     printf("  Testing ember_eval with null script...\\n");
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     result = ember_eval(vm, NULL);
     assert(result != 0);
@@ -41,6 +45,9 @@ void test_syntax_error_handling() {
     printf("Testing syntax error handling...\\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test various syntax errors
@@ -52,12 +59,20 @@ void test_syntax_error_handling() {
     };
     
     int error_count = 0;
+
+    
+    UNUSED(error_count);
     int handled_gracefully = 0;
+
+    UNUSED(handled_gracefully);
     
     for (int i = 0; syntax_errors[i] != NULL; i++) {
         printf("  Testing: %s\\n", syntax_errors[i]);
         
         int result = ember_eval(vm, syntax_errors[i]);
+
+        
+        UNUSED(result);
         error_count++;
         if (result != 0) {
             handled_gracefully++;
@@ -78,6 +93,9 @@ void test_runtime_error_handling() {
     printf("Testing runtime error handling...\\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test runtime errors that should be handled gracefully
@@ -88,12 +106,20 @@ void test_runtime_error_handling() {
     };
     
     int error_count = 0;
+
+    
+    UNUSED(error_count);
     int handled_gracefully = 0;
+
+    UNUSED(handled_gracefully);
     
     for (int i = 0; runtime_errors[i] != NULL; i++) {
         printf("  Testing: %s\\n", runtime_errors[i]);
         
         int result = ember_eval(vm, runtime_errors[i]);
+
+        
+        UNUSED(result);
         error_count++;
         if (result != 0) {
             handled_gracefully++;
@@ -115,10 +141,14 @@ void test_vm_lifecycle_safety() {
     // Test normal VM lifecycle
     printf("  Testing normal VM allocation and deallocation...\\n");
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Use the VM
     int result = ember_eval(vm, "x = 42");
+
+    UNUSED(result);
     printf("    VM usage result: %d\\n", result);
     
     // Free the VM
@@ -129,6 +159,8 @@ void test_vm_lifecycle_safety() {
     printf("  Testing multiple VM cycles...\\n");
     for (int i = 0; i < 10; i++) {
         ember_vm* test_vm = ember_new_vm();
+
+        UNUSED(test_vm);
         assert(test_vm != NULL);
         ember_eval(test_vm, "y = 123");
         ember_free_vm(test_vm);

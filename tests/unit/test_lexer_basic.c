@@ -8,22 +8,32 @@
 
 void test_basic_tokenization(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing basic tokenization...\n");
     
     // Test simple numeric expression parsing
     const char* simple_expr = "42 + 3.14";
+
+    UNUSED(simple_expr);
     int result = ember_eval(vm, simple_expr);
+
+    UNUSED(result);
     printf("Evaluation result for '%s': %d\n", simple_expr, result);
     
     // Test boolean literals
     const char* bool_expr = "true && false";
+
+    UNUSED(bool_expr);
     result = ember_eval(vm, bool_expr);
     printf("Evaluation result for '%s': %d\n", bool_expr, result);
     
     // Test string literals
     const char* string_expr = "\"Hello World\"";
+
+    UNUSED(string_expr);
     result = ember_eval(vm, string_expr);
     printf("Evaluation result for '%s': %d\n", string_expr, result);
     
@@ -33,6 +43,8 @@ void test_basic_tokenization(void) {
 
 void test_arithmetic_expressions(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing arithmetic expressions...\n");
@@ -51,6 +63,8 @@ void test_arithmetic_expressions(void) {
     for (int i = 0; expressions[i] != NULL; i++) {
         printf("Testing expression: %s\n", expressions[i]);
         int result = ember_eval(vm, expressions[i]);
+
+        UNUSED(result);
         printf("  Result: %d\n", result);
     }
     
@@ -60,6 +74,8 @@ void test_arithmetic_expressions(void) {
 
 void test_comparison_operations(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing comparison operations...\n");
@@ -77,6 +93,8 @@ void test_comparison_operations(void) {
     for (int i = 0; comparisons[i] != NULL; i++) {
         printf("Testing comparison: %s\n", comparisons[i]);
         int result = ember_eval(vm, comparisons[i]);
+
+        UNUSED(result);
         printf("  Result: %d\n", result);
     }
     
@@ -86,6 +104,8 @@ void test_comparison_operations(void) {
 
 void test_logical_operations(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing logical operations...\n");
@@ -103,6 +123,8 @@ void test_logical_operations(void) {
     for (int i = 0; logical_ops[i] != NULL; i++) {
         printf("Testing logical operation: %s\n", logical_ops[i]);
         int result = ember_eval(vm, logical_ops[i]);
+
+        UNUSED(result);
         printf("  Result: %d\n", result);
     }
     
@@ -112,6 +134,8 @@ void test_logical_operations(void) {
 
 void test_variable_operations(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing variable operations...\n");
@@ -127,6 +151,8 @@ void test_variable_operations(void) {
     for (int i = 0; var_tests[i] != NULL; i++) {
         printf("Testing variable operation: %s\n", var_tests[i]);
         int result = ember_eval(vm, var_tests[i]);
+
+        UNUSED(result);
         printf("  Result: %d\n", result);
     }
     
@@ -136,6 +162,8 @@ void test_variable_operations(void) {
 
 void test_function_calls(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing function calls...\n");
@@ -146,6 +174,8 @@ void test_function_calls(void) {
     
     // Test sqrt function
     int result = ember_call(vm, "sqrt", 1, args);
+
+    UNUSED(result);
     printf("sqrt(25) call result: %d\n", result);
     
     // Test abs function
@@ -164,6 +194,8 @@ void test_function_calls(void) {
 
 void test_error_handling(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing error handling...\n");
@@ -180,6 +212,8 @@ void test_error_handling(void) {
     for (int i = 0; syntax_errors[i] != NULL; i++) {
         printf("Testing syntax error: %s\n", syntax_errors[i]);
         int result = ember_eval(vm, syntax_errors[i]);
+
+        UNUSED(result);
         printf("  Error result: %d (expected non-zero)\n", result);
     }
     
@@ -189,12 +223,16 @@ void test_error_handling(void) {
 
 void test_edge_cases(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     printf("Testing edge cases...\n");
     
     // Test empty input
     int result = ember_eval(vm, "");
+
+    UNUSED(result);
     printf("Empty input result: %d\n", result);
     
     // Test whitespace only

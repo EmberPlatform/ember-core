@@ -1,0 +1,29 @@
+// Memory stress test
+print("Starting memory stress test...")
+
+// Test large string operations
+print("Test 1: Large string operations")
+for (i = 0; i < 10; i++) {
+    large_string = "test_" + str(i) + "_data"
+    print("Created string: " + large_string)
+}
+
+// Test array operations
+print("Test 2: Array operations")
+big_array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+for (j = 0; j < 5; j++) {
+    print("Array element " + str(j) + " = " + str(big_array[j]))
+}
+
+// Test function calls in loops
+print("Test 3: Function calls in loops")
+function test_func(n) {
+    return n * 2
+}
+
+for (k = 0; k < 5; k++) {
+    result = test_func(k)
+    print("test_func(" + str(k) + ") = " + str(result))
+}
+
+print("Memory stress test completed")

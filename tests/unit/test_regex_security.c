@@ -1,4 +1,7 @@
 #include "test_ember_internal.h"
+
+// Macro to mark variables as intentionally unused
+#define UNUSED(x) ((void)(x))
 #include "../../src/stdlib/regex_native.h"
 #include <assert.h>
 #include <string.h>
@@ -11,9 +14,14 @@ void test_regex_basic_match() {
     
     // Test simple character matching
     ember_regex_pattern* regex = ember_regex_compile("hello", &opts);
+
+    UNUSED(regex);
     assert(regex != NULL);
     
     ember_regex_match* match = ember_regex_match_string(regex, "hello world");
+
+    
+    UNUSED(match);
     assert(match != NULL);
     assert(match->matched == 1);
     assert(match->start == 0);
@@ -31,9 +39,14 @@ void test_regex_quantifiers() {
     
     // Test + quantifier
     ember_regex_pattern* regex = ember_regex_compile("a+", &opts);
+
+    UNUSED(regex);
     assert(regex != NULL);
     
     ember_regex_match* match = ember_regex_match_string(regex, "aaab");
+
+    
+    UNUSED(match);
     assert(match != NULL);
     assert(match->matched == 1);
     assert(match->start == 0);
@@ -62,9 +75,14 @@ void test_regex_character_classes() {
     
     // Test digit class
     ember_regex_pattern* regex = ember_regex_compile("\\d+", &opts);
+
+    UNUSED(regex);
     assert(regex != NULL);
     
     ember_regex_match* match = ember_regex_match_string(regex, "abc123def");
+
+    
+    UNUSED(match);
     assert(match != NULL);
     assert(match->matched == 1);
     
@@ -93,6 +111,8 @@ void test_regex_catastrophic_backtracking() {
     
     // Test nested quantifiers - should be rejected during compilation
     ember_regex_pattern* regex = ember_regex_compile("(a+)+", &opts);
+
+    UNUSED(regex);
     assert(regex == NULL);  // Should fail compilation due to dangerous pattern
     
     // Test alternation that could cause backtracking
@@ -100,6 +120,8 @@ void test_regex_catastrophic_backtracking() {
     if (regex != NULL) {
         // If compilation succeeds, execution should timeout or hit backtrack limit
         ember_regex_match* match = ember_regex_match_string(regex, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+        UNUSED(match);
         // Match should fail due to timeout or backtrack limit
         assert(match == NULL || !match->matched);
         
@@ -117,6 +139,8 @@ void test_regex_timeout_protection() {
     
     // Create a regex that would normally match quickly
     ember_regex_pattern* regex = ember_regex_compile("a*", &opts);
+
+    UNUSED(regex);
     assert(regex != NULL);
     
     // Test with a very long string that could cause timeout
@@ -126,6 +150,8 @@ void test_regex_timeout_protection() {
     
     clock_t start = clock();
     ember_regex_match* match = ember_regex_match_string(regex, long_string);
+
+    UNUSED(match);
     clock_t end = clock();
     
     double elapsed = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;
@@ -145,6 +171,9 @@ void test_regex_input_size_validation() {
     opts.max_input_size = 100;  // Small limit for testing
     
     ember_regex_pattern* regex = ember_regex_compile("test", &opts);
+
+    
+    UNUSED(regex);
     assert(regex != NULL);
     
     // Create string larger than limit
@@ -154,6 +183,8 @@ void test_regex_input_size_validation() {
     
     // Should reject large input
     ember_regex_match* match = ember_regex_match_string(regex, large_string);
+
+    UNUSED(match);
     assert(match == NULL);
     
     // Should accept small input
@@ -210,9 +241,14 @@ void test_regex_escape_sequences() {
     
     // Test literal dot
     ember_regex_pattern* regex = ember_regex_compile("\\.", &opts);
+
+    UNUSED(regex);
     assert(regex != NULL);
     
     ember_regex_match* match = ember_regex_match_string(regex, "a.b");
+
+    
+    UNUSED(match);
     assert(match != NULL);
     assert(match->matched == 1);
     
@@ -240,8 +276,12 @@ void test_regex_backtrack_limit() {
     
     // Pattern that could cause excessive backtracking
     ember_regex_pattern* regex = ember_regex_compile("a*a*a*a*a*a*a*a*a*a*b", &opts);
+
+    UNUSED(regex);
     if (regex != NULL) {
         ember_regex_match* match = ember_regex_match_string(regex, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+        UNUSED(match);
         // Should fail due to backtrack limit
         assert(match == NULL || !match->matched);
         
@@ -255,6 +295,8 @@ void test_regex_backtrack_limit() {
 // Test standard library functions
 void test_regex_stdlib_functions() {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test regex_test function
@@ -263,6 +305,9 @@ void test_regex_stdlib_functions() {
     args[1] = ember_make_string_gc(vm, "this is a test");
     
     ember_value result = ember_regex_test(vm, 2, args);
+
+    
+    UNUSED(result);
     assert(result.type == EMBER_VAL_BOOL);
     assert(result.as.bool_val == 1);
     
@@ -306,6 +351,9 @@ void test_regex_security_comprehensive() {
         printf("  Testing pattern: %s\n", attack_patterns[i]);
         
         ember_regex_pattern* regex = ember_regex_compile(attack_patterns[i], &opts);
+
+        
+        UNUSED(regex);
         if (regex == NULL) {
             printf("    ✓ Pattern rejected during compilation\n");
             continue;
@@ -314,6 +362,8 @@ void test_regex_security_comprehensive() {
         // If compilation succeeded, test with potentially problematic input
         clock_t start = clock();
         ember_regex_match* match = ember_regex_match_string(regex, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+        UNUSED(match);
         clock_t end = clock();
         
         double elapsed = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;

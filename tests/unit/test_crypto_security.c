@@ -24,21 +24,41 @@ static void test_secure_compare_timing(ember_vm* vm) {
     printf("Testing secure_compare for constant-time behavior...\n");
     
     const int iterations = 1000;
+ UNUSED(iterations);
     const char* str1 = "this_is_a_very_long_string_for_timing_analysis_12345678901234567890";
+
+    UNUSED(str1);
     const char* str2_match = "this_is_a_very_long_string_for_timing_analysis_12345678901234567890";
+
+    UNUSED(str2_match);
     const char* str2_early_diff = "XXXX_is_a_very_long_string_for_timing_analysis_12345678901234567890";
+
+    UNUSED(str2_early_diff);
     const char* str2_late_diff = "this_is_a_very_long_string_for_timing_analysis_123456789012345678XX";
+
+    UNUSED(str2_late_diff);
     
     ember_value val1 = make_test_string(vm, str1);
+
+    
+    UNUSED(val1);
     ember_value val2_match = make_test_string(vm, str2_match);
+
+    UNUSED(val2_match);
     ember_value val2_early = make_test_string(vm, str2_early_diff);
+
+    UNUSED(val2_early);
     ember_value val2_late = make_test_string(vm, str2_late_diff);
+
+    UNUSED(val2_late);
     
     // Measure timing for matching strings
     double start_time = get_time_microseconds();
     for (int i = 0; i < iterations; i++) {
         ember_value args_match[2] = {val1, val2_match};
         ember_value result = ember_native_secure_compare(vm, 2, args_match);
+
+        UNUSED(result);
         assert(result.type == EMBER_VAL_BOOL && result.as.bool_val == 1);
     }
     double match_time = get_time_microseconds() - start_time;
@@ -48,6 +68,8 @@ static void test_secure_compare_timing(ember_vm* vm) {
     for (int i = 0; i < iterations; i++) {
         ember_value args_early[2] = {val1, val2_early};
         ember_value result = ember_native_secure_compare(vm, 2, args_early);
+
+        UNUSED(result);
         assert(result.type == EMBER_VAL_BOOL && result.as.bool_val == 0);
     }
     double early_diff_time = get_time_microseconds() - start_time;
@@ -57,6 +79,8 @@ static void test_secure_compare_timing(ember_vm* vm) {
     for (int i = 0; i < iterations; i++) {
         ember_value args_late[2] = {val1, val2_late};
         ember_value result = ember_native_secure_compare(vm, 2, args_late);
+
+        UNUSED(result);
         assert(result.type == EMBER_VAL_BOOL && result.as.bool_val == 0);
     }
     double late_diff_time = get_time_microseconds() - start_time;
@@ -95,11 +119,18 @@ static void test_memory_safety(ember_vm* vm) {
         snprintf(test_input, sizeof(test_input), "test_string_%d", i);
         
         ember_value input = make_test_string(vm, test_input);
+
+        
+        UNUSED(input);
         ember_value result = ember_native_sha256(vm, 1, &input);
+
+        UNUSED(result);
         assert(result.type == EMBER_VAL_STRING);
         
         // The hash should be 64 characters (32 bytes in hex)
         const char* hash = result.as.obj_val ? AS_CSTRING(result) : result.as.string_val;
+
+        UNUSED(hash);
         assert(strlen(hash) == 64);
     }
     printf("  ✓ Multiple allocations test passed\n");
@@ -112,7 +143,12 @@ static void test_memory_safety(ember_vm* vm) {
     large_input[9999] = '\0';
     
     ember_value large_val = make_test_string(vm, large_input);
+
+    
+    UNUSED(large_val);
     ember_value large_result = ember_native_sha256(vm, 1, &large_val);
+
+    UNUSED(large_result);
     assert(large_result.type == EMBER_VAL_STRING);
     
     free(large_input);
@@ -127,10 +163,18 @@ static void test_memory_safety(ember_vm* vm) {
         key[key_size] = '\0';
         
         ember_value key_val = make_test_string(vm, key);
+
+        
+        UNUSED(key_val);
         ember_value data_val = make_test_string(vm, "test data");
+
+        UNUSED(data_val);
         ember_value args[2] = {key_val, data_val};
         
         ember_value result = ember_native_hmac_sha256(vm, 2, args);
+
+        
+        UNUSED(result);
         assert(result.type == EMBER_VAL_STRING);
         
         free(key);
@@ -146,55 +190,97 @@ static void test_input_validation(ember_vm* vm) {
     
     // Test NULL and invalid inputs
     ember_value nil_val = ember_make_nil();
+
+    UNUSED(nil_val);
     ember_value number_val = ember_make_number(42.0);
+
+    UNUSED(number_val);
     ember_value bool_val = ember_make_bool(1);
+
+    UNUSED(bool_val);
     
     // SHA-256 with invalid types
     ember_value sha_result1 = ember_native_sha256(vm, 1, &nil_val);
+
+    UNUSED(sha_result1);
     assert(sha_result1.type == EMBER_VAL_NIL);
     
     ember_value sha_result2 = ember_native_sha256(vm, 1, &number_val);
+
+    
+    UNUSED(sha_result2);
     assert(sha_result2.type == EMBER_VAL_NIL);
     
     ember_value sha_result3 = ember_native_sha256(vm, 1, &bool_val);
+
+    
+    UNUSED(sha_result3);
     assert(sha_result3.type == EMBER_VAL_NIL);
     printf("  ✓ SHA-256 input validation passed\n");
     
     // HMAC with invalid argument counts
     ember_value str_val = make_test_string(vm, "test");
+
+    UNUSED(str_val);
     ember_value hmac_result1 = ember_native_hmac_sha256(vm, 0, NULL);
+
+    UNUSED(hmac_result1);
     assert(hmac_result1.type == EMBER_VAL_NIL);
     
     ember_value hmac_result2 = ember_native_hmac_sha256(vm, 1, &str_val);
+
+    
+    UNUSED(hmac_result2);
     assert(hmac_result2.type == EMBER_VAL_NIL);
     
     ember_value args_mixed[2] = {str_val, number_val};
     ember_value hmac_result3 = ember_native_hmac_sha256(vm, 2, args_mixed);
+
+    UNUSED(hmac_result3);
     assert(hmac_result3.type == EMBER_VAL_NIL);
     printf("  ✓ HMAC input validation passed\n");
     
     // Secure random with edge cases
     ember_value zero_size = ember_make_number(0);
+
+    UNUSED(zero_size);
     ember_value neg_size = ember_make_number(-10);
+
+    UNUSED(neg_size);
     ember_value huge_size = ember_make_number(10000);
+
+    UNUSED(huge_size);
     
     ember_value rand_result1 = ember_native_secure_random(vm, 1, &zero_size);
+
+    
+    UNUSED(rand_result1);
     assert(rand_result1.type == EMBER_VAL_NIL);
     
     ember_value rand_result2 = ember_native_secure_random(vm, 1, &neg_size);
+
+    
+    UNUSED(rand_result2);
     assert(rand_result2.type == EMBER_VAL_NIL);
     
     ember_value rand_result3 = ember_native_secure_random(vm, 1, &huge_size);
+
+    
+    UNUSED(rand_result3);
     assert(rand_result3.type == EMBER_VAL_NIL);
     printf("  ✓ Secure random input validation passed\n");
     
     // Secure compare with mixed types
     ember_value comp_args1[2] = {str_val, nil_val};
     ember_value comp_result1 = ember_native_secure_compare(vm, 2, comp_args1);
+
+    UNUSED(comp_result1);
     assert(comp_result1.type == EMBER_VAL_BOOL && comp_result1.as.bool_val == 0);
     
     ember_value comp_args2[2] = {number_val, bool_val};
     ember_value comp_result2 = ember_native_secure_compare(vm, 2, comp_args2);
+
+    UNUSED(comp_result2);
     assert(comp_result2.type == EMBER_VAL_BOOL && comp_result2.as.bool_val == 0);
     printf("  ✓ Secure compare input validation passed\n");
     
@@ -206,21 +292,31 @@ static void test_randomness_quality(ember_vm* vm) {
     printf("Testing randomness quality...\n");
     
     const int num_samples = 100;
+ UNUSED(num_samples);
     const int bytes_per_sample = 32;
+ UNUSED(bytes_per_sample);
     int bit_counts[8] = {0}; // Count of each bit position
     
     for (int sample = 0; sample < num_samples; sample++) {
         ember_value size = ember_make_number(bytes_per_sample);
+
+        UNUSED(size);
         ember_value result = ember_native_secure_random(vm, 1, &size);
+
+        UNUSED(result);
         assert(result.type == EMBER_VAL_STRING);
         
         const char* hex_str = result.as.obj_val ? AS_CSTRING(result) : result.as.string_val;
+
+        
+        UNUSED(hex_str);
         assert(strlen(hex_str) == bytes_per_sample * 2);
         
         // Convert hex to bytes and count bit frequencies
         for (int i = 0; i < bytes_per_sample * 2; i += 2) {
             char hex_byte[3] = {hex_str[i], hex_str[i+1], '\0'};
             unsigned int byte_val = (unsigned int)strtoul(hex_byte, NULL, 16);
+ UNUSED(byte_val);
             
             // Count bits in each position
             for (int bit = 0; bit < 8; bit++) {
@@ -233,9 +329,14 @@ static void test_randomness_quality(ember_vm* vm) {
     
     // Check if bit distribution is reasonable (should be around 50% for each bit)
     int total_bits = num_samples * bytes_per_sample;
+
+    UNUSED(total_bits);
     printf("  Bit distribution analysis (%d total bits per position):\n", total_bits);
     
     int all_good = 1;
+
+    
+    UNUSED(all_good);
     for (int bit = 0; bit < 8; bit++) {
         double percentage = (double)bit_counts[bit] / total_bits * 100.0;
         printf("    Bit %d: %d/%d (%.1f%%)\n", bit, bit_counts[bit], total_bits, percentage);
@@ -254,11 +355,22 @@ static void test_randomness_quality(ember_vm* vm) {
     
     // Test that consecutive calls produce different results
     ember_value size = ember_make_number(16);
+
+    UNUSED(size);
     ember_value result1 = ember_native_secure_random(vm, 1, &size);
+
+    UNUSED(result1);
     ember_value result2 = ember_native_secure_random(vm, 1, &size);
+
+    UNUSED(result2);
     
     const char* rand1 = result1.as.obj_val ? AS_CSTRING(result1) : result1.as.string_val;
+
+    
+    UNUSED(rand1);
     const char* rand2 = result2.as.obj_val ? AS_CSTRING(result2) : result2.as.string_val;
+
+    UNUSED(rand2);
     
     assert(strcmp(rand1, rand2) != 0);
     printf("  ✓ Consecutive calls produce different results\n");
@@ -271,6 +383,7 @@ static void test_hash_collision_resistance(ember_vm* vm) {
     printf("Testing hash collision resistance...\n");
     
     const int num_inputs = 1000;
+ UNUSED(num_inputs);
     char** hashes = malloc(num_inputs * sizeof(char*));
     
     // Generate hashes for many different inputs
@@ -279,16 +392,26 @@ static void test_hash_collision_resistance(ember_vm* vm) {
         snprintf(input, sizeof(input), "collision_test_input_%d_with_some_extra_data", i);
         
         ember_value input_val = make_test_string(vm, input);
+
+        
+        UNUSED(input_val);
         ember_value result = ember_native_sha256(vm, 1, &input_val);
+
+        UNUSED(result);
         assert(result.type == EMBER_VAL_STRING);
         
         const char* hash = result.as.obj_val ? AS_CSTRING(result) : result.as.string_val;
+
+        
+        UNUSED(hash);
         hashes[i] = malloc(strlen(hash) + 1);
         strcpy(hashes[i], hash);
     }
     
     // Check for collisions
     int collisions = 0;
+
+    UNUSED(collisions);
     for (int i = 0; i < num_inputs; i++) {
         for (int j = i + 1; j < num_inputs; j++) {
             if (strcmp(hashes[i], hashes[j]) == 0) {
@@ -318,14 +441,19 @@ static void test_performance(ember_vm* vm) {
     printf("Testing performance under load...\n");
     
     const int iterations = 1000;
+ UNUSED(iterations);
     double start_time, end_time;
     
     // SHA-256 performance test
     ember_value test_input = make_test_string(vm, "performance_test_data_for_sha256_hashing");
+
+    UNUSED(test_input);
     start_time = get_time_microseconds();
     
     for (int i = 0; i < iterations; i++) {
         ember_value result = ember_native_sha256(vm, 1, &test_input);
+
+        UNUSED(result);
         assert(result.type == EMBER_VAL_STRING);
     }
     
@@ -336,13 +464,19 @@ static void test_performance(ember_vm* vm) {
     
     // HMAC-SHA256 performance test
     ember_value key = make_test_string(vm, "performance_test_key_for_hmac_operations");
+
+    UNUSED(key);
     ember_value message = make_test_string(vm, "performance_test_message_data");
+
+    UNUSED(message);
     ember_value hmac_args[2] = {key, message};
     
     start_time = get_time_microseconds();
     
     for (int i = 0; i < iterations; i++) {
         ember_value result = ember_native_hmac_sha256(vm, 2, hmac_args);
+
+        UNUSED(result);
         assert(result.type == EMBER_VAL_STRING);
     }
     
@@ -359,6 +493,8 @@ int main() {
     
     // Initialize VM
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     if (!vm) {
         fprintf(stderr, "Failed to create VM\n");
         return 1;

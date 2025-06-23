@@ -66,13 +66,19 @@ void test_string_interning() {
         "performance", "benchmark", "ember", "vm", "cache"
     };
     int num_common = sizeof(common_strings) / sizeof(common_strings[0]);
+
+    UNUSED(num_common);
     
     const char* interned[10000];
     int duplicates = 0;
+
+    UNUSED(duplicates);
     
     // Intern many strings with repetition
     for (int i = 0; i < 10000; i++) {
         const char* original = common_strings[i % num_common];
+
+        UNUSED(original);
         interned[i] = string_intern_cstr(table, original);
         
         // Check if interning worked (same pointer for same string)
@@ -101,6 +107,9 @@ void test_vm_optimizations() {
     printf("\n=== Testing VM Optimizations ===\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) {
         printf("Failed to create VM\n");
         return;
@@ -122,10 +131,14 @@ void test_vm_optimizations() {
         "    i = i + 1\n"
         "}\n"
         "print(\"Optimized result:\", result)\n";
+
+    UNUSED(test_code);
     
     printf("Running optimization test with standard VM...\n");
     clock_t start1 = clock();
     int result1 = ember_eval(vm, test_code);
+
+    UNUSED(result1);
     clock_t end1 = clock();
     double time1 = ((double)(end1 - start1)) / CLOCKS_PER_SEC * 1000.0;
     
@@ -138,6 +151,8 @@ void test_vm_optimizations() {
     ember_vm_clear_error(vm);
     clock_t start2 = clock();
     int result2 = ember_run_optimized(vm);
+
+    UNUSED(result2);
     clock_t end2 = clock();
     double time2 = ((double)(end2 - start2)) / CLOCKS_PER_SEC * 1000.0;
     
@@ -172,8 +187,10 @@ void benchmark_memory_operations() {
     
     // Compare standard malloc/free vs arena allocation
     const int iterations = 10000;
+ UNUSED(iterations);
     const int allocation_sizes[] = {16, 32, 64, 128, 256};
     const int num_sizes = sizeof(allocation_sizes) / sizeof(allocation_sizes[0]);
+ UNUSED(num_sizes);
     
     printf("Testing %d allocations with standard malloc/free...\n", iterations);
     clock_t start1 = clock();

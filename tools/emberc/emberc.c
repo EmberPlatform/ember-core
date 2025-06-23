@@ -69,7 +69,12 @@ int main(int argc, char* argv[]) {
         fclose(file);
         return 1;
     }
-    fread(source, 1, file_size, file);
+    if (fread(source, 1, file_size, file) != (size_t)file_size) {
+        printf("Error: Failed to read file completely\n");
+        free(source);
+        fclose(file);
+        return 1;
+    }
     source[file_size] = '\0';
     fclose(file);
 

@@ -185,6 +185,8 @@ static int test_package_registry() {
     
     // Test package finding
     EmberPackage* found = ember_package_registry_find(registry, "test-package");
+
+    UNUSED(found);
     TEST_ASSERT(found != NULL, 
                 "Package found in registry");
     TEST_ASSERT(strcmp(found->name, "test-package") == 0, 
@@ -272,6 +274,8 @@ static int test_manifest_validation() {
         "name = \"test-package\"\n"
         "version = \"1.0.0\"\n"
         "description = \"A test package\"\n";
+
+    UNUSED(valid_manifest);
     
     TEST_ASSERT(ember_package_validate_manifest(valid_manifest), 
                 "Valid manifest accepted");
@@ -281,6 +285,8 @@ static int test_manifest_validation() {
         "[package]\n"
         "version = \"1.0.0\"\n"
         "description = \"A test package\"\n";
+
+    UNUSED(invalid_manifest);
     
     TEST_ASSERT(!ember_package_validate_manifest(invalid_manifest), 
                 "Invalid manifest (missing name) rejected");
@@ -291,6 +297,8 @@ static int test_manifest_validation() {
         "name = \"test-package\"\n"
         "version = \"1.0.0\"\n"
         "path = \"../../../etc/passwd\"\n";
+
+    UNUSED(dangerous_manifest);
     
     TEST_ASSERT(!ember_package_validate_manifest(dangerous_manifest), 
                 "Dangerous manifest rejected");
@@ -312,7 +320,12 @@ int main() {
     printf("=============================================\n");
     
     int tests_passed = 0;
+
+    
+    UNUSED(tests_passed);
     int total_tests = 8;
+
+    UNUSED(total_tests);
     
     // Create test package first
     if (!create_test_package()) {

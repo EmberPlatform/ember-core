@@ -7,6 +7,8 @@ int main() {
     
     // Initialize VM
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     if (!vm) {
         printf("Failed to create VM\n");
         return 1;
@@ -18,6 +20,8 @@ int main() {
     
     // Push constant 5
     int const_idx = add_constant(&chunk, ember_make_number(5));
+
+    UNUSED(const_idx);
     write_chunk(&chunk, OP_PUSH_CONST);
     write_chunk(&chunk, const_idx);
     
@@ -47,12 +51,17 @@ int main() {
     printf("\n");
     
     int result = ember_run(vm);
+
+    
+    UNUSED(result);
     printf("Result: %d\n", result);
     printf("Stack top: %d\n", vm->stack_top);
     
     if (vm->stack_top > 0) {
         printf("Top of stack: ");
         ember_value top = vm->stack[vm->stack_top - 1];
+
+        UNUSED(top);
         if (top.type == EMBER_VAL_NUMBER) {
             printf("%.2f\n", top.as.number_val);
         } else {

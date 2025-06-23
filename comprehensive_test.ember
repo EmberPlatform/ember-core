@@ -1,0 +1,91 @@
+// Comprehensive Ember Interpreter Verification Test
+print("=== EMBER INTERPRETER COMPREHENSIVE VERIFICATION ===")
+
+// Test 1: Basic expressions and variables
+print("Test 1: Basic expressions and variables")
+x = 5 + 3
+y = x * 2
+z = y - 4
+print("x = " + str(x) + ", y = " + str(y) + ", z = " + str(z))
+
+// Test 2: String operations  
+print("Test 2: String operations")
+str1 = "Hello"
+str2 = "World"
+combined = str1 + " " + str2
+print("Combined: " + combined)
+print("Length: " + str(len(combined)))
+
+// Test 3: Arrays
+print("Test 3: Arrays")
+arr = [10, 20, 30, 40, 50]
+print("arr[0] = " + str(arr[0]))
+print("arr[2] = " + str(arr[2]))
+arr[1] = 99
+print("Modified arr[1] = " + str(arr[1]))
+
+// Test 4: Control flow - if statements
+print("Test 4: If statements")
+if x > 5 {
+    print("x is greater than 5")
+} else {
+    print("x is not greater than 5")
+}
+
+// Test 5: While loops
+print("Test 5: While loops")
+counter = 0
+while counter < 3 {
+    print("While iteration " + str(counter))
+    counter = counter + 1
+}
+
+// Test 6: For loops  
+print("Test 6: For loops")
+for (i = 0; i < 3; i++) {
+    print("For iteration " + str(i))
+}
+
+// Test 7: Break statements
+print("Test 7: Break statements")  
+for (j = 0; j < 10; j++) {
+    if j == 3 {
+        print("Breaking at j = " + str(j))
+        break
+    }
+    print("j = " + str(j))
+}
+
+// Test 8: Function definitions
+print("Test 8: Function definitions")
+function multiply(a, b) {
+    return a * b
+}
+
+result = multiply(6, 7)
+print("multiply(6, 7) = " + str(result))
+
+// Test 9: Math functions
+print("Test 9: Math functions")
+print("abs(-15) = " + str(abs(-15)))
+print("sqrt(144) = " + str(sqrt(144)))
+print("pow(2, 8) = " + str(pow(2, 8)))
+
+// Test 10: Standard library crypto
+print("Test 10: Crypto functions")
+hash = sha256("test")
+print("sha256('test') = " + hash)
+
+// Test 11: JSON functions
+print("Test 11: JSON functions")
+json_val = json_parse("42")
+print("json_parse('42') = " + str(json_val))
+
+// Test 12: File I/O
+print("Test 12: File I/O")
+test_file = "/tmp/ember_test.txt"
+write_file(test_file, "Ember test content")
+content = read_file(test_file)
+print("File content: " + content)
+
+print("=== ALL TESTS COMPLETED ===")

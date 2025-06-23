@@ -5,8 +5,13 @@
 #include <stdlib.h>
 #include "test_ember_internal.h"
 
+// Macro to mark variables as intentionally unused
+#define UNUSED(x) ((void)(x))
+
 void test_vm_init(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     ember_free_vm(vm);
     printf("VM initialization test passed\n");
@@ -14,6 +19,8 @@ void test_vm_init(void) {
 
 void test_arithmetic(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test skipped due to internal access requirements
@@ -24,6 +31,8 @@ void test_arithmetic(void) {
 
 void test_stack_operations(void) {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test skipped due to internal access requirements

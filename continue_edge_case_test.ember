@@ -1,0 +1,25 @@
+// Edge case testing for continue statement
+print("Testing edge cases for continue statement...")
+
+// Edge case 1: Continue with complex expressions
+print("Edge case 1: Continue with string concatenation")
+for (i = 0; i < 3; i++) {
+    if i == 1 {
+        print("Continuing at i=" + str(i))
+        continue
+    }
+    print("Processing i=" + str(i))
+}
+
+// Edge case 2: Continue in nested loops
+print("Edge case 2: Nested loops with continue")
+for (outer = 0; outer < 2; outer++) {
+    for (inner = 0; inner < 3; inner++) {
+        if inner == 1 {
+            continue
+        }
+        print("outer=" + str(outer) + ", inner=" + str(inner))
+    }
+}
+
+print("Edge case testing completed")

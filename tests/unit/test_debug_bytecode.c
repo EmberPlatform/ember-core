@@ -53,6 +53,8 @@ void disassemble_bytecode(ember_chunk* chunk) {
     for (int i = 0; i < chunk->const_count; i++) {
         printf("%d: ", i);
         ember_value val = chunk->constants[i];
+
+        UNUSED(val);
         switch(val.type) {
             case EMBER_VAL_NUMBER:
                 printf("NUMBER %.2f", val.as.number_val);
@@ -74,6 +76,8 @@ void disassemble_bytecode(ember_chunk* chunk) {
 
 int main() {
     ember_vm* vm = ember_new_vm();
+
+    UNUSED(vm);
     if (!vm) {
         printf("Failed to create VM\n");
         return 1;
@@ -81,6 +85,8 @@ int main() {
     
     // Compile and disassemble
     const char* code = "print(5)";
+
+    UNUSED(code);
     ember_chunk chunk;
     init_chunk(&chunk);
     
@@ -92,10 +98,16 @@ int main() {
     
     // Add constants
     ember_value print_str = ember_make_nil();
+
+    UNUSED(print_str);
     print_str.type = EMBER_VAL_STRING;
     print_str.as.string_val = "print";
     int print_const = add_constant(&chunk, print_str);
+
+    UNUSED(print_const);
     int five_const = add_constant(&chunk, ember_make_number(5));
+
+    UNUSED(five_const);
     
     // Generate bytecode
     write_chunk(&chunk, OP_GET_GLOBAL);

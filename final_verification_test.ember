@@ -1,0 +1,116 @@
+// Final comprehensive verification test
+print("=== EMBER INTERPRETER FINAL VERIFICATION ===")
+
+// Test basic working features documented in CLAUDE.md
+error_count = 0
+
+// Variables and expressions
+print("Testing variables and expressions...")
+x = 5 + 3
+if x == 8 {
+    print("✓ Variables and arithmetic working")
+} else {
+    print("✗ Variables and arithmetic failed")
+    error_count = error_count + 1
+}
+
+// String operations  
+print("Testing string operations...")
+str_result = "Hello" + " " + "World"
+if len(str_result) == 11 {
+    print("✓ String concatenation and len() working")
+} else {
+    print("✗ String operations failed")
+    error_count = error_count + 1
+}
+
+// Control flow - if statements
+print("Testing if statements...")
+test_if = false
+if 5 > 3 {
+    test_if = true
+}
+if test_if {
+    print("✓ If statements working")
+} else {
+    print("✗ If statements failed")
+    error_count = error_count + 1
+}
+
+// Control flow - while loops
+print("Testing while loops...")
+while_test = 0
+i = 0
+while i < 3 {
+    while_test = while_test + 1
+    i = i + 1
+}
+if while_test == 3 {
+    print("✓ While loops working")
+} else {
+    print("✗ While loops failed")
+    error_count = error_count + 1
+}
+
+// Control flow - for loops
+print("Testing for loops...")
+for_test = 0
+for (j = 0; j < 3; j++) {
+    for_test = for_test + 1
+}
+if for_test == 3 {
+    print("✓ For loops working")
+} else {
+    print("✗ For loops failed")
+    error_count = error_count + 1
+}
+
+// Math functions
+print("Testing math functions...")
+if abs(-10) == 10 {
+    print("✓ Math functions working")
+} else {
+    print("✗ Math functions failed")
+    error_count = error_count + 1
+}
+
+// Arrays
+print("Testing arrays...")
+arr = [1, 2, 3]
+if arr[1] == 2 {
+    print("✓ Arrays working")
+} else {
+    print("✗ Arrays failed")
+    error_count = error_count + 1
+}
+
+// Functions
+print("Testing user-defined functions...")
+function test_func(n) {
+    return n * 2
+}
+if test_func(5) == 10 {
+    print("✓ User-defined functions working")
+} else {
+    print("✗ User-defined functions failed")
+    error_count = error_count + 1
+}
+
+// Standard library
+print("Testing standard library...")
+hash = sha256("test")
+if len(hash) > 0 {
+    print("✓ Standard library (crypto) working")
+} else {
+    print("✗ Standard library failed")
+    error_count = error_count + 1
+}
+
+// Summary
+print("=== VERIFICATION SUMMARY ===")
+if error_count == 0 {
+    print("✓ ALL TESTS PASSED - Ember interpreter is functional")
+} else {
+    print("✗ " + str(error_count) + " tests failed")
+}
+print("=== END OF VERIFICATION ===")

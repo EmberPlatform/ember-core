@@ -9,6 +9,9 @@ void test_stack_unwinding_memory() {
     printf("Testing stack unwinding memory safety...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test complex stack unwinding with multiple locals and nested calls
@@ -31,8 +34,13 @@ void test_stack_unwinding_memory() {
         "    print(\"Array length: \" + str(len(x)))\n"
         "}\n"
         "print(\"Memory test completed\")\n";
+
+    UNUSED(source);
         
     int result = ember_eval(vm, source);
+
+        
+    UNUSED(result);
     assert(result == 0); // Should succeed
     
     ember_free_vm(vm);
@@ -44,11 +52,16 @@ void test_handler_cleanup() {
     printf("Testing exception handler cleanup...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test that exception handlers are properly cleaned up
     const char* source = 
-        "for (i = 0; i < 10; i = i + 1) {\n"
+        "for (i = 0;
+
+    UNUSED(source); i < 10; i = i + 1) {\n"
         "    try {\n"
         "        if (i == 5) {\n"
         "            throw \"Exception at iteration \" + str(i)\n"
@@ -63,6 +76,9 @@ void test_handler_cleanup() {
         "print(\"Loop completed\")\n";
         
     int result = ember_eval(vm, source);
+
+        
+    UNUSED(result);
     assert(result == 0); // Should succeed
     
     // Verify handler count is back to 0
@@ -78,11 +94,16 @@ void test_exception_object_memory() {
     printf("Testing exception object memory management...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Create many exceptions to test GC
     const char* source = 
-        "for (i = 0; i < 100; i = i + 1) {\n"
+        "for (i = 0;
+
+    UNUSED(source); i < 100; i = i + 1) {\n"
         "    try {\n"
         "        throw \"Exception number \" + str(i)\n"
         "    } catch (e) {\n"
@@ -95,6 +116,9 @@ void test_exception_object_memory() {
         "print(\"Exception object memory test completed\")\n";
         
     int result = ember_eval(vm, source);
+
+        
+    UNUSED(result);
     assert(result == 0); // Should succeed
     
     ember_free_vm(vm);
@@ -106,6 +130,9 @@ void test_resource_cleanup() {
     printf("Testing resource cleanup in finally blocks...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Simulate resource allocation and cleanup
@@ -137,8 +164,13 @@ void test_resource_cleanup() {
         "    print(\"Resources cleaned up\")\n"
         "}\n"
         "print(\"Resource cleanup test completed\")\n";
+
+    UNUSED(source);
         
     int result = ember_eval(vm, source);
+
+        
+    UNUSED(result);
     assert(result == 0); // Should succeed
     
     ember_free_vm(vm);
@@ -150,6 +182,9 @@ void test_deep_recursion_exceptions() {
     printf("Testing deep recursion with exceptions...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     assert(vm != NULL);
     
     // Test that deep recursion doesn't cause stack overflow
@@ -172,8 +207,13 @@ void test_deep_recursion_exceptions() {
         "    print(\"Final catch: \" + e)\n"
         "}\n"
         "print(\"Deep recursion test completed\")\n";
+
+    UNUSED(source);
         
     int result = ember_eval(vm, source);
+
+        
+    UNUSED(result);
     assert(result == 0); // Should succeed
     
     ember_free_vm(vm);

@@ -223,7 +223,7 @@ ember_hash_map* allocate_hash_map(ember_vm* vm, int capacity) {
     map->capacity = capacity > 0 ? capacity : 8;
     
     // Check for integer overflow
-    if (map->capacity > SIZE_MAX / sizeof(ember_hash_entry)) {
+    if ((size_t)map->capacity > SIZE_MAX / sizeof(ember_hash_entry)) {
         fprintf(stderr, "[SECURITY] Hash map capacity overflow prevented\n");
         return NULL;
     }
@@ -280,7 +280,7 @@ void hash_map_set(ember_hash_map* map, ember_value key, ember_value value) {
     if (!map) return;
     
     // Store old value for write barrier
-    ember_value old_val = hash_map_get(map, key);
+    ember_value old_val __attribute__((unused)) = hash_map_get(map, key);
     
     // Resize if load factor > 0.75
     if (map->length + 1 > map->capacity * 0.75) {
@@ -296,7 +296,7 @@ void hash_map_set(ember_hash_map* map, ember_value key, ember_value value) {
         map->capacity *= 2;
         
         // Check for allocation size overflow
-        if (map->capacity > SIZE_MAX / sizeof(ember_hash_entry)) {
+        if ((size_t)map->capacity > SIZE_MAX / sizeof(ember_hash_entry)) {
             fprintf(stderr, "[SECURITY] Hash map allocation size overflow prevented\n");
             map->capacity = old_capacity;
             return;
@@ -609,7 +609,6 @@ void print_value(ember_value value) {
             break;
         case EMBER_VAL_FUNCTION:
             if (value.as.obj_val && value.as.obj_val->type == OBJ_METHOD) {
-                ember_bound_method* bound = AS_BOUND_METHOD(value);
                 printf("<bound method>");
             } else {
                 printf("<function %s>", value.as.func_val.name ? value.as.func_val.name : "anonymous");

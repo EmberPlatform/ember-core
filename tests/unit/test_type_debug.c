@@ -7,6 +7,9 @@ int main() {
     printf("Testing type passing debug...\n");
     
     ember_vm* vm = ember_new_vm();
+
+    
+    UNUSED(vm);
     if (!vm) {
         fprintf(stderr, "Failed to create VM\n");
         return 1;
@@ -15,10 +18,14 @@ int main() {
     // Test what type we're actually passing
     printf("Creating test number value...\n");
     ember_value num_val = ember_make_number(42.0);
+
+    UNUSED(num_val);
     printf("Number value type: %d, value: %f\n", num_val.type, num_val.as.number_val);
     
     printf("Creating test string value...\n");
     ember_value str_val = ember_make_string("test");
+
+    UNUSED(str_val);
     printf("String value type: %d, value: %s\n", str_val.type, str_val.as.string_val);
     
     // Check what arguments get stored in locals

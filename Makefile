@@ -1,6 +1,8 @@
 CC = gcc
 VERSION = $(shell cat VERSION)
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude -DEMBER_VERSION_STRING=\"$(VERSION)\"
+# SECURITY FIX: Enhanced security flags
+ENHANCED_SECURITY_FLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Werror=format-security -fstack-clash-protection -fcf-protection -Wl,-z,relro -Wl,-z,now -Wl,-z,defs -fPIE -pie
+CFLAGS = -Wall -Wextra -std=c99 -Iinclude -DEMBER_VERSION_STRING=\"$(VERSION)\" $(ENHANCED_SECURITY_FLAGS)
 DEBUG_FLAGS = -g -O0 -DDEBUG
 RELEASE_FLAGS = -O2 -DNDEBUG
 ASAN_FLAGS = -g -O1 -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -DDEBUG
@@ -13,7 +15,8 @@ THREAD_OPT_FLAGS = -pthread -std=c11 -D_GNU_SOURCE -mavx2 -mfma
 LOCKFREE_FLAGS = -DUSE_SECURE_VM_POOL -DVM_POOL_DISABLE_LOCKFREE
 PERFORMANCE_FLAGS = -O3 -DNDEBUG -march=native -mtune=native -flto -fomit-frame-pointer
 VM_POOL_FLAGS = -DENABLE_VM_POOL_SECURE -DENABLE_ADAPTIVE_POOL_SIZING -lnuma
-SECURITY_FLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
+# Note: Security flags now included in ENHANCED_SECURITY_FLAGS above
+# SECURITY_FLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
 
 # JIT compilation flags
 JIT_FLAGS = -DENABLE_JIT_COMPILER

@@ -9,9 +9,14 @@
 #include "../../src/runtime/package/package.h"
 #include "test_ember_internal.h"
 
+// Macro to mark variables as intentionally unused
+#define UNUSED(x) ((void)(x))
+
 // Test helper to create temporary directory
 static char temp_dir[512];
 static int temp_dir_created = 0;
+ UNUSED(temp_dir_created);
+ UNUSED(temp_dir_created);
 
 static void setup_temp_dir(void) {
     if (!temp_dir_created) {
@@ -51,12 +56,22 @@ static void test_package_registry(void) {
     test_package.loaded = false;
     
     bool add_result = ember_package_registry_add(registry, &test_package);
+
+    
+    UNUSED(add_result);
+
+    
+    UNUSED(add_result);
     assert(add_result == true);
     assert(registry->count == 1);
     printf("  ✓ Package registry add test passed\n");
     
     // Test finding a package
     EmberPackage* found_package = ember_package_registry_find(registry, "test_package");
+
+    UNUSED(found_package);
+
+    UNUSED(found_package);
     assert(found_package != NULL);
     assert(strcmp(found_package->name, "test_package") == 0);
     assert(strcmp(found_package->version, "1.0.0") == 0);
@@ -64,6 +79,10 @@ static void test_package_registry(void) {
     
     // Test finding nonexistent package
     EmberPackage* nonexistent = ember_package_registry_find(registry, "nonexistent_package");
+
+    UNUSED(nonexistent);
+
+    UNUSED(nonexistent);
     assert(nonexistent == NULL);
     printf("  ✓ Package registry nonexistent find test passed\n");
     
@@ -71,10 +90,20 @@ static void test_package_registry(void) {
     EmberPackage updated_package = test_package;
     strncpy(updated_package.version, "2.0.0", EMBER_PACKAGE_MAX_VERSION_LEN - 1);
     bool update_result = ember_package_registry_add(registry, &updated_package);
+
+    UNUSED(update_result);
+
+    UNUSED(update_result);
     assert(update_result == true);
     assert(registry->count == 1); // Should still be 1
     
     EmberPackage* updated_found = ember_package_registry_find(registry, "test_package");
+
+    
+    UNUSED(updated_found);
+
+    
+    UNUSED(updated_found);
     assert(strcmp(updated_found->version, "2.0.0") == 0);
     printf("  ✓ Package registry update test passed\n");
     
@@ -113,6 +142,10 @@ static void test_package_discovery(void) {
     // Test basic package discovery
     EmberPackage discovered_package;
     bool discovery_result = ember_package_discover("valid_package", &discovered_package);
+
+    UNUSED(discovery_result);
+
+    UNUSED(discovery_result);
     assert(discovery_result == true);
     assert(strcmp(discovered_package.name, "valid_package") == 0);
     assert(strcmp(discovered_package.version, "latest") == 0);
@@ -123,20 +156,46 @@ static void test_package_discovery(void) {
     // Test package discovery with invalid names
     EmberPackage invalid_package;
     bool invalid_result1 = ember_package_discover("../invalid", &invalid_package);
+
+    UNUSED(invalid_result1);
+
+    UNUSED(invalid_result1);
     assert(invalid_result1 == false);
     
     bool invalid_result2 = ember_package_discover("invalid/name", &invalid_package);
+
+    
+    UNUSED(invalid_result2);
+
+    
+    UNUSED(invalid_result2);
     assert(invalid_result2 == false);
     
     bool invalid_result3 = ember_package_discover("invalid<name", &invalid_package);
+
+    
+    UNUSED(invalid_result3);
+
+    
+    UNUSED(invalid_result3);
     assert(invalid_result3 == false);
     printf("  ✓ Invalid package name discovery test passed\n");
     
     // Test NULL parameter handling
     bool null_result1 = ember_package_discover(NULL, &discovered_package);
+
+    UNUSED(null_result1);
+
+    UNUSED(null_result1);
     assert(null_result1 == false);
     
     bool null_result2 = ember_package_discover("valid", NULL);
+
+    
+    UNUSED(null_result2);
+
+    
+    UNUSED(null_result2);
     assert(null_result2 == false);
     printf("  ✓ Package discovery NULL handling test passed\n");
     
@@ -227,6 +286,12 @@ static void test_package_download_load(void) {
     strncpy(download_package.version, "1.0.0", EMBER_PACKAGE_MAX_VERSION_LEN - 1);
     
     bool download_result = ember_package_download(&download_package);
+
+    
+    UNUSED(download_result);
+
+    
+    UNUSED(download_result);
     assert(download_result == true);
     assert(download_package.verified == true);
     assert(strlen(download_package.local_path) > 0);
@@ -240,12 +305,20 @@ static void test_package_download_load(void) {
     
     // Test package loading
     bool load_result = ember_package_load(&download_package);
+
+    UNUSED(load_result);
+
+    UNUSED(load_result);
     assert(load_result == true);
     assert(download_package.loaded == true);
     printf("  ✓ Package loading test passed\n");
     
     // Test package unloading
     bool unload_result = ember_package_unload(&download_package);
+
+    UNUSED(unload_result);
+
+    UNUSED(unload_result);
     assert(unload_result == true);
     assert(download_package.loaded == false);
     printf("  ✓ Package unloading test passed\n");
@@ -309,6 +382,10 @@ static void test_project_management(void) {
     
     // Test adding dependencies
     bool add_dep1 = ember_project_add_dependency(project, "dep1", "1.0.0");
+
+    UNUSED(add_dep1);
+
+    UNUSED(add_dep1);
     assert(add_dep1 == true);
     assert(project->dependency_count == 1);
     assert(strcmp(project->dependencies[0].name, "dep1") == 0);
@@ -317,6 +394,10 @@ static void test_project_management(void) {
     
     // Test updating existing dependency
     bool update_dep = ember_project_add_dependency(project, "dep1", "2.0.0");
+
+    UNUSED(update_dep);
+
+    UNUSED(update_dep);
     assert(update_dep == true);
     assert(project->dependency_count == 1); // Should still be 1
     assert(strcmp(project->dependencies[0].version, "2.0.0") == 0);
@@ -341,6 +422,12 @@ static void test_project_management(void) {
     strncpy(project->author, "Test Author", 127);
     
     bool save_result = ember_project_save_to_file(project, project_file);
+
+    
+    UNUSED(save_result);
+
+    
+    UNUSED(save_result);
     assert(save_result == true);
     assert(access(project_file, F_OK) == 0);
     printf("  ✓ Project save test passed\n");
@@ -348,6 +435,10 @@ static void test_project_management(void) {
     // Test project loading
     EmberProject* loaded_project = NULL;
     bool load_result = ember_project_load_from_file(project_file, &loaded_project);
+
+    UNUSED(load_result);
+
+    UNUSED(load_result);
     assert(load_result == true);
     assert(loaded_project != NULL);
     assert(strcmp(loaded_project->name, "test_project") == 0);
@@ -363,6 +454,12 @@ static void test_project_management(void) {
     ember_package_create_directory_recursive(default_dir);
     
     bool default_result = ember_project_generate_default(default_dir);
+
+    
+    UNUSED(default_result);
+
+    
+    UNUSED(default_result);
     assert(default_result == true);
     
     char default_file[700];
@@ -411,12 +508,22 @@ static void test_global_package_system(void) {
     strncpy(global_package.version, "1.0.0", EMBER_PACKAGE_MAX_VERSION_LEN - 1);
     
     bool global_add = ember_package_registry_add(global_registry, &global_package);
+
+    
+    UNUSED(global_add);
+
+    
+    UNUSED(global_add);
     assert(global_add == true);
     assert(global_registry->count >= 1);
     printf("  ✓ Global registry package add test passed\n");
     
     // Test finding in global registry
     EmberPackage* found_global = ember_package_registry_find(global_registry, "global_test");
+
+    UNUSED(found_global);
+
+    UNUSED(found_global);
     assert(found_global != NULL);
     assert(strcmp(found_global->name, "global_test") == 0);
     printf("  ✓ Global registry package find test passed\n");
@@ -453,6 +560,10 @@ static void test_package_structure_validation(void) {
     
     // Test valid package structure
     bool valid_result = ember_package_validate_structure(valid_package_dir);
+
+    UNUSED(valid_result);
+
+    UNUSED(valid_result);
     assert(valid_result == true);
     printf("  ✓ Valid package structure validation test passed\n");
     
@@ -462,11 +573,21 @@ static void test_package_structure_validation(void) {
     ember_package_create_directory_recursive(invalid_package_dir);
     
     bool invalid_result = ember_package_validate_structure(invalid_package_dir);
+
+    
+    UNUSED(invalid_result);
+
+    
+    UNUSED(invalid_result);
     assert(invalid_result == false);
     printf("  ✓ Invalid package structure validation test passed\n");
     
     // Test manifest validation (stub)
     bool manifest_result = ember_package_validate_manifest("{\"name\": \"test\"}");
+
+    UNUSED(manifest_result);
+
+    UNUSED(manifest_result);
     assert(manifest_result == true); // Currently always returns true
     printf("  ✓ Package manifest validation test passed\n");
     
@@ -486,6 +607,10 @@ static void test_repository_functions(void) {
     
     // Test fetch from repository (stub)
     bool fetch_result = ember_package_fetch_from_repository("test_package", "1.0.0", "https://example.com");
+
+    UNUSED(fetch_result);
+
+    UNUSED(fetch_result);
     assert(fetch_result == true); // Currently always returns true
     printf("  ✓ Package fetch from repository test passed\n");
     
@@ -496,6 +621,12 @@ static void test_repository_functions(void) {
     strncpy(publish_package.version, "1.0.0", EMBER_PACKAGE_MAX_VERSION_LEN - 1);
     
     bool publish_result = ember_package_publish_to_repository(&publish_package, "https://example.com");
+
+    
+    UNUSED(publish_result);
+
+    
+    UNUSED(publish_result);
     assert(publish_result == true); // Currently always returns true
     printf("  ✓ Package publish to repository test passed\n");
     
@@ -531,11 +662,19 @@ static void test_import_scanning(void) {
     // Test import scanning
     EmberProject* scan_project = ember_project_init("scan_test", "1.0.0");
     bool scan_result = ember_project_scan_imports(script_file, scan_project);
+
+    UNUSED(scan_result);
+
+    UNUSED(scan_result);
     assert(scan_result == true);
     assert(scan_project->dependency_count == 3);
     
     // Check discovered dependencies
     bool found_math = false, found_string = false, found_json = false;
+
+    UNUSED(found_math);
+
+    UNUSED(found_math);
     for (size_t i = 0; i < scan_project->dependency_count; i++) {
         if (strcmp(scan_project->dependencies[i].name, "math") == 0) {
             found_math = true;
@@ -553,6 +692,10 @@ static void test_import_scanning(void) {
     
     // Test dependency installation
     bool install_result = ember_project_install_dependencies(scan_project);
+
+    UNUSED(install_result);
+
+    UNUSED(install_result);
     assert(install_result == true);
     
     // Check that packages were loaded
@@ -564,6 +707,10 @@ static void test_import_scanning(void) {
     // Test with empty project
     EmberProject* empty_project = ember_project_init("empty", "1.0.0");
     bool empty_install = ember_project_install_dependencies(empty_project);
+
+    UNUSED(empty_install);
+
+    UNUSED(empty_install);
     assert(empty_install == true); // Should succeed with no dependencies
     printf("  ✓ Empty project dependency installation test passed\n");
     
