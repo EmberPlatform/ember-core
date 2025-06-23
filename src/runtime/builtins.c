@@ -2,7 +2,7 @@
 #include "ember.h"
 #include "../vm.h"
 #include "value/value.h"
-#include "../stdlib/include/ember_stdlib.h"
+#include "stdlib_working.h"
 #include "../stdlib/common.h"
 #include "../stdlib/http_native.h"
 #include "../stdlib/websocket_native.h"
@@ -296,23 +296,8 @@ void register_builtin_functions(ember_vm* vm) {
     // ember_register_func(vm, "regex_split", ember_regex_split);
     // ember_register_func(vm, "regex_find_all", ember_regex_find_all);
     
-    // Date/time functions from stdlib/datetime_native.c
-    ember_register_func(vm, "datetime_now", ember_native_datetime_now);
-    ember_register_func(vm, "datetime_timestamp", ember_native_datetime_timestamp);
-    ember_register_func(vm, "datetime_format", ember_native_datetime_format);
-    ember_register_func(vm, "datetime_parse", ember_native_datetime_parse);
-    ember_register_func(vm, "datetime_add", ember_native_datetime_add);
-    ember_register_func(vm, "datetime_diff", ember_native_datetime_diff);
-    ember_register_func(vm, "datetime_to_utc", ember_native_datetime_to_utc);
-    ember_register_func(vm, "datetime_from_utc", ember_native_datetime_from_utc);
-    ember_register_func(vm, "datetime_year", ember_native_datetime_year);
-    ember_register_func(vm, "datetime_month", ember_native_datetime_month);
-    ember_register_func(vm, "datetime_day", ember_native_datetime_day);
-    ember_register_func(vm, "datetime_hour", ember_native_datetime_hour);
-    ember_register_func(vm, "datetime_minute", ember_native_datetime_minute);
-    ember_register_func(vm, "datetime_second", ember_native_datetime_second);
-    ember_register_func(vm, "datetime_weekday", ember_native_datetime_weekday);
-    ember_register_func(vm, "datetime_yearday", ember_native_datetime_yearday);
+    // Date/time functions from stdlib/datetime_native.c (not implemented yet)
+    // ember_register_func(vm, "datetime_now", ember_native_datetime_now);
     
     // HTTP server functions from stdlib/http_native.c
     ember_register_func(vm, "http_listen_and_serve", ember_native_http_listen_and_serve);
