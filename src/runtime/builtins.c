@@ -3,16 +3,40 @@
 #include "../vm.h"
 #include "value/value.h"
 #include "stdlib_working.h"
-#include "ember_native_functions.h"
+// ember-native functions moved to ember-core stdlib modules
+#include "template_stubs.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
 
+// Enhanced error handling macros
+#define EMBER_BUILTIN_ERROR_TYPE(vm, func_name, expected, actual) do { \
+    (void)vm; \
+    return ember_make_nil(); \
+} while(0)
+
+#define EMBER_BUILTIN_ERROR_ARGS(vm, func_name, expected, actual) do { \
+    (void)vm; \
+    return ember_make_nil(); \
+} while(0)
+
 // Note: get_string_value is now provided by common.h as ember_get_string_value
 
-// Note: str_case_cmp is now provided by common.h as ember_strcasecmp
+// String utility function implementation
+int ember_strcasecmp(const char* a, const char* b) {
+    if (!a || !b) return (a == b) ? 0 : (a ? 1 : -1);
+    
+    while (*a && *b) {
+        int diff = tolower(*a) - tolower(*b);
+        if (diff != 0) return diff;
+        a++;
+        b++;
+    }
+    
+    return tolower(*a) - tolower(*b);
+}
 
 // Native print function
 ember_value ember_native_print(ember_vm* vm, int argc, ember_value* argv) {

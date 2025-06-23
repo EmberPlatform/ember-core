@@ -101,3 +101,20 @@ ember_value ember_native_append_file_working(ember_vm* vm, int argc, ember_value
     
     return ember_make_bool(written == content_len);
 }
+
+// Function aliases for compatibility
+ember_value ember_native_read_file(ember_vm* vm, int argc, ember_value* argv) {
+    return ember_native_read_file_working(vm, argc, argv);
+}
+
+ember_value ember_native_write_file(ember_vm* vm, int argc, ember_value* argv) {
+    return ember_native_write_file_working(vm, argc, argv);
+}
+
+ember_value ember_native_append_file(ember_vm* vm, int argc, ember_value* argv) {
+    return ember_native_append_file_working(vm, argc, argv);
+}
+
+ember_value ember_native_file_exists(ember_vm* vm, int argc, ember_value* argv) {
+    return ember_native_file_exists_working(vm, argc, argv);
+}
