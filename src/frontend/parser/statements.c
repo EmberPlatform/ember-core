@@ -138,6 +138,7 @@ void while_statement(ember_vm* vm, ember_chunk* chunk) {
     
     loop_context* loop_ctx = &parser->loop_stack[parser->loop_depth++];
     loop_ctx->break_count = 0;
+    loop_ctx->continue_count = 0;
     
     int loop_start = chunk->count;
     loop_ctx->continue_target = loop_start;
@@ -170,6 +171,18 @@ void while_statement(ember_vm* vm, ember_chunk* chunk) {
     for (int i = 0; i < loop_ctx->break_count; i++) {
         int break_jump = loop_ctx->break_jumps[i];
         chunk->code[break_jump] = chunk->count - break_jump - 1;
+    }
+    
+    // Patch all continue statements to jump to loop start
+    for (int i = 0; i < loop_ctx->continue_count; i++) {
+        int continue_jump = loop_ctx->continue_jumps[i];
+        // Calculate backward jump offset: jump from (continue_jump + 1) to continue_target
+        int continue_offset = (continue_jump + 1) - loop_ctx->continue_target;
+        if (continue_offset < 0 || continue_offset > 255) {
+            error("Continue jump offset too large");
+            continue;
+        }
+        chunk->code[continue_jump] = (uint8_t)continue_offset;
     }
     
     // Clean up loop context
@@ -291,11 +304,18 @@ void continue_statement(ember_chunk* chunk) {
         return;
     }
     
-    // Emit OP_CONTINUE with offset to loop condition
-    loop_context* current_loop = &parser->loop_stack[parser->loop_depth - 1];
+    // Emit OP_CONTINUE with placeholder offset
     write_chunk(chunk, OP_CONTINUE);
-    int continue_offset = chunk->count - current_loop->continue_target + 2;
-    write_chunk(chunk, continue_offset);
+    int continue_jump = chunk->count;
+    write_chunk(chunk, 0); // Placeholder for jump offset (will be patched)
+    
+    // Store the continue jump location for later patching
+    loop_context* current_loop = &parser->loop_stack[parser->loop_depth - 1];
+    if (current_loop->continue_count < 16) {
+        current_loop->continue_jumps[current_loop->continue_count++] = continue_jump;
+    } else {
+        error("Too many continue statements in single loop");
+    }
 }
 
 void for_statement(ember_vm* vm, ember_chunk* chunk) {
@@ -321,6 +341,7 @@ void for_statement(ember_vm* vm, ember_chunk* chunk) {
     
     loop_context* current_loop = &parser->loop_stack[parser->loop_depth - 1];
     current_loop->break_count = 0;
+    current_loop->continue_count = 0;
     
     // Mark loop start (where condition is checked)
     int loop_start = chunk->count;
@@ -365,11 +386,13 @@ void for_statement(ember_vm* vm, ember_chunk* chunk) {
     // Parse and emit loop body
     parse_loop_body(vm, chunk);
     
+    // Track increment section start for continue statements
+    int increment_start = -1;
+    
     // Now emit the increment expression if it exists
     if (increment_has_expression && increment_token_count > 0) {
         // Mark the start of increment code for continue statements
-        int increment_start = chunk->count;
-        current_loop->continue_target = increment_start;
+        increment_start = chunk->count;
         
         // Generate bytecode for different increment patterns
         // Handle common patterns directly to avoid complex token replay
@@ -426,6 +449,40 @@ void for_statement(ember_vm* vm, ember_chunk* chunk) {
         chunk->code[break_offset] = chunk->count - break_offset - 1;
     }
     
+    // Patch all continue statements to jump to appropriate target
+    int continue_target;
+    if (increment_has_expression && increment_token_count > 0) {
+        // For loops with increment: continue jumps to increment section
+        continue_target = increment_start;
+    } else {
+        // For loops without increment: continue jumps to condition check
+        continue_target = loop_start;
+    }
+    
+    for (int i = 0; i < current_loop->continue_count; i++) {
+        int continue_jump = current_loop->continue_jumps[i];
+        
+        if (increment_has_expression && increment_token_count > 0) {
+            // For loops with increment: use forward jump (OP_JUMP) to increment section
+            // Change OP_CONTINUE to OP_JUMP at continue_jump - 1
+            chunk->code[continue_jump - 1] = OP_JUMP;
+            int continue_offset = continue_target - continue_jump - 1;
+            if (continue_offset < 0 || continue_offset > 255) {
+                error("Continue jump offset too large");
+                continue;
+            }
+            chunk->code[continue_jump] = (uint8_t)continue_offset;
+        } else {
+            // For loops without increment: use backward jump (OP_CONTINUE) to condition
+            int continue_offset = (continue_jump + 1) - continue_target;
+            if (continue_offset < 0 || continue_offset > 255) {
+                error("Continue jump offset too large");
+                continue;
+            }
+            chunk->code[continue_jump] = (uint8_t)continue_offset;
+        }
+    }
+    
     // Clean up
     parser->loop_depth--;
     
@@ -433,6 +490,7 @@ void for_statement(ember_vm* vm, ember_chunk* chunk) {
 }
 
 void import_statement(ember_vm* vm, ember_chunk* chunk) {
+    (void)chunk; // Parameter used in future implementation
     // Parse module name
     consume(TOKEN_IDENTIFIER, "Expect module name after 'import'");
     
@@ -450,7 +508,6 @@ void import_statement(ember_vm* vm, ember_chunk* chunk) {
         parser_state* parser = get_parser_state();
         
         // Manually parse version constraint to handle periods
-        const char* version_start = parser->current.start;
         int version_length = 0;
         
         // Accept version patterns: 1.2.x, latest, 2.0.1, etc.
@@ -482,6 +539,7 @@ void import_statement(ember_vm* vm, ember_chunk* chunk) {
     
     // Copy version constraint
     strncpy(package.version, version_constraint, EMBER_PACKAGE_MAX_VERSION_LEN - 1);
+    package.version[EMBER_PACKAGE_MAX_VERSION_LEN - 1] = '\0'; // Ensure null termination
     
     // Load package (this handles download if needed)
     if (!ember_package_load(&package)) {
@@ -663,6 +721,7 @@ void expression_statement(ember_chunk* chunk) {
 }
 
 void function_definition(ember_vm* vm, ember_chunk* chunk) {
+    (void)chunk; // Parameter used in future implementation
     // Parse function name
     consume(TOKEN_IDENTIFIER, "Expect function name");
     
@@ -886,6 +945,7 @@ void async_function_definition(ember_vm* vm, ember_chunk* chunk) {
     
     ember_value name_val = ember_make_string_gc(vm, name_str);
     int const_idx = add_constant(chunk, name_val);
+    (void)const_idx; // Reserved for future bytecode implementation
     free(name_str);
     
     // Parse parameters
@@ -965,6 +1025,7 @@ void generator_function_definition(ember_vm* vm, ember_chunk* chunk) {
     
     ember_value name_val = ember_make_string_gc(vm, name_str);
     int const_idx = add_constant(chunk, name_val);
+    (void)const_idx; // Reserved for future bytecode implementation
     free(name_str);
     
     // Parse parameters

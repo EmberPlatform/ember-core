@@ -9,6 +9,8 @@
 typedef struct {
     int break_jumps[16];    // Array to store break jump locations
     int break_count;        // Number of break jumps to patch
+    int continue_jumps[16]; // Array to store continue jump locations
+    int continue_count;     // Number of continue jumps to patch
     int continue_target;    // Where continue should jump to
 } loop_context;
 

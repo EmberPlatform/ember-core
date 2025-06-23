@@ -584,12 +584,20 @@ int ember_install_library(const char* library_name, const char* source_path) {
         // If source is a .ember file, copy it as the main package file
         const char* src_ext = strrchr(source_path, '.');
         if (src_ext && strcmp(src_ext, ".ember") == 0) {
-            snprintf(dest_path, sizeof(dest_path), "%s/package.ember", install_dir);
+            int result = snprintf(dest_path, sizeof(dest_path), "%s/package.ember", install_dir);
+            if (result >= (int)sizeof(dest_path)) {
+                fprintf(stderr, "[LIBRARY] Destination path too long: %s/package.ember\n", install_dir);
+                return -1;
+            }
         } else {
             // Copy with original filename
             const char* filename = strrchr(source_path, '/');
             filename = filename ? filename + 1 : source_path;
-            snprintf(dest_path, sizeof(dest_path), "%s/%s", install_dir, filename);
+            int result = snprintf(dest_path, sizeof(dest_path), "%s/%s", install_dir, filename);
+            if (result >= (int)sizeof(dest_path)) {
+                fprintf(stderr, "[LIBRARY] Destination path too long: %s/%s\n", install_dir, filename);
+                return -1;
+            }
         }
         
         // Copy file
@@ -644,7 +652,11 @@ int ember_install_library(const char* library_name, const char* source_path) {
     
     // Create package manifest if it doesn't exist
     char manifest_path[EMBER_PACKAGE_MAX_PATH_LEN];
-    snprintf(manifest_path, sizeof(manifest_path), "%s/package.toml", install_dir);
+    int manifest_result = snprintf(manifest_path, sizeof(manifest_path), "%s/package.toml", install_dir);
+    if (manifest_result >= (int)sizeof(manifest_path)) {
+        fprintf(stderr, "[LIBRARY] Manifest path too long: %s/package.toml\n", install_dir);
+        return -1;
+    }
     
     if (access(manifest_path, F_OK) != 0) {
         FILE* manifest_file = fopen(manifest_path, "w");
@@ -764,14 +776,18 @@ char* ember_resolve_module_path(const char* module_name) {
         char* last_slash = strrchr(exec_path, '/');
         if (last_slash) {
             *last_slash = '\0';
-            snprintf(resolved_path, EMBER_MAX_PATH_LEN, "%s/lib/ember/%s.ember", exec_path, module_name);
-            if (access(resolved_path, R_OK) == 0) {
+            int result1 = snprintf(resolved_path, EMBER_MAX_PATH_LEN, "%s/lib/ember/%s.ember", exec_path, module_name);
+            if (result1 >= EMBER_MAX_PATH_LEN) {
+                printf("[RESOLVE] Path too long for module: %s/lib/ember/%s.ember\n", exec_path, module_name);
+            } else if (access(resolved_path, R_OK) == 0) {
                 printf("[RESOLVE] Found module in executable directory: %s\n", resolved_path);
                 return resolved_path;
             }
             
-            snprintf(resolved_path, EMBER_MAX_PATH_LEN, "%s/lib/ember/%s/package.ember", exec_path, module_name);
-            if (access(resolved_path, R_OK) == 0) {
+            int result2 = snprintf(resolved_path, EMBER_MAX_PATH_LEN, "%s/lib/ember/%s/package.ember", exec_path, module_name);
+            if (result2 >= EMBER_MAX_PATH_LEN) {
+                printf("[RESOLVE] Path too long for package: %s/lib/ember/%s/package.ember\n", exec_path, module_name);
+            } else if (access(resolved_path, R_OK) == 0) {
                 printf("[RESOLVE] Found module package in executable directory: %s\n", resolved_path);
                 return resolved_path;
             }

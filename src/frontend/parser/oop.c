@@ -90,6 +90,7 @@ void class_declaration(ember_vm* vm, ember_chunk* chunk) {
 
 // Parse method definition: fn methodName(params) { ... }
 void method_definition(ember_vm* vm, ember_chunk* chunk) {
+    (void)vm; // Parameter reserved for future implementation
     parser_state* parser = get_parser_state();
     
     // Get method name

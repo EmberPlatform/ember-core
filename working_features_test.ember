@@ -1,0 +1,29 @@
+
+// Test basic working features
+print("=== Basic Ember Features Test ===")
+
+// Variables and expressions
+x = 5 + 3
+y = x * 2
+print("Math: x = " + str(x) + ", y = " + str(y))
+
+// If statements work
+if x > 7 {
+    print("If statement works: x > 7")
+}
+
+// While loops work
+count = 0
+while count < 3 {
+    print("While loop iteration " + str(count))
+    count = count + 1
+}
+
+// For loops work (but avoid continue)
+print("For loop test:")
+for (i = 0; i < 3; i++) {
+    print("For iteration " + str(i))
+}
+
+print("=== Test completed successfully ===")
+

@@ -674,6 +674,15 @@ void ember_print_value(ember_value value);
 void print_value(ember_value value);
 int values_equal(ember_value a, ember_value b);
 
+// Array operation functions needed by stdlib
+void array_push(ember_array* array, ember_value value);
+
+// Hash map operation functions needed by stdlib
+ember_hash_map* allocate_hash_map(ember_vm* vm, int capacity);
+void hash_map_set(ember_hash_map* map, ember_value key, ember_value value);
+void hash_map_set_with_vm(ember_vm* vm, ember_hash_map* map, ember_value key, ember_value value);
+ember_value hash_map_get(ember_hash_map* map, ember_value key);
+
 // Performance optimization API
 void vm_set_optimization_level(int level); // 0=none, 1=basic, 2=advanced, 3=max
 void vm_print_performance_stats(void);
