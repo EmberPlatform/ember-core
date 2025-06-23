@@ -717,13 +717,14 @@ struct ember_vm {
     // Generator support
     ember_generator* current_generator; // Currently executing generator (if any)
     
-    // Performance optimization support
-    void* jit_integration;              // JIT compiler integration (jit_vm_integration_t*)
-    bool jit_enabled;                   // Whether JIT compilation is enabled
-    void* arena_allocator;              // Arena allocator for memory optimization
-    bool memory_optimized;              // Whether memory optimization is enabled
-    void* vm_pool_context;              // VM pool context for concurrent execution
-    bool vm_pool_enabled;               // Whether VM pool is enabled
+    // Performance optimization support (EXPERIMENTAL - not yet functional)
+    // These fields exist for future integration but are currently unused:
+    void* jit_integration;              // JIT compiler integration (always NULL)
+    bool jit_enabled;                   // Whether JIT compilation is enabled (always false)
+    void* arena_allocator;              // Arena allocator for memory optimization (always NULL)
+    bool memory_optimized;              // Whether memory optimization is enabled (always false)
+    void* vm_pool_context;              // VM pool context for concurrent execution (minimal functionality)
+    bool vm_pool_enabled;               // Whether VM pool is enabled (basic support only)
     
     // Performance statistics
     uint64_t instructions_executed;     // Total instructions executed

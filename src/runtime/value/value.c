@@ -991,6 +991,7 @@ const char* ember_exception_type_to_string(ember_exception_type type) {
 void ember_exception_add_stack_frame(ember_vm* vm, ember_exception* exc, const char* function_name, 
                                      const char* file_name, int line_number, int column_number, 
                                      uint8_t* instruction_ptr) {
+    (void)vm; // Currently unused
     if (!exc) return;
     
     // Reallocate stack frames array
@@ -1040,12 +1041,14 @@ void ember_exception_add_stack_frame(ember_vm* vm, ember_exception* exc, const c
 
 // Set the cause of an exception (for exception chaining)
 void ember_exception_set_cause(ember_vm* vm, ember_exception* exc, ember_value cause) {
+    (void)vm; // Currently unused
     if (!exc) return;
     exc->cause = cause;
 }
 
 // Add a suppressed exception
 void ember_exception_add_suppressed(ember_vm* vm, ember_exception* exc, ember_value suppressed) {
+    (void)vm; // Currently unused
     if (!exc) return;
     
     // Reallocate suppressed exceptions array

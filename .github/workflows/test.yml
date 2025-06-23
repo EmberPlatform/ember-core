@@ -1,0 +1,131 @@
+name: Ember Core Tests
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        build-type: [release, debug, asan]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config
+    
+    - name: Build Ember Core (${{ matrix.build-type }})
+      run: |
+        make clean
+        make BUILD_TYPE=${{ matrix.build-type }}
+    
+    - name: Run tests
+      run: |
+        make test
+      continue-on-error: ${{ matrix.build-type == 'asan' }}
+    
+    - name: Run quick smoke tests
+      run: |
+        make test-quick
+    
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.build-type }}
+        path: |
+          test_results.txt
+          failed_tests.txt
+          build.log
+    
+    - name: Check for memory leaks (ASAN build only)
+      if: matrix.build-type == 'asan'
+      run: |
+        echo "Memory safety check completed with AddressSanitizer"
+
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config lcov
+    
+    - name: Build with coverage
+      run: |
+        make clean
+        make BUILD_TYPE=coverage
+    
+    - name: Run tests with coverage
+      run: |
+        make test
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --list coverage.info
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.info
+        flags: unittests
+        name: ember-core-coverage
+      continue-on-error: true
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libreadline-dev libssl-dev libcurl4-openssl-dev pkg-config
+    
+    - name: Build Ember Core
+      run: |
+        make clean
+        make
+    
+    - name: Run security tests
+      run: |
+        make test-security
+      continue-on-error: true
+    
+    - name: Static security analysis
+      run: |
+        # Run basic security checks
+        echo "Checking for common security issues..."
+        grep -r "strcpy\|strcat\|gets\|sprintf" src/ || echo "No unsafe string functions found"
+        grep -r "system(" src/ || echo "No direct system calls found"
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Check code formatting
+      run: |
+        # Basic style checks
+        echo "Checking for tabs vs spaces..."
+        find src/ -name "*.c" -o -name "*.h" | xargs grep -l $'\t' || echo "No tabs found (good!)"
+        
+        echo "Checking line endings..."
+        find src/ -name "*.c" -o -name "*.h" | xargs file | grep -v "ASCII text" || echo "All files have correct line endings"

@@ -309,64 +309,16 @@ void binary(ember_chunk* chunk) {
 }
 
 void logical_and_binary(ember_chunk* chunk) {
-    // For logical AND (&&), we need short-circuiting:
-    // If left operand is falsy, return it without evaluating right operand
-    // If left operand is truthy, return the right operand
-    
-    // At this point, the left operand is already on the stack
-    // Jump to end if left operand is falsy (short-circuit)
-    write_chunk(chunk, OP_JUMP_IF_FALSE);
-    int end_jump = chunk->count;
-    write_chunk(chunk, 0); // Placeholder for jump offset (will be patched)
-    
-    // Left operand was truthy, so pop it and evaluate right operand
-    write_chunk(chunk, OP_POP);
+    // For logical AND (&&), we simply use the OP_AND opcode
+    // The VM implementation handles the logical semantics
     parse_precedence((precedence)(PREC_AND + 1), chunk);
-    
-    // Patch the jump to come here (end of expression)
-    int end_offset = chunk->count - end_jump - 1;
-    if (end_offset < 0 || end_offset > 255) {
-        error("Jump offset too large for logical AND");
-        return;
-    }
-    chunk->code[end_jump] = (uint8_t)end_offset;
+    write_chunk(chunk, OP_AND);
 }
 
 void logical_or_binary(ember_chunk* chunk) {
-    // For logical OR (||), we need short-circuiting:
-    // If left operand is truthy, return it without evaluating right operand
-    // If left operand is falsy, return the right operand
-    
-    // At this point, the left operand is already on the stack
-    // Jump to end if left operand is falsy (we need to evaluate right operand)
-    write_chunk(chunk, OP_JUMP_IF_FALSE);
-    int else_jump = chunk->count;
-    write_chunk(chunk, 0); // Placeholder for jump offset (will be patched)
-    
-    // Left operand was truthy, jump to end (short-circuit)
-    write_chunk(chunk, OP_JUMP);
-    int end_jump = chunk->count;
-    write_chunk(chunk, 0); // Placeholder for jump offset (will be patched)
-    
-    // Patch the else jump to come here (evaluate right operand)
-    int else_offset = chunk->count - else_jump - 1;
-    if (else_offset < 0 || else_offset > 255) {
-        error("Jump offset too large for logical OR else");
-        return;
-    }
-    chunk->code[else_jump] = (uint8_t)else_offset;
-    
-    // Left operand was falsy, so pop it and evaluate right operand
-    write_chunk(chunk, OP_POP);
+    // For logical OR (||), we simply use the OP_OR opcode which handles short-circuit
     parse_precedence((precedence)(PREC_OR + 1), chunk);
-    
-    // Patch the end jump to come here (end of expression)
-    int end_offset = chunk->count - end_jump - 1;
-    if (end_offset < 0 || end_offset > 255) {
-        error("Jump offset too large for logical OR end");
-        return;
-    }
-    chunk->code[end_jump] = (uint8_t)end_offset;
+    write_chunk(chunk, OP_OR);
 }
 
 void logical_not_unary(ember_chunk* chunk) {

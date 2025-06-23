@@ -15,8 +15,6 @@
 // Test helper to create temporary directory
 static char temp_dir[512];
 static int temp_dir_created = 0;
- UNUSED(temp_dir_created);
- UNUSED(temp_dir_created);
 
 static void setup_temp_dir(void) {
     if (!temp_dir_created) {
@@ -30,7 +28,8 @@ static void cleanup_temp_dir(void) {
     if (temp_dir_created) {
         char cleanup_cmd[600];
         snprintf(cleanup_cmd, sizeof(cleanup_cmd), "rm -rf %s", temp_dir);
-        system(cleanup_cmd);
+        int result = system(cleanup_cmd);
+        (void)result; // Ignore result for cleanup
         temp_dir_created = 0;
     }
 }
@@ -247,6 +246,7 @@ static void test_package_validation(void) {
     struct stat st;
     assert(stat(test_dir, &st) == 0);
     assert(S_ISDIR(st.st_mode));
+    (void)st; // Silence compiler warning - st is used in assert
     printf("  ✓ Directory creation test passed\n");
     
     // Test creating nested directories
@@ -672,9 +672,6 @@ static void test_import_scanning(void) {
     // Check discovered dependencies
     bool found_math = false, found_string = false, found_json = false;
 
-    UNUSED(found_math);
-
-    UNUSED(found_math);
     for (size_t i = 0; i < scan_project->dependency_count; i++) {
         if (strcmp(scan_project->dependencies[i].name, "math") == 0) {
             found_math = true;
@@ -688,6 +685,10 @@ static void test_import_scanning(void) {
         }
     }
     assert(found_math && found_string && found_json);
+    // Explicitly use variables to silence compiler warnings
+    (void)found_math;
+    (void)found_string;
+    (void)found_json;
     printf("  ✓ Import scanning test passed\n");
     
     // Test dependency installation

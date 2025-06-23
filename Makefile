@@ -8,13 +8,12 @@ RELEASE_FLAGS = -O2 -DNDEBUG
 ASAN_FLAGS = -g -O1 -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -DDEBUG
 COVERAGE_FLAGS = -g -O0 -DDEBUG -fprofile-arcs -ftest-coverage
 
-# Thread optimization flags
-THREAD_OPT_FLAGS = -pthread -std=c11 -D_GNU_SOURCE -mavx2 -mfma
-# SECURITY: Lock-free pool disabled due to critical vulnerabilities
-# LOCKFREE_FLAGS = -DENABLE_LOCKFREE_OPTIMIZATIONS -DATOMIC_OPERATIONS_SUPPORT -DUSE_LOCKFREE_VM_POOL
-LOCKFREE_FLAGS = -DUSE_SECURE_VM_POOL -DVM_POOL_DISABLE_LOCKFREE
+# Thread optimization flags (future use)
+THREAD_OPT_FLAGS = -pthread -std=c11 -D_GNU_SOURCE
+# VM pool flags - only secure pool is currently implemented
+VM_POOL_FLAGS = -DENABLE_VM_POOL_SECURE
+# Performance flags for release builds
 PERFORMANCE_FLAGS = -O3 -DNDEBUG -march=native -mtune=native -flto -fomit-frame-pointer
-VM_POOL_FLAGS = -DENABLE_VM_POOL_SECURE -DENABLE_ADAPTIVE_POOL_SIZING -lnuma
 # Note: Security flags now included in ENHANCED_SECURITY_FLAGS above
 # SECURITY_FLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
 
@@ -95,7 +94,7 @@ JIT_DIR = $(CORE_DIR)/jit
 
 # Core library source files
 FRONTEND_MODULES = $(FRONTEND_DIR)/lexer/lexer.c $(FRONTEND_DIR)/parser/parser.c $(FRONTEND_DIR)/parser/core.c $(FRONTEND_DIR)/parser/expressions.c $(FRONTEND_DIR)/parser/statements.c $(FRONTEND_DIR)/parser/oop.c $(FRONTEND_DIR)/parser/import_parser.c $(FRONTEND_DIR)/parser/export_parser.c
-CORE_MODULES = $(CORE_DIR)/vm.c $(CORE_DIR)/vm_arithmetic.c $(CORE_DIR)/vm_comparison.c $(CORE_DIR)/vm_stack.c $(CORE_DIR)/string_intern_optimized.c $(CORE_DIR)/bytecode.c $(CORE_DIR)/memory.c $(CORE_DIR)/error.c $(CORE_DIR)/optimizer.c $(CORE_DIR)/memory/memory_pool.c $(CORE_DIR)/vm_pool/vm_pool_secure.c $(CORE_DIR)/vm_pool/vm_memory_integration.c $(CORE_DIR)/vm_regex.c src/vm_pool_api.c
+CORE_MODULES = $(CORE_DIR)/vm.c $(CORE_DIR)/vm_arithmetic.c $(CORE_DIR)/vm_comparison.c $(CORE_DIR)/vm_stack.c $(CORE_DIR)/string_intern_optimized.c $(CORE_DIR)/bytecode.c $(CORE_DIR)/memory.c $(CORE_DIR)/error.c $(CORE_DIR)/optimizer.c $(CORE_DIR)/memory/memory_pool.c $(CORE_DIR)/vm_pool/vm_pool_secure.c $(CORE_DIR)/vm_regex.c src/vm_pool_api.c
 RUNTIME_MODULES = $(RUNTIME_DIR)/builtins.c $(RUNTIME_DIR)/value/value.c $(RUNTIME_DIR)/vfs/vfs.c $(RUNTIME_DIR)/package/package.c $(RUNTIME_DIR)/package/http_stubs.c $(RUNTIME_DIR)/template_stubs.c $(RUNTIME_DIR)/math_stdlib.c $(RUNTIME_DIR)/string_stdlib.c
 JIT_MODULES = $(JIT_DIR)/jit_compiler.c $(JIT_DIR)/jit_x86_64.c $(JIT_DIR)/jit_integration.c $(JIT_DIR)/jit_arithmetic.c
 
@@ -104,7 +103,7 @@ LIBSRC = $(SRCDIR)/api.c $(FRONTEND_MODULES) $(CORE_MODULES) $(RUNTIME_MODULES) 
 # Core library object files
 LIBOBJ = $(BUILDDIR)/api.o
 LIBOBJ += $(BUILDDIR)/lexer.o $(BUILDDIR)/parser.o $(BUILDDIR)/parser_core.o $(BUILDDIR)/parser_expressions.o $(BUILDDIR)/parser_statements.o $(BUILDDIR)/parser_oop.o $(BUILDDIR)/import_parser.o
-LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_secure.o $(BUILDDIR)/core_vm_pool_vm_memory_integration.o $(BUILDDIR)/vm_pool_api.o $(BUILDDIR)/core_async.o $(BUILDDIR)/core_vm_async.o $(BUILDDIR)/core_vm_collections.o $(BUILDDIR)/core_vm_regex.o
+LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_secure.o $(BUILDDIR)/vm_pool_api.o $(BUILDDIR)/core_async.o $(BUILDDIR)/core_vm_async.o $(BUILDDIR)/core_vm_collections.o $(BUILDDIR)/core_vm_regex.o
 LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o $(BUILDDIR)/math_stdlib.o $(BUILDDIR)/string_stdlib.o $(BUILDDIR)/crypto_simple.o $(BUILDDIR)/json_simple.o $(BUILDDIR)/io_simple.o $(BUILDDIR)/module_system.o $(BUILDDIR)/import_parser.o
 # JIT temporarily disabled due to integration issues - will be Phase 3.1 priority
 # LIBOBJ += $(BUILDDIR)/jit_compiler.o $(BUILDDIR)/jit_x86_64.o $(BUILDDIR)/jit_integration.o $(BUILDDIR)/jit_arithmetic.o
@@ -376,6 +375,25 @@ check: tests
 test-all: test-framework check
 	@echo "Running comprehensive test suite..."
 	@cd $(TEST_FRAMEWORK_DIR) && $(MAKE) test
+
+# New test targets for automated testing framework
+test: all
+	@echo "Running Ember test suite..."
+	@scripts/run_regression_tests.sh
+
+test-core: all
+	@echo "Running core functionality tests..."
+	@scripts/run_regression_tests.sh --filter=core
+
+test-security: all
+	@echo "Running security tests..."
+	@scripts/run_regression_tests.sh --filter=security
+
+test-quick: all
+	@echo "Running quick smoke tests..."
+	@$(BUILDDIR)/ember tests/core/basic_test.ember
+	@$(BUILDDIR)/ember tests/stdlib/math_test.ember
+	@echo "Quick tests passed!"
 
 # Run fuzzing tests
 fuzz-run: fuzz
