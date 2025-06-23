@@ -470,6 +470,13 @@ typedef enum {
     EMBER_ERR_INTERNAL = -7
 } ember_result_code;
 
+// VM operation result codes
+typedef enum {
+    VM_RESULT_OK = 0,
+    VM_RESULT_ERROR = -1,
+    VM_RESULT_CONTINUE = 1
+} vm_operation_result;
+
 // Error types for categorizing errors
 typedef enum {
     EMBER_ERROR_SYNTAX,      // Parse-time syntax errors
@@ -691,26 +698,26 @@ ember_value regex_replace(ember_vm* vm, ember_regex* regex, const char* text, co
 ember_array* regex_split(ember_vm* vm, ember_regex* regex, const char* text);
 
 // VM collection operation handlers
-void vm_handle_set_new(ember_vm* vm);
-void vm_handle_set_add(ember_vm* vm);
-void vm_handle_set_has(ember_vm* vm);
-void vm_handle_set_delete(ember_vm* vm);
-void vm_handle_set_size(ember_vm* vm);
-void vm_handle_set_clear(ember_vm* vm);
-void vm_handle_map_new(ember_vm* vm);
-void vm_handle_map_set(ember_vm* vm);
-void vm_handle_map_get(ember_vm* vm);
-void vm_handle_map_has(ember_vm* vm);
-void vm_handle_map_delete(ember_vm* vm);
-void vm_handle_map_size(ember_vm* vm);
-void vm_handle_map_clear(ember_vm* vm);
+vm_operation_result vm_handle_set_new(ember_vm* vm);
+vm_operation_result vm_handle_set_add(ember_vm* vm);
+vm_operation_result vm_handle_set_has(ember_vm* vm);
+vm_operation_result vm_handle_set_delete(ember_vm* vm);
+vm_operation_result vm_handle_set_size(ember_vm* vm);
+vm_operation_result vm_handle_set_clear(ember_vm* vm);
+vm_operation_result vm_handle_map_new(ember_vm* vm);
+vm_operation_result vm_handle_map_set(ember_vm* vm);
+vm_operation_result vm_handle_map_get(ember_vm* vm);
+vm_operation_result vm_handle_map_has(ember_vm* vm);
+vm_operation_result vm_handle_map_delete(ember_vm* vm);
+vm_operation_result vm_handle_map_size(ember_vm* vm);
+vm_operation_result vm_handle_map_clear(ember_vm* vm);
 
 // VM regex operation handlers
-void vm_handle_regex_new(ember_vm* vm);
-void vm_handle_regex_test(ember_vm* vm);
-void vm_handle_regex_match(ember_vm* vm);
-void vm_handle_regex_replace(ember_vm* vm);
-void vm_handle_regex_split(ember_vm* vm);
+vm_operation_result vm_handle_regex_new(ember_vm* vm);
+vm_operation_result vm_handle_regex_test(ember_vm* vm);
+vm_operation_result vm_handle_regex_match(ember_vm* vm);
+vm_operation_result vm_handle_regex_replace(ember_vm* vm);
+vm_operation_result vm_handle_regex_split(ember_vm* vm);
 ember_value ember_peek_stack_top(ember_vm* vm);
 void ember_print_value(ember_value value);
 void print_value(ember_value value);
@@ -849,6 +856,10 @@ ember_vm* ember_pool_get_vm(void);
 void ember_pool_release_vm(ember_vm* vm);
 
 // Object helper macros
+#define IS_NUMBER(value) ((value).type == EMBER_VAL_NUMBER)
+#define AS_NUMBER(value) ((value).as.number_val)
+#define IS_BOOL(value) ((value).type == EMBER_VAL_BOOL)
+#define AS_BOOL(value) ((value).as.bool_val)
 #define IS_STRING(value) ((value).type == EMBER_VAL_STRING)
 #define AS_STRING(value) ((ember_string*)((value).as.obj_val))
 #define AS_CSTRING(value) (((ember_string*)((value).as.obj_val))->chars)

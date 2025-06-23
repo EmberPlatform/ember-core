@@ -1,0 +1,113 @@
+# Ember JIT Integration Makefile
+# Builds JIT integration and test programs
+
+CC = gcc
+CFLAGS = -std=c11 -Wall -Wextra -O2 -g -pthread
+INCLUDES = -I. -Iinclude
+LDFLAGS = -lm -ldl
+
+# JIT specific flags
+JIT_CFLAGS = -DENABLE_JIT_INTEGRATION
+
+# Source files
+JIT_SOURCES = src/core/jit_vm_hook.c \
+              src/core/jit/jit_integration.c \
+              src/core/jit/jit_compiler.c \
+              src/core/jit/jit_x86_64.c \
+              src/core/jit/jit_arithmetic.c
+
+CORE_SOURCES = src/core/vm.c \
+               src/runtime/builtins.c \
+               src/runtime/io_simple.c \
+               src/frontend/parser/parser.c \
+               src/frontend/lexer/lexer.c
+
+TEST_SOURCES = test_jit_integration.c
+
+# Object files
+JIT_OBJECTS = $(JIT_SOURCES:.c=.o)
+CORE_OBJECTS = $(CORE_SOURCES:.c=.o)
+TEST_OBJECTS = $(TEST_SOURCES:.c=.o)
+
+# Targets
+.PHONY: all clean test jit-test jit-only
+
+all: jit-test
+
+# Build JIT integration test
+jit-test: $(JIT_OBJECTS) $(CORE_OBJECTS) $(TEST_OBJECTS)
+	@echo "Linking JIT integration test..."
+	$(CC) $(CFLAGS) $(JIT_CFLAGS) -o $@ $^ $(LDFLAGS)
+	@echo "JIT integration test built successfully"
+
+# Build only JIT components
+jit-only: $(JIT_OBJECTS)
+	@echo "JIT components compiled successfully"
+
+# Compile with JIT flags
+%.o: %.c
+	@echo "Compiling $< with JIT support..."
+	$(CC) $(CFLAGS) $(JIT_CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Test targets
+test: jit-test
+	@echo "Running JIT integration tests..."
+	./jit-test
+
+# Run the Ember JIT test script
+test-script: build/ember jit_integration_test.ember
+	@echo "Running JIT test script..."
+	./build/ember jit_integration_test.ember
+
+# Quick build check
+check:
+	@echo "Checking JIT source files..."
+	@for file in $(JIT_SOURCES); do \
+		if [ -f "$$file" ]; then \
+			echo "✓ $$file"; \
+		else \
+			echo "✗ $$file (missing)"; \
+		fi; \
+	done
+
+# Clean build artifacts
+clean:
+	@echo "Cleaning JIT build artifacts..."
+	rm -f $(JIT_OBJECTS) $(CORE_OBJECTS) $(TEST_OBJECTS)
+	rm -f jit-test
+	@echo "Clean complete"
+
+# Help target
+help:
+	@echo "Ember JIT Integration Makefile"
+	@echo "=============================="
+	@echo ""
+	@echo "Targets:"
+	@echo "  all        - Build JIT integration test (default)"
+	@echo "  jit-test   - Build JIT integration test program"
+	@echo "  jit-only   - Compile only JIT components"
+	@echo "  test       - Run JIT integration tests"
+	@echo "  test-script- Run Ember JIT test script"
+	@echo "  check      - Check for required source files"
+	@echo "  clean      - Remove build artifacts"
+	@echo "  help       - Show this help message"
+	@echo ""
+	@echo "JIT Features:"
+	@echo "  - Hot path detection and compilation"
+	@echo "  - x86-64 native code generation"
+	@echo "  - Arithmetic operation optimization"
+	@echo "  - Performance profiling and statistics"
+	@echo "  - Seamless fallback to interpreter"
+
+# Development targets
+dev-test: CFLAGS += -DDEBUG -fsanitize=address
+dev-test: jit-test
+
+profile-test: CFLAGS += -pg
+profile-test: jit-test
+
+# Installation (for development)
+install-dev: jit-test
+	@echo "Installing JIT integration for development..."
+	cp jit-test ../tools/
+	@echo "JIT test installed to ../tools/"

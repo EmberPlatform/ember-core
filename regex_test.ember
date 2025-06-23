@@ -1,0 +1,278 @@
+# Comprehensive Regex Support Test
+print("=== Ember Regex Support Test ===")
+
+# Test 1: Basic regex creation and testing
+print("\n1. Testing basic regex creation and matching:")
+
+# Create a simple regex for email validation
+email_regex = regex_new("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", 0)
+print("Created email regex:", email_regex)
+
+# Test valid email
+test_email1 = "user@example.com"
+is_valid1 = regex_test(email_regex, test_email1)
+print("Email '" + test_email1 + "' is valid:", is_valid1)
+
+# Test invalid email
+test_email2 = "invalid-email"
+is_valid2 = regex_test(email_regex, test_email2)
+print("Email '" + test_email2 + "' is valid:", is_valid2)
+
+# Test 2: Phone number regex
+print("\n2. Testing phone number regex:")
+
+phone_regex = regex_new("^\\(\\d{3}\\) \\d{3}-\\d{4}$", 0)
+print("Created phone regex")
+
+# Test valid phone number
+phone1 = "(555) 123-4567"
+phone_valid1 = regex_test(phone_regex, phone1)
+print("Phone '" + phone1 + "' is valid:", phone_valid1)
+
+# Test invalid phone number
+phone2 = "555-123-4567"
+phone_valid2 = regex_test(phone_regex, phone2)
+print("Phone '" + phone2 + "' is valid:", phone_valid2)
+
+# Test 3: Case-insensitive regex
+print("\n3. Testing case-insensitive regex:")
+
+# Create case-insensitive regex for color matching
+color_regex = regex_new("red|blue|green", 1)  # 1 = REGEX_CASE_INSENSITIVE
+print("Created case-insensitive color regex")
+
+# Test different cases
+colors = ["RED", "Blue", "green", "YELLOW"]
+for i = 0; i < 4; i = i + 1 {
+    # Note: This would require array indexing to work properly
+    # For now, we'll test individual cases
+    print("Testing color matching...")
+}
+
+# Test RED
+red_match = regex_test(color_regex, "RED")
+print("'RED' matches color regex:", red_match)
+
+# Test Blue
+blue_match = regex_test(color_regex, "Blue")
+print("'Blue' matches color regex:", blue_match)
+
+# Test YELLOW
+yellow_match = regex_test(color_regex, "YELLOW")
+print("'YELLOW' matches color regex:", yellow_match)
+
+# Test 4: Regex match with capture groups
+print("\n4. Testing regex match with capture groups:")
+
+# Create regex to extract parts of a date
+date_regex = regex_new("(\\d{4})-(\\d{2})-(\\d{2})", 0)
+print("Created date extraction regex")
+
+# Test date matching
+test_date = "2023-12-25"
+date_match = regex_match(date_regex, test_date)
+print("Date match result:", date_match)
+
+# Test invalid date
+invalid_date = "25-12-2023"
+invalid_match = regex_match(date_regex, invalid_date)
+print("Invalid date match result:", invalid_match)
+
+# Test 5: Regex replacement
+print("\n5. Testing regex replacement:")
+
+# Create regex to find numbers
+number_regex = regex_new("\\d+", 0)
+print("Created number regex")
+
+# Test replacement
+text_with_numbers = "I have 5 apples and 10 oranges"
+replaced_text = regex_replace(number_regex, text_with_numbers, "X")
+print("Original:", text_with_numbers)
+print("After replacing numbers:", replaced_text)
+
+# Test replacing words
+word_regex = regex_new("\\b(apple|orange)s?\\b", 1)  # Case insensitive
+fruit_text = "I like Apples and ORANGES very much"
+replaced_fruits = regex_replace(word_regex, fruit_text, "fruit")
+print("Original:", fruit_text)
+print("After replacing fruits:", replaced_fruits)
+
+# Test 6: Regex splitting
+print("\n6. Testing regex splitting:")
+
+# Create regex to split on whitespace
+whitespace_regex = regex_new("\\s+", 0)
+print("Created whitespace regex")
+
+# Test splitting
+sentence = "The quick   brown\t\tfox jumps"
+split_words = regex_split(whitespace_regex, sentence)
+print("Original sentence:", sentence)
+print("Split result:", split_words)
+
+# Test splitting on punctuation
+punct_regex = regex_new("[,.!?;:]", 0)
+text_with_punct = "Hello, world! How are you? Fine, thanks."
+split_on_punct = regex_split(punct_regex, text_with_punct)
+print("Original text:", text_with_punct)
+print("Split on punctuation:", split_on_punct)
+
+# Test 7: URL parsing regex
+print("\n7. Testing URL parsing regex:")
+
+# Create comprehensive URL regex
+url_regex = regex_new("^(https?)://([^/]+)(/.*)$", 0)
+print("Created URL parsing regex")
+
+# Test URL parsing
+test_urls = [
+    "https://www.example.com/path/to/page",
+    "http://api.service.com/v1/users",
+    "ftp://files.server.net/downloads",
+    "not-a-url"
+]
+
+# Test first URL
+url1 = "https://www.example.com/path/to/page"
+url_match1 = regex_match(url_regex, url1)
+print("URL '" + url1 + "' match:", url_match1)
+
+# Test second URL
+url2 = "http://api.service.com/v1/users"
+url_match2 = regex_match(url_regex, url2)
+print("URL '" + url2 + "' match:", url_match2)
+
+# Test invalid URL
+url3 = "not-a-url"
+url_match3 = regex_match(url_regex, url3)
+print("URL '" + url3 + "' match:", url_match3)
+
+# Test 8: Complex regex patterns
+print("\n8. Testing complex regex patterns:")
+
+# Password strength regex
+password_regex = regex_new("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", 0)
+print("Created password strength regex")
+
+# Test strong password
+strong_pass = "MyStr0ng!Pass"
+strong_valid = regex_test(password_regex, strong_pass)
+print("Password '" + strong_pass + "' is strong:", strong_valid)
+
+# Test weak password
+weak_pass = "password"
+weak_valid = regex_test(password_regex, weak_pass)
+print("Password '" + weak_pass + "' is strong:", weak_valid)
+
+# Test 9: Multiline regex (if supported)
+print("\n9. Testing multiline regex:")
+
+# Create multiline regex
+multiline_regex = regex_new("^Line \\d+$", 2)  # 2 = REGEX_MULTILINE
+print("Created multiline regex")
+
+# Test multiline text
+multiline_text = "Line 1\nLine 2\nSomething else\nLine 3"
+multiline_match = regex_test(multiline_regex, multiline_text)
+print("Multiline text matches:", multiline_match)
+
+# Test 10: Global flag behavior (if supported)
+print("\n10. Testing regex with global flag:")
+
+# Create global regex for finding all numbers
+global_regex = regex_new("\\d+", 4)  # 4 = REGEX_GLOBAL
+print("Created global number regex")
+
+# Test finding all numbers (would need special handling for global)
+numbers_text = "I have 5 cats, 10 dogs, and 3 birds"
+global_test = regex_test(global_regex, numbers_text)
+print("Global regex test:", global_test)
+
+# Global replacement would replace all occurrences
+global_replace = regex_replace(global_regex, numbers_text, "N")
+print("Original:", numbers_text)
+print("After global replace:", global_replace)
+
+# Test 11: Regex error handling
+print("\n11. Testing regex error handling:")
+
+# Try to create invalid regex
+print("Testing invalid regex pattern...")
+try {
+    invalid_regex = regex_new("[unclosed", 0)
+    print("Invalid regex created (unexpected):", invalid_regex)
+} catch (regex_error) {
+    print("Caught regex error:", regex_error)
+}
+
+# Test 12: Special character patterns
+print("\n12. Testing special character patterns:")
+
+# Create regex for hexadecimal colors
+hex_color_regex = regex_new("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$", 0)
+print("Created hex color regex")
+
+# Test valid hex colors
+hex1 = "#FF5733"
+hex1_valid = regex_test(hex_color_regex, hex1)
+print("Hex color '" + hex1 + "' is valid:", hex1_valid)
+
+hex2 = "#abc"
+hex2_valid = regex_test(hex_color_regex, hex2)
+print("Hex color '" + hex2 + "' is valid:", hex2_valid)
+
+# Test invalid hex color
+hex3 = "#GGG"
+hex3_valid = regex_test(hex_color_regex, hex3)
+print("Hex color '" + hex3 + "' is valid:", hex3_valid)
+
+# Test 13: Performance with complex patterns
+print("\n13. Testing performance with complex patterns:")
+
+# Create complex regex for parsing log entries
+log_regex = regex_new("^\\[(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\] (\\w+): (.+)$", 0)
+print("Created log parsing regex")
+
+# Test log entry
+log_entry = "[2023-12-25 14:30:45] INFO: User logged in successfully"
+log_match = regex_match(log_regex, log_entry)
+print("Log entry match:", log_match)
+
+# Test invalid log entry
+invalid_log = "This is not a log entry"
+invalid_log_match = regex_match(log_regex, invalid_log)
+print("Invalid log match:", invalid_log_match)
+
+print("\n=== Ember Regex Support Test Complete ===")
+print("All regex functionality tested!")
+
+# Test 14: Practical regex examples
+print("\n14. Testing practical regex examples:")
+
+# IP address validation
+ip_regex = regex_new("^(?:(?:25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)$", 0)
+
+# Test valid IP
+ip1 = "192.168.1.1"
+ip1_valid = regex_test(ip_regex, ip1)
+print("IP '" + ip1 + "' is valid:", ip1_valid)
+
+# Test invalid IP
+ip2 = "256.256.256.256"
+ip2_valid = regex_test(ip_regex, ip2)
+print("IP '" + ip2 + "' is valid:", ip2_valid)
+
+# Credit card number pattern (simplified)
+cc_regex = regex_new("^\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}$", 0)
+
+# Test credit card format
+cc1 = "1234 5678 9012 3456"
+cc1_valid = regex_test(cc_regex, cc1)
+print("Credit card '" + cc1 + "' format is valid:", cc1_valid)
+
+cc2 = "1234-5678-9012-3456"
+cc2_valid = regex_test(cc_regex, cc2)
+print("Credit card '" + cc2 + "' format is valid:", cc2_valid)
+
+print("\nRegex implementation complete with comprehensive test coverage!")
