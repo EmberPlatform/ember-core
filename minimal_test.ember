@@ -1,2 +1,0 @@
-print("Testing minimal functions:")
-print(abs(-5))

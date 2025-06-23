@@ -77,6 +77,7 @@ ember_value ember_make_regex(ember_vm* vm, const char* pattern, ember_regex_flag
 
 // Test if a string matches the regex
 bool ember_regex_test(ember_vm* vm, ember_regex* regex, const char* text) {
+    (void)vm; // Currently unused
     if (!regex || !regex->compiled_regex || !text) {
         return false;
     }

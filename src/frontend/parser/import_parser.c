@@ -160,6 +160,7 @@ static void emit_default_import(ember_chunk* chunk, const char* module_name, con
 
 // Enhanced import statement parser
 void enhanced_import_statement(ember_vm* vm, ember_chunk* chunk) {
+    (void)vm; // Currently unused
     parser_state* parser = get_parser_state();
     
     // Check for different import patterns

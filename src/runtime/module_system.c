@@ -369,7 +369,13 @@ static ember_value load_file_module(ember_vm* vm, const char* file_path) {
         return ember_make_nil();
     }
     
-    fread(source, 1, file_size, file);
+    size_t read_size = fread(source, 1, file_size, file);
+    if (read_size != (size_t)file_size) {
+        fclose(file);
+        free(source);
+        // Simply return nil on error - don't use error() which is for parser errors
+        return ember_make_nil();
+    }
     source[file_size] = '\0';
     fclose(file);
     
