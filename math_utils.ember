@@ -1,0 +1,55 @@
+// Math utilities module - demonstrates named exports
+// This module exports various mathematical functions and constants
+
+// Export named constants
+export pi = 3.14159265359
+export e = 2.71828182846
+
+// Export named functions
+export function add(a, b) {
+    return a + b
+}
+
+export function multiply(a, b) {
+    return a * b
+}
+
+export function power(base, exponent) {
+    result = 1
+    i = 0
+    while i < exponent {
+        result = result * base
+        i = i + 1
+    }
+    return result
+}
+
+export function factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+// Export calculated constant
+export goldenRatio = (1 + power(5, 0.5)) / 2
+
+// Internal helper function (not exported)
+function isEven(n) {
+    return n % 2 == 0
+}
+
+// Export function using helper
+export function sumEvenNumbers(max) {
+    sum = 0
+    i = 0
+    while i <= max {
+        if isEven(i) {
+            sum = sum + i
+        }
+        i = i + 1
+    }
+    return sum
+}
+
+print("Math utilities module loaded")

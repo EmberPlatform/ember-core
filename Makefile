@@ -93,7 +93,7 @@ RUNTIME_DIR = $(SRCDIR)/runtime
 JIT_DIR = $(CORE_DIR)/jit
 
 # Core library source files
-FRONTEND_MODULES = $(FRONTEND_DIR)/lexer/lexer.c $(FRONTEND_DIR)/parser/parser.c $(FRONTEND_DIR)/parser/core.c $(FRONTEND_DIR)/parser/expressions.c $(FRONTEND_DIR)/parser/statements.c $(FRONTEND_DIR)/parser/oop.c
+FRONTEND_MODULES = $(FRONTEND_DIR)/lexer/lexer.c $(FRONTEND_DIR)/parser/parser.c $(FRONTEND_DIR)/parser/core.c $(FRONTEND_DIR)/parser/expressions.c $(FRONTEND_DIR)/parser/statements.c $(FRONTEND_DIR)/parser/oop.c $(FRONTEND_DIR)/parser/import_parser.c $(FRONTEND_DIR)/parser/export_parser.c
 CORE_MODULES = $(CORE_DIR)/vm.c $(CORE_DIR)/vm_arithmetic.c $(CORE_DIR)/vm_comparison.c $(CORE_DIR)/vm_stack.c $(CORE_DIR)/string_intern_optimized.c $(CORE_DIR)/bytecode.c $(CORE_DIR)/memory.c $(CORE_DIR)/error.c $(CORE_DIR)/optimizer.c $(CORE_DIR)/memory/memory_pool.c $(CORE_DIR)/vm_pool/vm_pool_secure.c $(CORE_DIR)/vm_pool/vm_memory_integration.c $(CORE_DIR)/vm_regex.c src/vm_pool_api.c
 RUNTIME_MODULES = $(RUNTIME_DIR)/builtins.c $(RUNTIME_DIR)/value/value.c $(RUNTIME_DIR)/vfs/vfs.c $(RUNTIME_DIR)/package/package.c $(RUNTIME_DIR)/package/http_stubs.c $(RUNTIME_DIR)/template_stubs.c $(RUNTIME_DIR)/math_stdlib.c $(RUNTIME_DIR)/string_stdlib.c
 JIT_MODULES = $(JIT_DIR)/jit_compiler.c $(JIT_DIR)/jit_x86_64.c $(JIT_DIR)/jit_integration.c $(JIT_DIR)/jit_arithmetic.c
@@ -102,7 +102,7 @@ LIBSRC = $(SRCDIR)/api.c $(FRONTEND_MODULES) $(CORE_MODULES) $(RUNTIME_MODULES) 
 
 # Core library object files
 LIBOBJ = $(BUILDDIR)/api.o
-LIBOBJ += $(BUILDDIR)/lexer.o $(BUILDDIR)/parser.o $(BUILDDIR)/parser_core.o $(BUILDDIR)/parser_expressions.o $(BUILDDIR)/parser_statements.o $(BUILDDIR)/parser_oop.o
+LIBOBJ += $(BUILDDIR)/lexer.o $(BUILDDIR)/parser.o $(BUILDDIR)/parser_core.o $(BUILDDIR)/parser_expressions.o $(BUILDDIR)/parser_statements.o $(BUILDDIR)/parser_oop.o $(BUILDDIR)/import_parser.o
 LIBOBJ += $(BUILDDIR)/core_vm.o $(BUILDDIR)/core_vm_arithmetic.o $(BUILDDIR)/core_vm_comparison.o $(BUILDDIR)/core_vm_stack.o $(BUILDDIR)/core_string_intern_optimized.o $(BUILDDIR)/core_bytecode.o $(BUILDDIR)/core_memory.o $(BUILDDIR)/core_error.o $(BUILDDIR)/core_optimizer.o $(BUILDDIR)/core_memory_memory_pool.o $(BUILDDIR)/core_vm_pool_vm_pool_secure.o $(BUILDDIR)/core_vm_pool_vm_memory_integration.o $(BUILDDIR)/vm_pool_api.o $(BUILDDIR)/core_async.o $(BUILDDIR)/core_vm_async.o $(BUILDDIR)/core_vm_collections.o $(BUILDDIR)/core_vm_regex.o
 LIBOBJ += $(BUILDDIR)/runtime_builtins.o $(BUILDDIR)/value.o $(BUILDDIR)/vfs.o $(BUILDDIR)/package.o $(BUILDDIR)/http_stubs.o $(BUILDDIR)/template_stubs.o $(BUILDDIR)/math_stdlib.o $(BUILDDIR)/string_stdlib.o $(BUILDDIR)/crypto_simple.o $(BUILDDIR)/json_simple.o $(BUILDDIR)/io_simple.o $(BUILDDIR)/module_system.o $(BUILDDIR)/import_parser.o
 # JIT disabled for container build compatibility
@@ -162,6 +162,12 @@ $(BUILDDIR)/parser_statements.o: $(FRONTEND_DIR)/parser/statements.c | $(BUILDDI
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/parser_oop.o: $(FRONTEND_DIR)/parser/oop.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/import_parser.o: $(FRONTEND_DIR)/parser/import_parser.c | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/export_parser.o: $(FRONTEND_DIR)/parser/export_parser.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Core modules
@@ -236,9 +242,6 @@ $(BUILDDIR)/io_simple.o: $(RUNTIME_DIR)/io_simple.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/module_system.o: $(RUNTIME_DIR)/module_system.c | $(BUILDDIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILDDIR)/import_parser.o: $(FRONTEND_DIR)/parser/import_parser.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/math_stdlib.o: $(RUNTIME_DIR)/math_stdlib.c | $(BUILDDIR)

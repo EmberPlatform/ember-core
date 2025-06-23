@@ -13,6 +13,10 @@ extern void expression(ember_chunk* chunk);
 extern void emit_byte(ember_chunk* chunk, uint8_t byte);
 extern void emit_bytes(ember_chunk* chunk, uint8_t byte1, uint8_t byte2);
 extern int add_constant(ember_chunk* chunk, ember_value constant);
+extern void init_chunk(ember_chunk* chunk);
+extern void statement(ember_vm* vm, ember_chunk* chunk);
+extern void error_at(ember_token* token, const char* message);
+extern void track_function_chunk(ember_vm* vm, ember_chunk* chunk);
 
 // Helper function to emit constant operation
 static void emit_constant(ember_chunk* chunk, ember_value value) {
@@ -52,27 +56,23 @@ void class_declaration(ember_vm* vm, ember_chunk* chunk) {
         
         // Emit code to get superclass from globals
         ember_value super_name_val = ember_make_string(super_name_str);
-        emit_constant(chunk, super_name_val);
-        emit_byte(chunk, OP_GET_GLOBAL);
+        int super_name_idx = add_constant(chunk, super_name_val);
+        emit_bytes(chunk, OP_GET_GLOBAL, super_name_idx);
         
         free(super_name_str);
     }
     
     // Create the class
     ember_value class_name_val = ember_make_string(name_str);
-    emit_constant(chunk, class_name_val);
+    int class_name_idx = add_constant(chunk, class_name_val);
     
     if (has_superclass) {
-        emit_byte(chunk, OP_INHERIT);  // Pop superclass, push class
+        emit_bytes(chunk, OP_INHERIT, class_name_idx);  // Pop superclass, push class
     } else {
-        emit_byte(chunk, OP_CLASS_DEF);  // Create new class
+        emit_bytes(chunk, OP_CLASS_DEF, class_name_idx);  // Create new class
     }
     
-    // Store class in global
-    emit_constant(chunk, class_name_val);
-    emit_byte(chunk, OP_SET_GLOBAL);
-    
-    // Parse class body
+    // Parse class body (class is on stack)
     consume(TOKEN_LBRACE, "Expected '{' before class body");
     
     while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
@@ -85,6 +85,10 @@ void class_declaration(ember_vm* vm, ember_chunk* chunk) {
     }
     
     consume(TOKEN_RBRACE, "Expected '}' after class body");
+    
+    // Store class in global (class is still on stack)
+    emit_bytes(chunk, OP_SET_GLOBAL, class_name_idx);
+    emit_byte(chunk, OP_POP);  // Pop the class from stack
     free(name_str);
 }
 
@@ -124,20 +128,43 @@ void method_definition(ember_vm* vm, ember_chunk* chunk) {
     
     // Create a new chunk for the method
     ember_chunk* method_chunk = malloc(sizeof(ember_chunk));
-    method_chunk->code = NULL;
-    method_chunk->capacity = 0;
-    method_chunk->count = 0;
-    method_chunk->constants = NULL;
-    method_chunk->const_capacity = 0;
-    method_chunk->const_count = 0;
+    init_chunk(method_chunk);
+    
+    // Track this method chunk for cleanup
+    track_function_chunk(vm, method_chunk);
     
     // Parse method body into the method chunk
-    while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
-        // This would normally parse statements, but for now just skip
-        advance_parser();
+    // Keep parsing until we find the closing brace
+    for (;;) {
+        // Skip newlines and semicolons
+        while (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) {
+            // Continue
+        }
+        
+        // Check for end of method body
+        if (check(TOKEN_RBRACE)) {
+            break;
+        }
+        if (check(TOKEN_EOF)) {
+            break;  // Allow EOF to end method parsing gracefully
+        }
+        
+        // Parse a statement
+        statement(vm, method_chunk);
+        
+        // After statement, consume newline or semicolon if present
+        if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) {
+            // Consumed separator, continue
+        } else if (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+            error_at(&get_parser_state()->current, "Expect newline, semicolon, or '}' after statement");
+            break;
+        }
     }
     
     consume(TOKEN_RBRACE, "Expected '}' after method body");
+    
+    // Add implicit return at end of method
+    emit_byte(method_chunk, OP_RETURN);
     
     // Create method value and emit it
     ember_value method_val;
@@ -154,7 +181,8 @@ void method_definition(ember_vm* vm, ember_chunk* chunk) {
     // Define the method on the class
     emit_byte(chunk, OP_METHOD_DEF);
     
-    free(name_str);
+    // Note: name_str is NOT freed here because it's referenced by the method value
+    // The garbage collector will handle this when the method is cleaned up
 }
 
 // Parse 'this' expression
@@ -177,8 +205,8 @@ void super_expression(ember_chunk* chunk) {
     name_str[method_name.length] = '\0';
     
     ember_value method_name_val = ember_make_string(name_str);
-    emit_constant(chunk, method_name_val);
-    emit_byte(chunk, OP_GET_SUPER);
+    int method_name_idx = add_constant(chunk, method_name_val);
+    emit_bytes(chunk, OP_GET_SUPER, method_name_idx);
     
     free(name_str);
 }
@@ -196,8 +224,8 @@ void new_expression(ember_chunk* chunk) {
     
     // Load class from globals
     ember_value class_name_val = ember_make_string(name_str);
-    emit_constant(chunk, class_name_val);
-    emit_byte(chunk, OP_GET_GLOBAL);
+    int class_name_idx = add_constant(chunk, class_name_val);
+    emit_bytes(chunk, OP_GET_GLOBAL, class_name_idx);
     
     // Create instance
     emit_byte(chunk, OP_INSTANCE_NEW);
@@ -223,6 +251,7 @@ void new_expression(ember_chunk* chunk) {
         emit_constant(chunk, init_name);
         emit_bytes(chunk, OP_INVOKE, (uint8_t)arg_count);
     }
+    // If no parentheses, just create the instance without calling init
     
     free(name_str);
 }
@@ -239,7 +268,6 @@ void dot_expression(ember_chunk* chunk) {
     name_str[property_name.length] = '\0';
     
     ember_value property_name_val = ember_make_string(name_str);
-    emit_constant(chunk, property_name_val);
     
     if (match(TOKEN_LPAREN)) {
         // Method call
@@ -256,10 +284,12 @@ void dot_expression(ember_chunk* chunk) {
         }
         
         consume(TOKEN_RPAREN, "Expected ')' after arguments");
+        emit_constant(chunk, property_name_val);
         emit_bytes(chunk, OP_INVOKE, (uint8_t)arg_count);
     } else {
         // Property access
-        emit_byte(chunk, OP_GET_PROPERTY);
+        int property_name_idx = add_constant(chunk, property_name_val);
+        emit_bytes(chunk, OP_GET_PROPERTY, property_name_idx);
     }
     
     free(name_str);

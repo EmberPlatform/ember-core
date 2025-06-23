@@ -67,7 +67,11 @@ static void emit_named_import(ember_chunk* chunk, const char* module_name, impor
     int module_const = add_constant(chunk, module_name_val);
     emit_bytes(chunk, OP_PUSH_CONST, module_const);
     
-    // Call import function
+    // Call import function (using native import)
+    ember_value import_func = ember_make_string("import");
+    int import_const = add_constant(chunk, import_func);
+    emit_bytes(chunk, OP_PUSH_CONST, import_const);
+    emit_byte(chunk, OP_GET_GLOBAL);
     emit_bytes(chunk, OP_CALL, 1); // 1 argument (module name)
     
     // Extract each named export
@@ -109,6 +113,10 @@ static void emit_namespace_import(ember_chunk* chunk, const char* module_name, c
     emit_bytes(chunk, OP_PUSH_CONST, module_const);
     
     // Call import function
+    ember_value import_func = ember_make_string("import");
+    int import_const = add_constant(chunk, import_func);
+    emit_bytes(chunk, OP_PUSH_CONST, import_const);
+    emit_byte(chunk, OP_GET_GLOBAL);
     emit_bytes(chunk, OP_CALL, 1);
     
     // Set as global variable with namespace name
@@ -127,6 +135,10 @@ static void emit_default_import(ember_chunk* chunk, const char* module_name, con
     emit_bytes(chunk, OP_PUSH_CONST, module_const);
     
     // Call import function
+    ember_value import_func = ember_make_string("import");
+    int import_const = add_constant(chunk, import_func);
+    emit_bytes(chunk, OP_PUSH_CONST, import_const);
+    emit_byte(chunk, OP_GET_GLOBAL);
     emit_bytes(chunk, OP_CALL, 1);
     
     // Try to get 'default' export, or use entire module
@@ -249,6 +261,12 @@ void enhanced_import_statement(ember_vm* vm, ember_chunk* chunk) {
         ember_value module_name_val = ember_make_string(module_name);
         int module_const = add_constant(chunk, module_name_val);
         emit_bytes(chunk, OP_PUSH_CONST, module_const);
+        
+        // Call import function
+        ember_value import_func = ember_make_string("import");
+        int import_const = add_constant(chunk, import_func);
+        emit_bytes(chunk, OP_PUSH_CONST, import_const);
+        emit_byte(chunk, OP_GET_GLOBAL);
         emit_bytes(chunk, OP_CALL, 1);
         emit_byte(chunk, OP_POP); // Discard result
         

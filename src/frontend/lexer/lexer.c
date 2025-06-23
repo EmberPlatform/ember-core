@@ -171,6 +171,10 @@ static ember_token_type identifier_type() {
                 memcmp(scanner.start, "await", 5) == 0) {
                 return TOKEN_AWAIT;
             }
+            if (scanner.current - scanner.start == 2 && 
+                memcmp(scanner.start, "as", 2) == 0) {
+                return TOKEN_AS;
+            }
             break;
         case 'b':
             if (scanner.current - scanner.start == 5 && 
@@ -191,6 +195,20 @@ static ember_token_type identifier_type() {
                 memcmp(scanner.start, "class", 5) == 0) {
                 return TOKEN_CLASS;
             }
+            if (scanner.current - scanner.start == 4 && 
+                memcmp(scanner.start, "case", 4) == 0) {
+                return TOKEN_CASE;
+            }
+            break;
+        case 'd':
+            if (scanner.current - scanner.start == 2 && 
+                memcmp(scanner.start, "do", 2) == 0) {
+                return TOKEN_DO;
+            }
+            if (scanner.current - scanner.start == 7 && 
+                memcmp(scanner.start, "default", 7) == 0) {
+                return TOKEN_DEFAULT;
+            }
             break;
         case 'e': 
             if (scanner.current - scanner.start == 4 && 
@@ -200,6 +218,10 @@ static ember_token_type identifier_type() {
             if (scanner.current - scanner.start == 7 && 
                 memcmp(scanner.start, "extends", 7) == 0) {
                 return TOKEN_EXTENDS;
+            }
+            if (scanner.current - scanner.start == 6 && 
+                memcmp(scanner.start, "export", 6) == 0) {
+                return TOKEN_EXPORT;
             }
             break;
         case 'f':
@@ -222,6 +244,10 @@ static ember_token_type identifier_type() {
             if (scanner.current - scanner.start == 8 && 
                 memcmp(scanner.start, "function", 8) == 0) {
                 return TOKEN_FUNCTION;
+            }
+            if (scanner.current - scanner.start == 4 && 
+                memcmp(scanner.start, "from", 4) == 0) {
+                return TOKEN_FROM;
             }
             break;
         case 'i':
@@ -255,11 +281,19 @@ static ember_token_type identifier_type() {
                 memcmp(scanner.start, "return", 6) == 0) {
                 return TOKEN_RETURN;
             }
+            if (scanner.current - scanner.start == 7 && 
+                memcmp(scanner.start, "require", 7) == 0) {
+                return TOKEN_REQUIRE;
+            }
             break;
         case 's':
             if (scanner.current - scanner.start == 5 && 
                 memcmp(scanner.start, "super", 5) == 0) {
                 return TOKEN_SUPER;
+            }
+            if (scanner.current - scanner.start == 6 && 
+                memcmp(scanner.start, "switch", 6) == 0) {
+                return TOKEN_SWITCH;
             }
             break;
         case 't':

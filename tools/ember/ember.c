@@ -368,17 +368,19 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Initialize package management system
+    // Initialize package management system (temporarily disabled)
+    /*
     if (!ember_package_system_init()) {
         fprintf(stderr, "%sError:%s Failed to initialize package management system\n", COLOR_RED, COLOR_RESET);
         return 1;
     }
+    */
     
     // Create VM with standard configuration
     ember_vm* vm = ember_new_vm();
     if (!vm) {
         fprintf(stderr, "%sError:%s Failed to initialize Ember VM\n", COLOR_RED, COLOR_RESET);
-        ember_package_system_cleanup();
+        // ember_package_system_cleanup();  // Disabled
         return 1;
     }
     
@@ -447,38 +449,8 @@ int main(int argc, char* argv[]) {
         free(spec_copy);
     }
 
-    // Register native functions
-    ember_register_func(vm, "print", ember_native_print);
-    ember_register_func(vm, "abs", ember_native_abs);
-    ember_register_func(vm, "sqrt", ember_native_sqrt);
-    ember_register_func(vm, "type", ember_native_type);
-    ember_register_func(vm, "len", ember_native_len);
-    ember_register_func(vm, "max", ember_native_max);
-    ember_register_func(vm, "min", ember_native_min);
-    ember_register_func(vm, "floor", ember_native_floor);
-    ember_register_func(vm, "ceil", ember_native_ceil);
-    ember_register_func(vm, "round", ember_native_round);
-    ember_register_func(vm, "pow", ember_native_pow);
-    ember_register_func(vm, "not", ember_native_not);
-    
-    // String manipulation functions
-    ember_register_func(vm, "substr", ember_native_substr);
-    ember_register_func(vm, "split", ember_native_split);
-    ember_register_func(vm, "join", ember_native_join);
-    ember_register_func(vm, "starts_with", ember_native_starts_with);
-    ember_register_func(vm, "ends_with", ember_native_ends_with);
-    
-    // File I/O functions
-    ember_register_func(vm, "read_file", ember_native_read_file);
-    ember_register_func(vm, "write_file", ember_native_write_file);
-    ember_register_func(vm, "append_file", ember_native_append_file);
-    ember_register_func(vm, "file_exists", ember_native_file_exists);
-    
-    // Type conversion functions (explicit, security-focused)
-    ember_register_func(vm, "str", ember_native_str);
-    ember_register_func(vm, "num", ember_native_num);
-    ember_register_func(vm, "int", ember_native_int);
-    ember_register_func(vm, "bool", ember_native_bool);
+    // Native functions are automatically registered by ember_new_vm() via register_builtin_functions()
+    // This includes all math, string, file I/O, JSON, crypto, and type conversion functions
 
     // Check if we have a script file to execute
     if (script_file) {
@@ -524,7 +496,9 @@ int main(int argc, char* argv[]) {
             }
         }
         
-        // AUTO-RESOLVE IMPORTS: Scan for imports and install missing packages
+        // AUTO-RESOLVE IMPORTS: Temporarily disabled due to issues
+        // TODO: Re-enable once package system is stabilized
+        /*
         if (strlen(exec_source) > 0) {
             printf("%s[AUTO-IMPORT]%s Checking for import statements...\n", COLOR_CYAN, COLOR_RESET);
             
@@ -563,6 +537,7 @@ int main(int argc, char* argv[]) {
                 ember_package_system_cleanup();
             }
         }
+        */
         
         // Execute the entire file as one unit
         int result = 0;

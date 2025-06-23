@@ -1,0 +1,337 @@
+// Advanced Exception Handling Patterns and Best Practices
+// Demonstrates real-world exception handling scenarios
+
+print("=== Advanced Exception Handling Patterns ===")
+print("")
+
+// Pattern 1: Exception Chaining and Wrapping
+print("Pattern 1: Exception Chaining and Wrapping")
+print("Purpose: Preserve original error information while adding context")
+
+function database_operation() {
+    throw "Connection timeout to database server"
+}
+
+function user_service_get_user(user_id) {
+    try {
+        return database_operation()
+    } catch (db_error) {
+        // Wrap the database error with higher-level context
+        throw "Failed to retrieve user " + str(user_id) + ": " + str(db_error)
+    }
+}
+
+function handle_user_request(user_id) {
+    try {
+        return user_service_get_user(user_id)
+    } catch (service_error) {
+        print("User request error: " + str(service_error))
+        // Log the error and return a user-friendly response
+        return "Sorry, we couldn't retrieve your user information at this time."
+    }
+}
+
+var result = handle_user_request(12345)
+print("Result: " + str(result))
+print("")
+
+// Pattern 2: Error Recovery and Fallback Strategies
+print("Pattern 2: Error Recovery and Fallback Strategies")
+print("Purpose: Graceful degradation when primary operations fail")
+
+function primary_data_source() {
+    throw "Primary data source unavailable"
+}
+
+function secondary_data_source() {
+    return "Data from backup source"
+}
+
+function cache_data_source() {
+    return "Cached data (may be stale)"
+}
+
+function resilient_data_fetch() {
+    // Try multiple data sources in order of preference
+    try {
+        return primary_data_source()
+    } catch (primary_error) {
+        print("Primary source failed: " + str(primary_error))
+        try {
+            return secondary_data_source()
+        } catch (secondary_error) {
+            print("Secondary source failed: " + str(secondary_error))
+            try {
+                return cache_data_source()
+            } catch (cache_error) {
+                print("All data sources failed!")
+                throw "Complete data fetch failure"
+            }
+        }
+    }
+}
+
+try {
+    var data = resilient_data_fetch()
+    print("Successfully retrieved: " + str(data))
+} catch (e) {
+    print("Final error: " + str(e))
+}
+print("")
+
+// Pattern 3: Resource Management with Exception Safety
+print("Pattern 3: Resource Management with Exception Safety")
+print("Purpose: Ensure resources are properly cleaned up even when exceptions occur")
+
+function file_processor(filename) {
+    var file_handle = nil
+    var lock_acquired = false
+    var temp_resources = []
+    
+    try {
+        // Simulate acquiring file handle
+        print("Opening file: " + str(filename))
+        file_handle = filename + "_handle"
+        
+        // Simulate acquiring lock
+        print("Acquiring file lock...")
+        lock_acquired = true
+        
+        // Simulate creating temporary resources
+        temp_resources = ["temp1", "temp2", "temp3"]
+        print("Created temporary resources")
+        
+        // Simulate file processing that might fail
+        if filename == "corrupted.txt" {
+            throw "File is corrupted and cannot be processed"
+        }
+        
+        if filename == "permission_denied.txt" {
+            throw "Access denied: insufficient permissions"
+        }
+        
+        print("File processed successfully")
+        return "Processing complete for " + str(filename)
+        
+    } catch (e) {
+        print("Error during file processing: " + str(e))
+        throw "File processing failed: " + str(e)
+        
+    } finally {
+        // Cleanup resources in reverse order
+        if len(temp_resources) > 0 {
+            print("Cleaning up temporary resources...")
+            temp_resources = []
+        }
+        
+        if lock_acquired {
+            print("Releasing file lock...")
+            lock_acquired = false
+        }
+        
+        if file_handle != nil {
+            print("Closing file handle...")
+            file_handle = nil
+        }
+        
+        print("Resource cleanup complete")
+    }
+}
+
+var test_files = ["valid.txt", "corrupted.txt", "permission_denied.txt"]
+for i = 0; i < len(test_files); i = i + 1 {
+    try {
+        var result = file_processor(test_files[i])
+        print("Success: " + str(result))
+    } catch (e) {
+        print("Failed to process " + str(test_files[i]) + ": " + str(e))
+    }
+    print("---")
+}
+print("")
+
+// Pattern 4: Exception Translation and Domain-Specific Errors
+print("Pattern 4: Exception Translation and Domain-Specific Errors")
+print("Purpose: Convert low-level exceptions to domain-specific ones")
+
+function validate_email(email) {
+    if email == nil {
+        throw "Email cannot be null"
+    }
+    if len(str(email)) == 0 {
+        throw "Email cannot be empty"
+    }
+    // Simplified email validation
+    var email_str = str(email)
+    if len(email_str) < 5 {
+        throw "Email is too short"
+    }
+    return true
+}
+
+function validate_age(age) {
+    if age == nil {
+        throw "Age cannot be null"
+    }
+    var age_num = age
+    if age_num < 0 {
+        throw "Age cannot be negative"
+    }
+    if age_num > 150 {
+        throw "Age cannot exceed 150"
+    }
+    return true
+}
+
+function create_user_account(email, age, name) {
+    try {
+        // Validate inputs
+        validate_email(email)
+        validate_age(age)
+        
+        if name == nil or len(str(name)) == 0 {
+            throw "Name is required"
+        }
+        
+        // Simulate account creation
+        print("Creating account for: " + str(name))
+        return "Account created successfully for " + str(email)
+        
+    } catch (validation_error) {
+        // Translate to domain-specific error
+        throw "User registration failed: " + str(validation_error)
+    }
+}
+
+var test_users = [
+    ["valid@email.com", 25, "John Doe"],
+    [nil, 30, "Jane Smith"],
+    ["a@b.c", -5, "Invalid User"],
+    ["test@example.com", 200, "Old User"],
+    ["valid@test.com", 30, nil]
+]
+
+for i = 0; i < len(test_users); i = i + 1 {
+    var user = test_users[i]
+    try {
+        var result = create_user_account(user[0], user[1], user[2])
+        print("Success: " + str(result))
+    } catch (e) {
+        print("Registration error: " + str(e))
+    }
+}
+print("")
+
+// Pattern 5: Circuit Breaker Pattern with Exceptions
+print("Pattern 5: Circuit Breaker Pattern")
+print("Purpose: Prevent cascading failures by temporarily disabling failing operations")
+
+var circuit_breaker_state = "CLOSED"  // CLOSED, OPEN, HALF_OPEN
+var failure_count = 0
+var failure_threshold = 3
+var success_count = 0
+var recovery_threshold = 2
+
+function unreliable_service(request_id) {
+    // Simulate a service that fails frequently
+    if request_id % 3 == 0 {
+        throw "Service temporarily unavailable"
+    }
+    return "Response for request " + str(request_id)
+}
+
+function circuit_breaker_call(request_id) {
+    if circuit_breaker_state == "OPEN" {
+        throw "Circuit breaker is OPEN - service calls disabled"
+    }
+    
+    try {
+        var result = unreliable_service(request_id)
+        
+        // Success - reset failure count and potentially close circuit
+        failure_count = 0
+        if circuit_breaker_state == "HALF_OPEN" {
+            success_count = success_count + 1
+            if success_count >= recovery_threshold {
+                circuit_breaker_state = "CLOSED"
+                success_count = 0
+                print("Circuit breaker state: HALF_OPEN -> CLOSED")
+            }
+        }
+        
+        return result
+        
+    } catch (service_error) {
+        failure_count = failure_count + 1
+        
+        if circuit_breaker_state == "CLOSED" and failure_count >= failure_threshold {
+            circuit_breaker_state = "OPEN"
+            print("Circuit breaker state: CLOSED -> OPEN")
+        } else if circuit_breaker_state == "HALF_OPEN" {
+            circuit_breaker_state = "OPEN"
+            success_count = 0
+            print("Circuit breaker state: HALF_OPEN -> OPEN")
+        }
+        
+        throw "Circuit breaker triggered: " + str(service_error)
+    }
+}
+
+// Simulate requests that will trigger circuit breaker
+for request_id = 1; request_id <= 15; request_id = request_id + 1 {
+    try {
+        // Simulate circuit breaker recovery attempt
+        if circuit_breaker_state == "OPEN" and request_id == 10 {
+            circuit_breaker_state = "HALF_OPEN"
+            print("Circuit breaker state: OPEN -> HALF_OPEN (recovery attempt)")
+        }
+        
+        var response = circuit_breaker_call(request_id)
+        print("Request " + str(request_id) + " success: " + str(response))
+        
+    } catch (e) {
+        print("Request " + str(request_id) + " failed: " + str(e))
+    }
+}
+print("")
+
+// Pattern 6: Exception Handling in Async-like Operations
+print("Pattern 6: Async-like Exception Handling")
+print("Purpose: Handle errors in asynchronous or callback-based operations")
+
+function simulate_async_operation(operation_id, should_succeed) {
+    // Simulate async operation completion
+    if should_succeed {
+        return "Async operation " + str(operation_id) + " completed successfully"
+    } else {
+        throw "Async operation " + str(operation_id) + " failed"
+    }
+}
+
+function async_operation_wrapper(operation_id) {
+    try {
+        var result = simulate_async_operation(operation_id, operation_id % 2 == 1)
+        print("✓ " + str(result))
+        return result
+    } catch (async_error) {
+        print("✗ Async error: " + str(async_error))
+        // Could implement retry logic here
+        return nil
+    }
+}
+
+print("Simulating multiple async operations:")
+for op_id = 1; op_id <= 6; op_id = op_id + 1 {
+    async_operation_wrapper(op_id)
+}
+print("")
+
+print("=== Exception Handling Patterns Summary ===")
+print("1. Exception Chaining: Preserve error context across layers")
+print("2. Fallback Strategies: Graceful degradation when operations fail")
+print("3. Resource Management: Ensure cleanup with finally blocks")
+print("4. Error Translation: Convert technical errors to domain-specific ones")
+print("5. Circuit Breaker: Prevent cascading failures")
+print("6. Async Error Handling: Manage errors in asynchronous operations")
+print("")
+print("These patterns provide robust error handling for production applications!")

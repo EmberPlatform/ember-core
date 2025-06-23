@@ -83,7 +83,8 @@ typedef enum {
     EMBER_VAL_GENERATOR,
     EMBER_VAL_SET,
     EMBER_VAL_MAP,
-    EMBER_VAL_REGEX
+    EMBER_VAL_REGEX,
+    EMBER_VAL_ITERATOR
 } ember_val_type;
 
 // Opcodes for the bytecode VM
@@ -133,6 +134,8 @@ typedef enum {
     OP_THROW,         // Throw exception
     OP_RETHROW,       // Rethrow current exception
     OP_POP_HANDLER,   // Pop exception handler
+    OP_CATCH_TYPE,    // Begin typed catch block (with exception type checking)
+    OP_EXCEPTION_MATCH, // Check if current exception matches specified type
     OP_CLASS_DEF,     // Define a class
     OP_METHOD_DEF,    // Define a method
     OP_INSTANCE_NEW,  // Create new instance
@@ -169,6 +172,13 @@ typedef enum {
     OP_SWITCH,        // Switch statement
     OP_CASE,          // Case clause
     OP_DEFAULT,       // Default clause
+    // Module system opcodes
+    OP_MODULE_INIT,   // Initialize module context
+    OP_MODULE_EXPORT, // Export value from module
+    OP_MODULE_EXPORT_DEFAULT, // Export default value
+    OP_MODULE_IMPORT, // Import from module
+    OP_MODULE_IMPORT_ALL, // Import all exports
+    OP_MODULE_REQUIRE, // Require module (CommonJS style)
     OP_HALT           // Stop execution
 } ember_opcode;
 
@@ -200,6 +210,7 @@ typedef enum {
     TOKEN_IF,
     TOKEN_ELSE,
     TOKEN_WHILE,
+    TOKEN_DO,
     TOKEN_FOR,
     TOKEN_FN,
     TOKEN_FUNCTION,
@@ -240,6 +251,11 @@ typedef enum {
     TOKEN_SWITCH,
     TOKEN_CASE,
     TOKEN_DEFAULT,
+    // Module system tokens
+    TOKEN_EXPORT,
+    TOKEN_FROM,
+    TOKEN_AS,
+    TOKEN_REQUIRE,
     TOKEN_EOF,
     TOKEN_ERROR
 } ember_token_type;
@@ -274,7 +290,8 @@ typedef enum {
     OBJ_GENERATOR,
     OBJ_SET,
     OBJ_MAP,
-    OBJ_REGEX
+    OBJ_REGEX,
+    OBJ_ITERATOR
 } ember_object_type;
 
 // Base object structure for GC
@@ -330,13 +347,49 @@ typedef struct {
     int capacity;   // Total capacity
 } ember_hash_map;
 
-// Exception object structure
+// Exception types for built-in exceptions
+typedef enum {
+    EMBER_EXCEPTION_ERROR,           // Generic Error
+    EMBER_EXCEPTION_TYPE_ERROR,      // TypeError
+    EMBER_EXCEPTION_RUNTIME_ERROR,   // RuntimeError
+    EMBER_EXCEPTION_SYNTAX_ERROR,    // SyntaxError
+    EMBER_EXCEPTION_REFERENCE_ERROR, // ReferenceError
+    EMBER_EXCEPTION_RANGE_ERROR,     // RangeError
+    EMBER_EXCEPTION_MEMORY_ERROR,    // MemoryError
+    EMBER_EXCEPTION_SECURITY_ERROR,  // SecurityError
+    EMBER_EXCEPTION_IO_ERROR,        // IOError
+    EMBER_EXCEPTION_NETWORK_ERROR,   // NetworkError
+    EMBER_EXCEPTION_TIMEOUT_ERROR,   // TimeoutError
+    EMBER_EXCEPTION_ASSERTION_ERROR, // AssertionError
+    EMBER_EXCEPTION_CUSTOM          // Custom user-defined exception
+} ember_exception_type;
+
+// Stack trace frame structure
+typedef struct {
+    char* function_name;      // Function name or "<script>" for top-level
+    char* file_name;          // Source file name
+    int line_number;          // Line number in source
+    int column_number;        // Column number in source
+    uint8_t* instruction_ptr; // VM instruction pointer
+    ember_value locals;       // Local variables at the time of exception (for debugging)
+} ember_stack_frame;
+
+// Enhanced exception object structure
 typedef struct {
     ember_object obj;
-    char* message;
-    char* type;
-    int line;
-    ember_value stack_trace;
+    ember_exception_type exception_type;  // Type of exception
+    char* message;                        // Error message
+    char* type_name;                      // String representation of type
+    char* file_name;                      // Source file where exception occurred
+    int line_number;                      // Line number where exception occurred
+    int column_number;                    // Column number where exception occurred
+    ember_stack_frame* stack_frames;      // Stack trace frames
+    int stack_frame_count;                // Number of stack frames
+    ember_value cause;                    // Cause of this exception (nested exceptions)
+    ember_value data;                     // Additional data attached to exception
+    uint64_t timestamp;                   // When the exception was created
+    int suppressed_count;                 // Number of suppressed exceptions
+    ember_value* suppressed_exceptions;   // Array of suppressed exceptions
 } ember_exception;
 
 // Class object structure
@@ -437,6 +490,31 @@ typedef struct {
     ember_array* groups;                   // Array of capture groups from last match
     int last_index;                        // Last match position (for global matching)
 } ember_regex;
+
+// Iterator types for different collections
+typedef enum {
+    ITERATOR_ARRAY,
+    ITERATOR_SET,
+    ITERATOR_MAP_KEYS,
+    ITERATOR_MAP_VALUES,
+    ITERATOR_MAP_ENTRIES
+} ember_iterator_type;
+
+// Iterator result structure
+typedef struct {
+    ember_value value;                     // Current value
+    int done;                              // Whether iteration is complete
+} ember_iterator_result;
+
+// Iterator object structure
+typedef struct {
+    ember_object obj;
+    ember_iterator_type type;              // Type of iterator
+    ember_value collection;                // Collection being iterated
+    int index;                             // Current position
+    int capacity;                          // Collection capacity (for optimization)
+    int length;                            // Collection length
+} ember_iterator;
 
 // Exception handler structure for try/catch/finally
 typedef struct {
@@ -668,6 +746,39 @@ ember_value ember_make_string_gc(ember_vm* vm, const char* str);
 ember_value ember_make_array(ember_vm* vm, int capacity);
 ember_value ember_make_hash_map(ember_vm* vm, int capacity);
 ember_value ember_make_exception(ember_vm* vm, const char* type, const char* message);
+
+// Enhanced exception creation functions
+ember_value ember_make_exception_detailed(ember_vm* vm, ember_exception_type type, const char* message, 
+                                         const char* file_name, int line_number, int column_number);
+ember_value ember_make_type_error(ember_vm* vm, const char* message);
+ember_value ember_make_runtime_error(ember_vm* vm, const char* message);
+ember_value ember_make_syntax_error(ember_vm* vm, const char* message);
+ember_value ember_make_reference_error(ember_vm* vm, const char* message);
+ember_value ember_make_range_error(ember_vm* vm, const char* message);
+ember_value ember_make_memory_error(ember_vm* vm, const char* message);
+ember_value ember_make_security_error(ember_vm* vm, const char* message);
+ember_value ember_make_io_error(ember_vm* vm, const char* message);
+ember_value ember_make_network_error(ember_vm* vm, const char* message);
+ember_value ember_make_timeout_error(ember_vm* vm, const char* message);
+ember_value ember_make_assertion_error(ember_vm* vm, const char* message);
+
+// Exception manipulation functions
+void ember_exception_add_stack_frame(ember_vm* vm, ember_exception* exc, const char* function_name, 
+                                     const char* file_name, int line_number, int column_number, 
+                                     uint8_t* instruction_ptr);
+void ember_exception_set_cause(ember_vm* vm, ember_exception* exc, ember_value cause);
+void ember_exception_add_suppressed(ember_vm* vm, ember_exception* exc, ember_value suppressed);
+ember_value ember_exception_get_stack_trace_string(ember_vm* vm, ember_exception* exc);
+const char* ember_exception_type_to_string(ember_exception_type type);
+
+// Exception stack trace utilities
+void ember_capture_stack_trace(ember_vm* vm, ember_exception* exc);
+void ember_print_exception_details(ember_vm* vm, ember_exception* exc);
+int ember_exception_matches_type(ember_exception* exc, ember_exception_type type);
+
+// Exception chaining utilities (for nested exceptions)
+ember_value ember_wrap_exception(ember_vm* vm, ember_value original, const char* new_message);
+ember_value ember_get_root_cause(ember_value exception);
 ember_value ember_make_class(ember_vm* vm, const char* name);
 ember_value ember_make_instance(ember_vm* vm, ember_class* klass);
 ember_value ember_make_bound_method(ember_vm* vm, ember_value receiver, ember_value method);
@@ -678,11 +789,21 @@ ember_value ember_make_map(ember_vm* vm);
 ember_value ember_make_regex(ember_vm* vm, const char* pattern, ember_regex_flags flags);
 ember_value ember_make_nil(void);
 
+// Utility functions
+const char* value_type_to_string(ember_val_type type);
+
 // Set operations
 int set_add(ember_set* set, ember_value element);
 int set_has(ember_set* set, ember_value element);
 int set_delete(ember_set* set, ember_value element);
 void set_clear(ember_set* set);
+
+// Enhanced Set operations
+ember_value set_to_array(ember_vm* vm, ember_set* set);
+ember_value set_union(ember_vm* vm, ember_set* set1, ember_set* set2);
+ember_value set_intersection(ember_vm* vm, ember_set* set1, ember_set* set2);
+ember_value set_difference(ember_vm* vm, ember_set* set1, ember_set* set2);
+int set_is_subset(ember_set* subset, ember_set* superset);
 
 // Map operations  
 int map_set(ember_map* map, ember_value key, ember_value value);
@@ -690,6 +811,11 @@ ember_value map_get(ember_map* map, ember_value key);
 int map_has(ember_map* map, ember_value key);
 int map_delete(ember_map* map, ember_value key);
 void map_clear(ember_map* map);
+
+// Enhanced Map operations
+ember_value map_keys(ember_vm* vm, ember_map* map);
+ember_value map_values(ember_vm* vm, ember_map* map);
+ember_value map_entries(ember_vm* vm, ember_map* map);
 
 // Regex operations
 int regex_test(ember_regex* regex, const char* text);
@@ -725,6 +851,27 @@ int values_equal(ember_value a, ember_value b);
 
 // Array operation functions needed by stdlib
 void array_push(ember_array* array, ember_value value);
+
+// Enhanced Array methods for functional programming
+void array_foreach(ember_vm* vm, ember_array* array, ember_value callback);
+ember_value array_map(ember_vm* vm, ember_array* array, ember_value callback);
+ember_value array_filter(ember_vm* vm, ember_array* array, ember_value callback);
+ember_value array_reduce(ember_vm* vm, ember_array* array, ember_value callback, ember_value initial);
+ember_value array_find(ember_vm* vm, ember_array* array, ember_value callback);
+int array_some(ember_vm* vm, ember_array* array, ember_value callback);
+int array_every(ember_vm* vm, ember_array* array, ember_value callback);
+int array_index_of(ember_array* array, ember_value search_element);
+int array_includes(ember_array* array, ember_value search_element);
+
+// Iterator protocol functions
+ember_value ember_make_iterator(ember_vm* vm, ember_value collection, ember_iterator_type type);
+ember_iterator_result iterator_next(ember_iterator* iterator);
+int iterator_done(ember_iterator* iterator);
+ember_value array_iterator(ember_vm* vm, ember_array* array);
+ember_value set_iterator(ember_vm* vm, ember_set* set);
+ember_value map_keys_iterator(ember_vm* vm, ember_map* map);
+ember_value map_values_iterator(ember_vm* vm, ember_map* map);
+ember_value map_entries_iterator(ember_vm* vm, ember_map* map);
 
 // Hash map operation functions needed by stdlib
 ember_hash_map* allocate_hash_map(ember_vm* vm, int capacity);
@@ -763,7 +910,7 @@ void ember_set_bytecode_cache_dir(const char* cache_dir);
 // Module/Library API functions
 int ember_import_module(ember_vm* vm, const char* module_name);
 int ember_install_library(const char* library_name, const char* source_path);
-char* ember_resolve_module_path(const char* module_name);
+char* ember_resolve_module_path(const char* module_name, const char* current_file);
 void ember_add_module_path(ember_vm* vm, const char* path);
 
 // Virtual filesystem API functions
@@ -805,6 +952,11 @@ ember_value ember_native_ceil(ember_vm* vm, int argc, ember_value* argv);
 ember_value ember_native_round(ember_vm* vm, int argc, ember_value* argv);
 ember_value ember_native_pow(ember_vm* vm, int argc, ember_value* argv);
 ember_value ember_native_not(ember_vm* vm, int argc, ember_value* argv);
+
+// Exception functions
+ember_value ember_native_is_exception(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_get_exception_type(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_get_stack_trace(ember_vm* vm, int argc, ember_value* argv);
 
 // String manipulation functions
 ember_value ember_native_substr(ember_vm* vm, int argc, ember_value* argv);
@@ -885,6 +1037,8 @@ void ember_pool_release_vm(ember_vm* vm);
 #define AS_MAP(value) ((ember_map*)((value).as.obj_val))
 #define IS_REGEX(value) ((value).type == EMBER_VAL_REGEX)
 #define AS_REGEX(value) ((ember_regex*)((value).as.obj_val))
+// Iterator access macros
+#define AS_ITERATOR(value) ((ember_iterator*)((value).as.obj_val))
 
 #ifdef __cplusplus
 }

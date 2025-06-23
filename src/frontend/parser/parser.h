@@ -14,13 +14,22 @@ typedef struct {
     int continue_target;    // Where continue should jump to
 } loop_context;
 
+// Catch block information
+typedef struct {
+    char* exception_type;    // Type of exception to catch (NULL for catch-all)
+    char* variable_name;     // Variable name to bind exception to (NULL for no binding)
+    int catch_start;         // Start of this catch block
+    int catch_end;           // End of this catch block
+} catch_block_info;
+
 // Exception context for try/catch/finally tracking
 typedef struct {
-    int handler_index;      // Index of exception handler in VM
-    int try_start;          // Start of try block
-    int catch_start;        // Start of catch block (-1 if no catch)
-    int finally_start;      // Start of finally block (-1 if no finally)
-    int stack_depth;        // Stack depth when try block started
+    int handler_index;       // Index of exception handler in VM
+    int try_start;           // Start of try block
+    catch_block_info catch_blocks[8];  // Multiple catch blocks
+    int catch_count;         // Number of catch blocks
+    int finally_start;       // Start of finally block (-1 if no finally)
+    int stack_depth;         // Stack depth when try block started
 } exception_context;
 
 // Parser state
@@ -74,11 +83,15 @@ void assignment_statement(ember_chunk* chunk);
 void expression_statement(ember_chunk* chunk);
 void if_statement(ember_vm* vm, ember_chunk* chunk);
 void while_statement(ember_vm* vm, ember_chunk* chunk);
+void do_while_statement(ember_vm* vm, ember_chunk* chunk);
 void for_statement(ember_vm* vm, ember_chunk* chunk);
 void parse_loop_body(ember_vm* vm, ember_chunk* chunk);
 void function_definition(ember_vm* vm, ember_chunk* chunk);
 void return_statement(ember_chunk* chunk);
 void import_statement(ember_vm* vm, ember_chunk* chunk);
+void export_statement(ember_vm* vm, ember_chunk* chunk);
+void enhanced_export_statement(ember_vm* vm, ember_chunk* chunk);
+void enhanced_import_statement(ember_vm* vm, ember_chunk* chunk);
 void break_statement(ember_chunk* chunk);
 void continue_statement(ember_chunk* chunk);
 void try_statement(ember_vm* vm, ember_chunk* chunk);

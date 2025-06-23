@@ -361,7 +361,7 @@ static char* ember_resolve_module_path_vm(ember_vm* vm, const char* module_name)
     
     // Fall back to standard resolution
     free(resolved_path);
-    return ember_resolve_module_path(module_name);
+    return ember_resolve_module_path(module_name, NULL);
 }
 
 // Module system implementation
@@ -691,7 +691,8 @@ int ember_install_library(const char* library_name, const char* source_path) {
     return 0;
 }
 
-char* ember_resolve_module_path(const char* module_name) {
+char* ember_resolve_module_path(const char* module_name, const char* current_file) {
+    (void)current_file; // Parameter unused in basic implementation
     if (!module_name || strlen(module_name) == 0) {
         return NULL;
     }

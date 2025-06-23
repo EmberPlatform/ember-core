@@ -1,0 +1,67 @@
+// String helpers module - demonstrates various export patterns
+
+// Named exports
+export function capitalize(str) {
+    if len(str) == 0 {
+        return str
+    }
+    first = substr(str, 0, 1)
+    rest = substr(str, 1, len(str) - 1)
+    // Note: would need proper toUpperCase implementation
+    return first + rest
+}
+
+export function reverse(str) {
+    result = ""
+    i = len(str) - 1
+    while i >= 0 {
+        result = result + substr(str, i, 1)
+        i = i - 1
+    }
+    return result
+}
+
+export function repeat(str, times) {
+    result = ""
+    i = 0
+    while i < times {
+        result = result + str
+        i = i + 1
+    }
+    return result
+}
+
+// Export with different name
+function internalTrim(str) {
+    // Simple trim implementation
+    return str  // Placeholder - would need proper implementation
+}
+
+export { internalTrim as trim }
+
+// Multiple exports in one statement
+export {
+    capitalize as upper,
+    reverse as rev
+}
+
+// Default export
+export default function formatText(text, options) {
+    result = text
+    
+    if options != nil {
+        if options["uppercase"] {
+            result = capitalize(result)
+        }
+        if options["reverse"] {
+            result = reverse(result)
+        }
+        if options["repeat"] {
+            result = repeat(result, options["repeat"])
+        }
+    }
+    
+    return result
+}
+
+print("String helpers module loaded")

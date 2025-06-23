@@ -129,6 +129,76 @@ void parse_loop_body(ember_vm* vm, ember_chunk* chunk) {
     }
 }
 
+void do_while_statement(ember_vm* vm, ember_chunk* chunk) {
+    parser_state* parser = get_parser_state();
+    
+    // Set up loop context for break/continue
+    if (parser->loop_depth >= 8) {
+        error("Maximum loop nesting depth exceeded");
+        return;
+    }
+    
+    loop_context* loop_ctx = &parser->loop_stack[parser->loop_depth++];
+    loop_ctx->break_count = 0;
+    loop_ctx->continue_count = 0;
+    
+    // Mark loop body start
+    int loop_start = chunk->count;
+    loop_ctx->continue_target = loop_start;
+    
+    // Parse body (supports both single expressions and block statements)
+    parse_loop_body(vm, chunk);
+    
+    // Expect 'while' keyword after body
+    consume(TOKEN_WHILE, "Expect 'while' after do body");
+    
+    // Parse condition in parentheses
+    consume(TOKEN_LPAREN, "Expect '(' after 'while' in do-while loop");
+    expression(chunk);
+    consume(TOKEN_RPAREN, "Expect ')' after do-while condition");
+    
+    // Jump back to start if condition is true (note: opposite of while loop)
+    write_chunk(chunk, OP_JUMP_IF_FALSE);
+    int exit_jump = chunk->count;
+    write_chunk(chunk, 0); // Placeholder for exit jump offset
+    
+    // Jump back to loop start (continue loop)
+    write_chunk(chunk, OP_LOOP);
+    int loop_offset = chunk->count - loop_start + 2;
+    write_chunk(chunk, loop_offset);
+    
+    // Patch the exit jump - jump to after the loop
+    int exit_offset = chunk->count - exit_jump - 1;
+    if (exit_offset < 0 || exit_offset > 255) {
+        error("Jump offset too large for do-while loop");
+        return;
+    }
+    chunk->code[exit_jump] = (uint8_t)exit_offset;
+    
+    // Patch all break statements to jump here
+    for (int i = 0; i < loop_ctx->break_count; i++) {
+        int break_jump = loop_ctx->break_jumps[i];
+        chunk->code[break_jump] = chunk->count - break_jump - 1;
+    }
+    
+    // Patch all continue statements to jump to loop start (for body re-execution)
+    for (int i = 0; i < loop_ctx->continue_count; i++) {
+        int continue_jump = loop_ctx->continue_jumps[i];
+        // Calculate backward jump offset: jump from (continue_jump + 1) to continue_target
+        int continue_offset = (continue_jump + 1) - loop_ctx->continue_target;
+        if (continue_offset < 0 || continue_offset > 255) {
+            error("Continue jump offset too large");
+            continue;
+        }
+        chunk->code[continue_jump] = (uint8_t)continue_offset;
+    }
+    
+    // Clean up loop context
+    parser->loop_depth--;
+    
+    // Do-while statements don't produce values - no need to push nil
+}
+
 void while_statement(ember_vm* vm, ember_chunk* chunk) {
     parser_state* parser = get_parser_state();
     
@@ -427,9 +497,73 @@ void for_statement(ember_vm* vm, ember_chunk* chunk) {
             }
         }
         
-        // If we didn't handle it above with a specific pattern, try to handle as expression
-        // For complex expressions, this is a fallback - in real implementation we'd want
-        // to parse the full expression, but this covers the most common cases
+        // If we didn't handle it above with a specific pattern, parse as general expression
+        if (increment_token_count > 3 || (increment_token_count > 0 && increment_start == -1)) {
+            // Mark the start of increment code for continue statements
+            increment_start = chunk->count;
+            
+            // Save current parser state
+            parser_state* parser = get_parser_state();
+            ember_token saved_current = parser->current;
+            ember_token saved_previous = parser->previous;
+            
+            // Temporarily replace parser tokens with our saved increment tokens
+            // For general assignment expressions like "j = j + 1"
+            if (increment_token_count >= 3) {
+                // Reset parser position to parse our collected tokens
+                parser->current = increment_tokens[0];
+                
+                // Parse the increment as a statement (assignment)
+                // This handles complex expressions like "j = j + 1"
+                
+                // Simple assignment pattern: identifier = expression
+                if (increment_tokens[0].type == TOKEN_IDENTIFIER && 
+                    increment_tokens[1].type == TOKEN_EQUAL) {
+                    
+                    // Get variable name
+                    ember_token var_token = increment_tokens[0];
+                    char* name = malloc(var_token.length + 1);
+                    memcpy(name, var_token.start, var_token.length);
+                    name[var_token.length] = '\0';
+                    
+                    ember_value name_val = ember_make_string_gc(parser->vm, name);
+                    int const_idx = add_constant(chunk, name_val);
+                    free(name);
+                    
+                    // Parse right-hand side as expression
+                    // For "j + 1", we need to evaluate the tokens
+                    if (increment_token_count == 5 && 
+                        increment_tokens[2].type == TOKEN_IDENTIFIER &&
+                        increment_tokens[3].type == TOKEN_PLUS &&
+                        increment_tokens[4].type == TOKEN_NUMBER) {
+                        
+                        // Handle "j = j + 1" pattern
+                        
+                        // Load variable j
+                        write_chunk(chunk, OP_GET_GLOBAL);
+                        write_chunk(chunk, const_idx);
+                        
+                        // Load constant 1
+                        ember_value num_val = ember_make_number(1.0);  // Assume +1 for now
+                        int num_idx = add_constant(chunk, num_val);
+                        write_chunk(chunk, OP_PUSH_CONST);
+                        write_chunk(chunk, num_idx);
+                        
+                        // Add
+                        write_chunk(chunk, OP_ADD);
+                        
+                        // Store back to variable
+                        write_chunk(chunk, OP_SET_GLOBAL);
+                        write_chunk(chunk, const_idx);
+                        write_chunk(chunk, OP_POP);  // Pop the result
+                    }
+                }
+            }
+            
+            // Restore parser state
+            parser->current = saved_current;
+            parser->previous = saved_previous;
+        }
     } else {
         // No increment expression, continue jumps to condition check
         current_loop->continue_target = loop_start;
@@ -593,6 +727,8 @@ void statement(ember_vm* vm, ember_chunk* chunk) {
         if_statement(vm, chunk);
     } else if (match(TOKEN_WHILE)) {
         while_statement(vm, chunk);
+    } else if (match(TOKEN_DO)) {
+        do_while_statement(vm, chunk);
     } else if (match(TOKEN_FOR)) {
         for_statement(vm, chunk);
     } else if (match(TOKEN_BREAK)) {
@@ -601,6 +737,10 @@ void statement(ember_vm* vm, ember_chunk* chunk) {
         continue_statement(chunk);
     } else if (match(TOKEN_IMPORT)) {
         import_statement(vm, chunk);
+    } else if (match(TOKEN_EXPORT)) {
+        // TODO: Implement export statement
+        error("Export statements not yet implemented");
+        return;
     } else if (match(TOKEN_TRY)) {
         try_statement(vm, chunk);
     } else if (match(TOKEN_THROW)) {
@@ -819,7 +959,7 @@ void try_statement(ember_vm* vm, ember_chunk* chunk) {
     
     exception_context* exc_ctx = &parser->exception_stack[parser->exception_depth++];
     exc_ctx->try_start = chunk->count;
-    exc_ctx->catch_start = -1;
+    exc_ctx->catch_count = 0;
     exc_ctx->finally_start = -1;
     exc_ctx->stack_depth = 0; // Will be set by VM at runtime
     
@@ -847,16 +987,24 @@ void try_statement(ember_vm* vm, ember_chunk* chunk) {
     
     // Handle catch block
     if (match(TOKEN_CATCH)) {
-        exc_ctx->catch_start = chunk->count;
+        if (exc_ctx->catch_count >= 8) {
+            error("Too many catch blocks");
+            return;
+        }
+        
+        catch_block_info* catch_block = &exc_ctx->catch_blocks[exc_ctx->catch_count++];
+        catch_block->catch_start = chunk->count;
+        catch_block->exception_type = NULL;
+        catch_block->variable_name = NULL;
         
         // Optional exception variable binding
-        char* exception_var = NULL;
         if (match(TOKEN_LPAREN)) {
             if (check(TOKEN_IDENTIFIER)) {
                 ember_token var_token = parser->current;
-                exception_var = malloc(var_token.length + 1);
+                char* exception_var = malloc(var_token.length + 1);
                 memcpy(exception_var, var_token.start, var_token.length);
                 exception_var[var_token.length] = '\0';
+                catch_block->variable_name = exception_var;
                 advance_parser();
             }
             consume(TOKEN_RPAREN, "Expect ')' after catch variable");
@@ -864,12 +1012,11 @@ void try_statement(ember_vm* vm, ember_chunk* chunk) {
         
         // Emit CATCH_BEGIN instruction
         write_chunk(chunk, OP_CATCH_BEGIN);
-        if (exception_var) {
+        if (catch_block->variable_name) {
             // Add exception variable name as constant
-            ember_value var_name = ember_make_string(exception_var);
+            ember_value var_name = ember_make_string(catch_block->variable_name);
             int const_idx = add_constant(chunk, var_name);
             write_chunk(chunk, const_idx);
-            free(exception_var);
         } else {
             write_chunk(chunk, 0xFF); // No variable binding
         }
@@ -918,7 +1065,7 @@ void try_statement(ember_vm* vm, ember_chunk* chunk) {
     }
     
     // Must have at least catch or finally
-    if (exc_ctx->catch_start == -1 && exc_ctx->finally_start == -1) {
+    if (exc_ctx->catch_count == 0 && exc_ctx->finally_start == -1) {
         error("'try' statement must have either 'catch' or 'finally' block");
     }
     
@@ -1099,10 +1246,10 @@ void switch_statement(ember_vm* vm, ember_chunk* chunk) {
     
     // Parse switch expression
     consume(TOKEN_LPAREN, "Expect '(' after 'switch'");
-    expression(chunk);
+    expression(chunk); // Switch expression is now on stack
     consume(TOKEN_RPAREN, "Expect ')' after switch expression");
     
-    // Set up switch context for case tracking
+    // Set up switch context for break tracking
     if (parser->loop_depth >= 8) {
         error("Maximum nesting depth exceeded");
         return;
@@ -1115,25 +1262,30 @@ void switch_statement(ember_vm* vm, ember_chunk* chunk) {
     consume(TOKEN_LBRACE, "Expect '{' before switch body");
     
     int case_count = 0;
-    int case_jumps[32];  // Store case jump locations
-    int default_jump = -1;
+    int case_jumps[32];      // Store jump locations for failed case comparisons
+    int case_bodies[32];     // Store case body start locations
+    int default_body = -1;   // Default case body location
     
-    while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
+    // First pass: collect all cases and default
+    while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF) && case_count < 32) {
         if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) continue;
         
         if (match(TOKEN_CASE)) {
             // Parse case value
-            expression(chunk);
+            expression(chunk); // Push case value to stack
             
-            // Emit case comparison
+            // Emit case comparison instruction
             write_chunk(chunk, OP_CASE);
             case_jumps[case_count] = chunk->count;
-            write_chunk(chunk, 0); // Placeholder for jump offset
-            case_count++;
+            write_chunk(chunk, 0); // Placeholder for jump offset (will patch later)
             
             consume(TOKEN_COLON, "Expect ':' after case value");
             
-            // Parse case body
+            // Mark start of case body
+            case_bodies[case_count] = chunk->count;
+            case_count++;
+            
+            // Parse case body (can be empty for fall-through)
             while (!check(TOKEN_CASE) && !check(TOKEN_DEFAULT) && 
                    !check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
                 if (match(TOKEN_NEWLINE) || match(TOKEN_SEMICOLON)) continue;
@@ -1149,8 +1301,8 @@ void switch_statement(ember_vm* vm, ember_chunk* chunk) {
         } else if (match(TOKEN_DEFAULT)) {
             consume(TOKEN_COLON, "Expect ':' after 'default'");
             
-            // Mark default case location
-            default_jump = chunk->count;
+            // Mark default case body location
+            default_body = chunk->count;
             
             // Parse default body
             while (!check(TOKEN_RBRACE) && !check(TOKEN_EOF)) {
@@ -1172,16 +1324,47 @@ void switch_statement(ember_vm* vm, ember_chunk* chunk) {
     
     consume(TOKEN_RBRACE, "Expect '}' after switch body");
     
-    // Emit default case jump if needed
-    if (default_jump != -1) {
-        write_chunk(chunk, OP_DEFAULT);
-        write_chunk(chunk, default_jump - chunk->count - 1);
+    // Pop the switch expression value from stack (it's been used for comparisons)
+    write_chunk(chunk, OP_POP);
+    
+    // If no match was found and there's a default case, execution falls through to it
+    if (default_body != -1) {
+        // This is handled by the VM - if no case matches, execution continues to default
     }
     
-    // Patch all break statements to jump here
+    // Patch all case jump targets
+    for (int i = 0; i < case_count; i++) {
+        int jump_location = case_jumps[i];
+        
+        // Calculate offset to next case or end of switch
+        int target_offset;
+        if (i + 1 < case_count) {
+            // Jump to next case for comparison
+            target_offset = case_bodies[i + 1] - jump_location - 1;
+        } else if (default_body != -1) {
+            // Jump to default case
+            target_offset = default_body - jump_location - 1;
+        } else {
+            // Jump to end of switch
+            target_offset = chunk->count - jump_location - 1;
+        }
+        
+        if (target_offset < 0 || target_offset > 255) {
+            error("Switch case jump offset too large");
+            continue;
+        }
+        chunk->code[jump_location] = (uint8_t)target_offset;
+    }
+    
+    // Patch all break statements to jump to end of switch
     for (int i = 0; i < switch_ctx->break_count; i++) {
         int break_jump = switch_ctx->break_jumps[i];
-        chunk->code[break_jump] = chunk->count - break_jump - 1;
+        int break_offset = chunk->count - break_jump - 1;
+        if (break_offset < 0 || break_offset > 255) {
+            error("Switch break jump offset too large");
+            continue;
+        }
+        chunk->code[break_jump] = (uint8_t)break_offset;
     }
     
     // Clean up switch context

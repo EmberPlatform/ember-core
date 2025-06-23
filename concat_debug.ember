@@ -1,0 +1,3 @@
+// Test concatenation
+result = str(42) + str(24)
+print(result)

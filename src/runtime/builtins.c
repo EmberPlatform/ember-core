@@ -11,6 +11,17 @@
 #include <ctype.h>
 #include <math.h>
 
+// Forward declarations for exception handling functions
+ember_value ember_native_create_error(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_create_type_error(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_create_runtime_error(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_create_range_error(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_create_io_error(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_create_security_error(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_is_exception(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_get_exception_type(ember_vm* vm, int argc, ember_value* argv);
+ember_value ember_native_get_stack_trace(ember_vm* vm, int argc, ember_value* argv);
+
 // Enhanced error handling macros
 #define EMBER_BUILTIN_ERROR_TYPE(vm, func_name, expected, actual) do { \
     (void)vm; \
@@ -316,6 +327,102 @@ void register_builtin_functions(ember_vm* vm) {
     // Date/time functions from stdlib/datetime_native.c (may need testing)
     // ember_register_func(vm, "datetime_now", ember_native_datetime_now);
     
+    // Exception handling utility functions
+    // TODO: Implement exception creation functions
+    // ember_register_func(vm, "Error", ember_native_create_error);
+    // ember_register_func(vm, "TypeError", ember_native_create_type_error);
+    // ember_register_func(vm, "RuntimeError", ember_native_create_runtime_error);
+    // ember_register_func(vm, "RangeError", ember_native_create_range_error);
+    // ember_register_func(vm, "IOError", ember_native_create_io_error);
+    // ember_register_func(vm, "SecurityError", ember_native_create_security_error);
+    ember_register_func(vm, "is_exception", ember_native_is_exception);
+    ember_register_func(vm, "get_exception_type", ember_native_get_exception_type);
+    ember_register_func(vm, "get_stack_trace", ember_native_get_stack_trace);
+    
     // Note: HTTP, WebSocket, upload, streaming, router, session, and template functions 
     // temporarily disabled due to integration issues - focus on core stdlib first
+}
+
+// Exception handling utility functions
+
+ember_value ember_native_create_error(ember_vm* vm, int argc, ember_value* argv) {
+    if (argc < 1) {
+        return ember_make_exception_detailed(vm, EMBER_EXCEPTION_ERROR, "Error", NULL, 0, 0);
+    }
+    
+    const char* message = ember_get_string_value(argv[0]);
+    return ember_make_exception_detailed(vm, EMBER_EXCEPTION_ERROR, message, NULL, 0, 0);
+}
+
+ember_value ember_native_create_type_error(ember_vm* vm, int argc, ember_value* argv) {
+    if (argc < 1) {
+        return ember_make_type_error(vm, "TypeError");
+    }
+    
+    const char* message = ember_get_string_value(argv[0]);
+    return ember_make_type_error(vm, message);
+}
+
+ember_value ember_native_create_runtime_error(ember_vm* vm, int argc, ember_value* argv) {
+    if (argc < 1) {
+        return ember_make_runtime_error(vm, "RuntimeError");
+    }
+    
+    const char* message = ember_get_string_value(argv[0]);
+    return ember_make_runtime_error(vm, message);
+}
+
+ember_value ember_native_create_range_error(ember_vm* vm, int argc, ember_value* argv) {
+    if (argc < 1) {
+        return ember_make_range_error(vm, "RangeError");
+    }
+    
+    const char* message = ember_get_string_value(argv[0]);
+    return ember_make_range_error(vm, message);
+}
+
+ember_value ember_native_create_io_error(ember_vm* vm, int argc, ember_value* argv) {
+    if (argc < 1) {
+        return ember_make_io_error(vm, "IOError");
+    }
+    
+    const char* message = ember_get_string_value(argv[0]);
+    return ember_make_io_error(vm, message);
+}
+
+ember_value ember_native_create_security_error(ember_vm* vm, int argc, ember_value* argv) {
+    if (argc < 1) {
+        return ember_make_security_error(vm, "SecurityError");
+    }
+    
+    const char* message = ember_get_string_value(argv[0]);
+    return ember_make_security_error(vm, message);
+}
+
+ember_value ember_native_is_exception(ember_vm* vm, int argc, ember_value* argv) {
+    (void)vm;
+    if (argc < 1) {
+        return ember_make_bool(0);
+    }
+    
+    return ember_make_bool(argv[0].type == EMBER_VAL_EXCEPTION);
+}
+
+ember_value ember_native_get_exception_type(ember_vm* vm, int argc, ember_value* argv) {
+    if (argc < 1 || argv[0].type != EMBER_VAL_EXCEPTION) {
+        return ember_make_nil();
+    }
+    
+    ember_exception* exc = AS_EXCEPTION(argv[0]);
+    const char* type_name = exc->type_name ? exc->type_name : "Exception";
+    return ember_make_string_gc(vm, type_name);
+}
+
+ember_value ember_native_get_stack_trace(ember_vm* vm, int argc, ember_value* argv) {
+    if (argc < 1 || argv[0].type != EMBER_VAL_EXCEPTION) {
+        return ember_make_nil();
+    }
+    
+    ember_exception* exc = AS_EXCEPTION(argv[0]);
+    return ember_exception_get_stack_trace_string(vm, exc);
 }

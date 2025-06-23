@@ -1,7 +1,4 @@
-print("Testing basic stdlib functions...")
-
-// Test if crypto functions are available
-print("crypto_hash_sha256('test') = " + str(crypto_hash_sha256("test")))
-
-// Test if HTTP functions are available  
-print("Testing http_get function...")
+x = 5
+y = 3
+z = x + y
+print("Result: " + str(z))

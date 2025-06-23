@@ -1,0 +1,50 @@
+// Calculator module - demonstrates default export and mixed exports
+
+// Import named exports from math_utils
+import { add, multiply, power } from "./math_utils"
+
+// Calculator class (will be default export)
+function Calculator() {
+    this.history = []
+    
+    this.add = function(a, b) {
+        result = add(a, b)
+        this.history.push("add(" + str(a) + ", " + str(b) + ") = " + str(result))
+        return result
+    }
+    
+    this.multiply = function(a, b) {
+        result = multiply(a, b)
+        this.history.push("multiply(" + str(a) + ", " + str(b) + ") = " + str(result))
+        return result
+    }
+    
+    this.power = function(base, exp) {
+        result = power(base, exp)
+        this.history.push("power(" + str(base) + ", " + str(exp) + ") = " + str(result))
+        return result
+    }
+    
+    this.getHistory = function() {
+        return this.history
+    }
+    
+    this.clearHistory = function() {
+        this.history = []
+    }
+    
+    return this
+}
+
+// Export default
+export default Calculator
+
+// Export named utility
+export version = "1.0.0"
+
+// Export named function
+export function createCalculator() {
+    return Calculator()
+}
+
+print("Calculator module loaded")

@@ -15,7 +15,15 @@
  */
 const char* ember_get_string_value(ember_value value) {
     if (value.type == EMBER_VAL_STRING) {
-        return value.as.string_val;
+        // Check for new GC-managed string representation first
+        if (value.as.obj_val && value.as.obj_val->type == OBJ_STRING) {
+            ember_string* str = AS_STRING(value);
+            return str->chars;
+        }
+        // Fall back to old string representation
+        else if (value.as.string_val) {
+            return value.as.string_val;
+        }
     }
     return NULL;
 }

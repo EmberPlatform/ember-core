@@ -1,0 +1,6 @@
+// Test string handling
+s1 = "Hello World"
+print(s1)
+
+s2 = "Test"
+print(s2)

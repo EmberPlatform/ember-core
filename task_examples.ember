@@ -1,0 +1,11 @@
+// Examples from the task description
+function greet() {
+    print("Hello")
+}
+greet()
+
+function add(a, b) {
+    return a + b
+}
+result = add(5, 3)
+print(result)

@@ -1,0 +1,4 @@
+// Test str() function
+s = str(42)
+print(123)
+print(s)

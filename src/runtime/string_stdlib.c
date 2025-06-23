@@ -8,14 +8,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// Helper function to get string data
-static const char* ember_get_string_value(ember_value value) {
-    if (value.type == EMBER_VAL_STRING) {
-        ember_string* str = AS_STRING(value);
-        return str->chars;
-    }
-    return NULL;
-}
+// ember_get_string_value is provided globally by template_stubs.c
+extern const char* ember_get_string_value(ember_value value);
 
 // String length function - supports strings, arrays, and hash maps
 ember_value ember_native_len(ember_vm* vm, int argc, ember_value* argv) {
